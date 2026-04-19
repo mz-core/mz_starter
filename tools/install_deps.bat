@@ -45,7 +45,7 @@ if exist "resources\[mz]\mz_core\.git" (
     echo mz_core ja existe sem .git; mantendo como esta.
   ) else (
     echo Clonando mz_core...
-    git clone https://github.com/Mazus-Ofc/mz_core.git "resources\[mz]\mz_core"
+    git clone https://github.com/mz-core/mz_core.git "resources\[mz]\mz_core"
     if errorlevel 1 goto :git_error
   )
 )

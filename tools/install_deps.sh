@@ -80,7 +80,7 @@ if [ -d "resources/[mz]/mz_core/.git" ] || [ -d "resources/[mz]/mz_core" ]; then
   fi
 else
   echo "Clonando mz_core..."
-  git clone https://github.com/Mazus-Ofc/mz_core.git "resources/[mz]/mz_core"
+  git clone https://github.com/mz-core/mz_core.git "resources/[mz]/mz_core"
 fi
 
 echo "Dependencias do projeto instaladas."
