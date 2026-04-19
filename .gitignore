@@ -1,0 +1,10 @@
+cache/
+crashes/
+logs/
+*.log
+*.tmp
+*.bak
+.env
+.env.*
+artifacts/
+txData/
