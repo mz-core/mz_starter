@@ -143,6 +143,7 @@ sync_cfx_resource "sessionmanager" "$CFX_SERVER_DATA_TMP/resources/[system]/sess
 
 sync_git_repo "mz_core" "https://github.com/mz-core/mz_core.git" "resources/[mz]/mz_core"
 sync_git_repo "mz_notify" "https://github.com/mz-core/mz_notify.git" "resources/[mz]/mz_notify"
+sync_git_repo "mz_sync" "https://github.com/mz-core/mz_sync.git" "resources/[mz]/mz_sync"
 sync_git_repo "pma-voice" "https://github.com/AvarianKnight/pma-voice.git" "resources/[som]/pma-voice"
 
 echo "Dependencias do projeto instaladas."

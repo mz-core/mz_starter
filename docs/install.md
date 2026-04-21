@@ -65,6 +65,7 @@ Antes de rodar o instalador, o ambiente precisa ter:
 - sincroniza `mapmanager`, `spawnmanager` e `sessionmanager` do repositorio oficial `citizenfx/cfx-server-data`
 - clona ou atualiza `mz_core`
 - clona ou atualiza `mz_notify`
+- clona ou atualiza `mz_sync`
 - clona ou atualiza `pma-voice`
 
 ## O que o instalador nao faz hoje
@@ -77,6 +78,7 @@ Antes de rodar o instalador, o ambiente precisa ter:
 - O `mz_starter` usa apenas uma parte do `cfx-server-data`, nao a base completa.
 - O `mz_core` entra como recurso do framework dentro de `resources/[mz]/mz_core`.
 - O `mz_notify` entra em `resources/[mz]/mz_notify`.
+- O `mz_sync` entra em `resources/[mz]/mz_sync`.
 - O `pma-voice` entra em `resources/[som]/pma-voice`.
 - Os recursos oficiais do boot atual entram em `resources/[managers]` e `resources/[system]`.
 
@@ -91,5 +93,6 @@ Ao final desta etapa, o ambiente deve ter:
 - `pma-voice` em `resources/[som]/pma-voice`
 - `mz_core` em `resources/[mz]/mz_core`
 - `mz_notify` em `resources/[mz]/mz_notify`
+- `mz_sync` em `resources/[mz]/mz_sync`
 
 Para a visao de fronteira entre os repositorios e a estrutura esperada do diretorio, veja [docs/structure.md](structure.md).

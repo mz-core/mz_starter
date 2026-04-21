@@ -18,7 +18,7 @@ Este repositorio e responsavel por:
 - definir o boot via `server.cfg`
 - separar a configuracao em arquivos dentro de `cfg/`
 - documentar o setup operacional
-- instalar dependencias do projeto, como `oxmysql`, `ox_lib`, `mz_core`, `mz_notify` e `pma-voice`
+- instalar dependencias do projeto, como `oxmysql`, `ox_lib`, `mz_core`, `mz_notify`, `mz_sync` e `pma-voice`
 - sincronizar os recursos oficiais minimos para o boot atual
 
 O `mz_starter` deve continuar enxuto e focado em ambiente.
@@ -65,7 +65,8 @@ server-data/
 |   |   `-- spawnmanager
 |   |-- [mz]/
 |   |   |-- mz_core
-|   |   `-- mz_notify
+|   |   |-- mz_notify
+|   |   `-- mz_sync
 |   |-- [ox]/
 |   |   |-- oxmysql
 |   |   `-- ox_lib

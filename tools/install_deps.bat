@@ -60,6 +60,9 @@ if errorlevel 1 goto :git_error
 call :sync_git_repo mz_notify https://github.com/mz-core/mz_notify.git "resources\[mz]\mz_notify"
 if errorlevel 1 goto :git_error
 
+call :sync_git_repo mz_sync https://github.com/mz-core/mz_sync.git "resources\[mz]\mz_sync"
+if errorlevel 1 goto :git_error
+
 call :sync_git_repo pma-voice https://github.com/AvarianKnight/pma-voice.git "resources\[som]\pma-voice"
 if errorlevel 1 goto :git_error
 

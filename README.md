@@ -20,6 +20,7 @@ Camada de boot, configuracao e instalacao para subir um servidor FiveM usando `m
 - sincroniza `mapmanager`, `spawnmanager` e `sessionmanager` do repositorio oficial `citizenfx/cfx-server-data`
 - clona ou atualiza `mz_core`
 - clona ou atualiza `mz_notify`
+- clona ou atualiza `mz_sync`
 - clona ou atualiza `pma-voice`
 
 ## O que o instalador nao faz hoje
