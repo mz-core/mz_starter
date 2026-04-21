@@ -1,52 +1,53 @@
-# Instalação
+# Instalacao
 
 ## Objetivo deste guia
 Este documento descreve o contrato operacional atual do setup do `mz_starter`.
 
-O foco aqui é deixar claro:
+O foco aqui e deixar claro:
 - o que precisa existir antes de rodar o instalador
 - o que o instalador realmente faz
-- o que continua fora do escopo deste repositório
+- o que continua fora do escopo deste repositorio
 
 ## Papel de cada parte no setup
 
 ### `mz_starter`
-Responsável pela camada de boot do projeto:
+Responsavel pela camada de boot do projeto:
 - `server.cfg`
 - arquivos em `cfg/`
-- scripts de instalação de dependências do projeto
+- scripts de instalacao de dependencias do projeto
 
 ### `mz_core`
-Responsável pela lógica do framework:
-- domínio de player e sessão
-- orgs, contas, inventário, veículos
+Responsavel pela logica do framework:
+- dominio de player e sessao
+- orgs, contas, inventario, veiculos e logs
 - regras e fluxos internos do core
 
 ### `cfx-server-data`
-Responsável pela base stock do ambiente FiveM.
+Responsavel pela base stock do servidor FiveM.
 
-No estado atual deste projeto, os recursos stock usados no boot, como `mapmanager` e `spawnmanager`, precisam já existir no ambiente por meio de `cfx-server-data` ou estrutura equivalente.
+No estado atual deste projeto, o instalador usa o repositorio oficial `citizenfx/cfx-server-data` para sincronizar apenas os recursos stock necessarios ao boot atual:
+- `mapmanager`
+- `spawnmanager`
+- `sessionmanager`
 
-O instalador do `mz_starter` não baixa essa base.
+O restante da base stock continua fora do escopo do `mz_starter`.
 
-## Pré-requisitos
+## Pre-requisitos
 Antes de rodar o instalador, o ambiente precisa ter:
-- FXServer artifacts já preparados
-- Git disponível
-- acesso à internet para baixar dependências
-- uma estrutura de `server-data` compatível com FiveM
-- recursos stock do FiveM disponíveis, incluindo os recursos exigidos no boot atual
+- FXServer artifacts ja preparados
+- Git disponivel
+- acesso a internet para baixar dependencias
+- `curl` e `unzip` disponiveis no Linux
 
-## Fluxo recomendado de instalação
+## Fluxo recomendado de instalacao
 1. Prepare o ambiente base do FiveM com seus artifacts.
-2. Garanta a presença da base stock de `server-data`, via `cfx-server-data` ou estrutura equivalente.
-3. Coloque o `mz_starter` como raiz do `server-data` do projeto.
-4. Ajuste as configurações locais:
+2. Coloque o `mz_starter` como raiz do `server-data` do projeto.
+3. Ajuste as configuracoes locais:
    - `cfg/database.cfg`
    - `cfg/base.cfg`
-   - `cfg/permissions.cfg`, se necessário
-5. Rode o instalador de dependências do projeto.
-6. Inicie o servidor usando o `server.cfg` deste repositório.
+   - `cfg/permissions.cfg`, se necessario
+4. Rode o instalador de dependencias do projeto.
+5. Inicie o servidor usando o `server.cfg` deste repositorio.
 
 ## Como rodar o instalador
 
@@ -59,29 +60,36 @@ Antes de rodar o instalador, o ambiente precisa ter:
 2. Rode `bash tools/install_deps.sh`.
 
 ## O que o instalador faz hoje
-- baixa a release estável do `oxmysql`
-- baixa a release estável do `ox_lib`
-- clona ou atualiza o `mz_core`
+- baixa a release estavel do `oxmysql`
+- baixa a release estavel do `ox_lib`
+- sincroniza `mapmanager`, `spawnmanager` e `sessionmanager` do repositorio oficial `citizenfx/cfx-server-data`
+- clona ou atualiza `mz_core`
+- clona ou atualiza `mz_notify`
+- clona ou atualiza `pma-voice`
 
-## O que o instalador não faz hoje
-- não instala FXServer artifacts
-- não baixa `cfx-server-data`
-- não cria a base stock do servidor
-- não valida automaticamente se os recursos stock exigidos pelo boot já existem
+## O que o instalador nao faz hoje
+- nao instala FXServer artifacts
+- nao baixa a base stock completa do FiveM
+- nao cria configs locais do servidor
 
 ## O que precisa ficar entendido sem ambiguidade
-- O `mz_starter` não substitui o `mz_core`.
-- O `mz_starter` também não substitui o `cfx-server-data`.
+- O `mz_starter` nao substitui o `mz_core`.
+- O `mz_starter` usa apenas uma parte do `cfx-server-data`, nao a base completa.
 - O `mz_core` entra como recurso do framework dentro de `resources/[mz]/mz_core`.
-- Os recursos stock do boot atual continuam vindo da base `cfx-server-data` ou equivalente.
-- Se essa base não existir, o ambiente fica incompleto mesmo que o instalador termine sem erro.
+- O `mz_notify` entra em `resources/[mz]/mz_notify`.
+- O `pma-voice` entra em `resources/[som]/pma-voice`.
+- Os recursos oficiais do boot atual entram em `resources/[managers]` e `resources/[system]`.
 
 ## Resultado esperado
 Ao final desta etapa, o ambiente deve ter:
 - o `server.cfg` e os `cfg/*.cfg` do `mz_starter`
 - `oxmysql` em `resources/[ox]/oxmysql`
 - `ox_lib` em `resources/[ox]/ox_lib`
+- `mapmanager` em `resources/[managers]/mapmanager`
+- `spawnmanager` em `resources/[managers]/spawnmanager`
+- `sessionmanager` em `resources/[system]/sessionmanager`
+- `pma-voice` em `resources/[som]/pma-voice`
 - `mz_core` em `resources/[mz]/mz_core`
-- recursos stock necessários ao boot já disponíveis no ambiente
+- `mz_notify` em `resources/[mz]/mz_notify`
 
-Para a visão de fronteira entre os repositórios e a estrutura esperada do diretório, veja [docs/structure.md](structure.md).
+Para a visao de fronteira entre os repositorios e a estrutura esperada do diretorio, veja [docs/structure.md](structure.md).

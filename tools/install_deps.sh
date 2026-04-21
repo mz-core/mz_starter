@@ -17,39 +17,104 @@ preflight() {
     exit 1
   fi
 
-  if [ ! -d "resources" ]; then
-    echo "[preflight] A pasta resources nao foi encontrada."
-    echo "[preflight] Este instalador nao cria a base stock do FiveM."
-    echo "[preflight] Prepare o server-data com cfx-server-data (ou equivalente) antes de continuar."
+  if ! command -v git >/dev/null 2>&1; then
+    echo "[preflight] Git nao foi encontrado no PATH."
+    echo "[preflight] Instale o Git antes de rodar este instalador."
     exit 1
   fi
 
-  if [ -z "$(find "resources" -type d -name "mapmanager" -print -quit)" ]; then
-    echo "[preflight] O recurso stock obrigatorio 'mapmanager' nao foi encontrado em resources."
-    echo "[preflight] Prepare o server-data com cfx-server-data (ou equivalente) antes de continuar."
+  if ! command -v curl >/dev/null 2>&1; then
+    echo "[preflight] curl nao foi encontrado no PATH."
+    echo "[preflight] Instale o curl antes de rodar este instalador."
     exit 1
   fi
 
-  if [ -z "$(find "resources" -type d -name "spawnmanager" -print -quit)" ]; then
-    echo "[preflight] O recurso stock obrigatorio 'spawnmanager' nao foi encontrado em resources."
-    echo "[preflight] Prepare o server-data com cfx-server-data (ou equivalente) antes de continuar."
+  if ! command -v unzip >/dev/null 2>&1; then
+    echo "[preflight] unzip nao foi encontrado no PATH."
+    echo "[preflight] Instale o unzip antes de rodar este instalador."
     exit 1
   fi
 
   echo "[preflight] Estrutura minima encontrada. Prosseguindo com a instalacao das dependencias do projeto..."
 }
 
-preflight
-
-mkdir -p "resources/[ox]" "resources/[mz]" "tmp"
-
-OXMYSQL_ZIP="tmp/oxmysql.zip"
-OXLIB_ZIP="tmp/ox_lib.zip"
-
 cleanup_zip() {
   local file="$1"
   [ -f "$file" ] && rm -f "$file"
+  return 0
 }
+
+sync_git_repo() {
+  local label="$1"
+  local repo_url="$2"
+  local target="$3"
+
+  if [ -d "$target/.git" ]; then
+    echo "Atualizando $label..."
+    git -C "$target" pull --ff-only
+  elif [ -d "$target" ]; then
+    echo "$label ja existe sem .git; mantendo como esta."
+  else
+    echo "Clonando $label..."
+    git clone --depth 1 "$repo_url" "$target"
+  fi
+}
+
+prepare_cfx_server_data() {
+  local repo_path="$1"
+
+  if [ -d "$repo_path/.git" ]; then
+    echo "Atualizando cfx-server-data oficial..."
+    git -C "$repo_path" pull --ff-only
+  else
+    rm -rf "$repo_path"
+    echo "Clonando cfx-server-data oficial..."
+    git clone --depth 1 https://github.com/citizenfx/cfx-server-data.git "$repo_path"
+  fi
+}
+
+find_resource_path() {
+  local name="$1"
+  find "resources" -type d -name "$name" -print -quit
+}
+
+sync_cfx_resource() {
+  local name="$1"
+  local source="$2"
+  local target="$3"
+  local existing=""
+
+  existing="$(find_resource_path "$name" || true)"
+  if [ -n "$existing" ] && [ "$existing" != "$target" ]; then
+    echo "$name ja existe em $existing; mantendo recurso existente para evitar duplicidade."
+    return 0
+  fi
+
+  if [ -n "$existing" ]; then
+    echo "Atualizando $name do cfx-server-data oficial..."
+  else
+    echo "Instalando $name do cfx-server-data oficial..."
+  fi
+
+  rm -rf "$target"
+  mkdir -p "$(dirname "$target")"
+  cp -R "$source" "$target"
+}
+
+preflight
+
+mkdir -p \
+  "resources" \
+  "resources/[ox]" \
+  "resources/[mz]" \
+  "resources/[som]" \
+  "resources/[managers]" \
+  "resources/[system]" \
+  "tmp"
+
+OXMYSQL_ZIP="tmp/oxmysql.zip"
+OXLIB_ZIP="tmp/ox_lib.zip"
+CFX_SERVER_DATA_TMP="tmp/cfx-server-data"
 
 cleanup_zip "$OXMYSQL_ZIP"
 cleanup_zip "$OXLIB_ZIP"
@@ -71,16 +136,13 @@ unzip -oq "$OXLIB_ZIP" -d "resources/[ox]/ox_lib"
 cleanup_zip "$OXMYSQL_ZIP"
 cleanup_zip "$OXLIB_ZIP"
 
-if [ -d "resources/[mz]/mz_core/.git" ] || [ -d "resources/[mz]/mz_core" ]; then
-  echo "Atualizando mz_core..."
-  if [ -d "resources/[mz]/mz_core/.git" ]; then
-    git -C "resources/[mz]/mz_core" pull --ff-only
-  else
-    echo "mz_core ja existe sem .git; mantendo como esta."
-  fi
-else
-  echo "Clonando mz_core..."
-  git clone https://github.com/mz-core/mz_core.git "resources/[mz]/mz_core"
-fi
+prepare_cfx_server_data "$CFX_SERVER_DATA_TMP"
+sync_cfx_resource "mapmanager" "$CFX_SERVER_DATA_TMP/resources/[managers]/mapmanager" "resources/[managers]/mapmanager"
+sync_cfx_resource "spawnmanager" "$CFX_SERVER_DATA_TMP/resources/[managers]/spawnmanager" "resources/[managers]/spawnmanager"
+sync_cfx_resource "sessionmanager" "$CFX_SERVER_DATA_TMP/resources/[system]/sessionmanager" "resources/[system]/sessionmanager"
+
+sync_git_repo "mz_core" "https://github.com/mz-core/mz_core.git" "resources/[mz]/mz_core"
+sync_git_repo "mz_notify" "https://github.com/mz-core/mz_notify.git" "resources/[mz]/mz_notify"
+sync_git_repo "pma-voice" "https://github.com/AvarianKnight/pma-voice.git" "resources/[som]/pma-voice"
 
 echo "Dependencias do projeto instaladas."

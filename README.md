@@ -1,37 +1,39 @@
 # mz_starter
 
-Camada de boot, configuração e instalação para subir um servidor FiveM usando `mz_core`.
+Camada de boot, configuracao e instalacao para subir um servidor FiveM usando `mz_core`.
 
-## O que este repositório é
-- `mz_starter` organiza o `server.cfg`, os arquivos em `cfg/` e o fluxo básico de dependências do ambiente.
-- Ele existe para preparar e iniciar o servidor, não para concentrar a lógica do framework.
+## O que este repositorio e
+- `mz_starter` organiza o `server.cfg`, os arquivos em `cfg/` e o fluxo basico de dependencias do ambiente.
+- Ele existe para preparar e iniciar o servidor, nao para concentrar a logica do framework.
 
-## O que este repositório não é
-- `mz_starter` não é o framework.
-- A lógica de domínio do servidor fica no `mz_core`: player, sessão, orgs, contas, inventário, veículos e demais regras do core.
+## O que este repositorio nao e
+- `mz_starter` nao e o framework.
+- A logica de dominio do servidor fica no `mz_core`: player, sessao, orgs, contas, inventario, veiculos e demais regras do core.
 
-## Relação com `cfx-server-data`
-- Este repositório assume um ambiente de `server-data` compatível com FiveM.
-- Os recursos stock usados no boot atual, como `mapmanager` e `spawnmanager`, não vêm neste repositório.
-- Eles precisam existir no ambiente por meio de `cfx-server-data` ou estrutura equivalente já preparada.
+## Relacao com recursos oficiais
+- O instalador sincroniza os recursos stock necessarios para o boot atual a partir do repositorio oficial `citizenfx/cfx-server-data`.
+- Hoje ele traz `mapmanager`, `spawnmanager` e `sessionmanager`, mantendo o restante da base stock fora do escopo deste repositorio.
 
 ## O que o instalador faz hoje
 - baixa `oxmysql`
 - baixa `ox_lib`
+- sincroniza `mapmanager`, `spawnmanager` e `sessionmanager` do repositorio oficial `citizenfx/cfx-server-data`
 - clona ou atualiza `mz_core`
+- clona ou atualiza `mz_notify`
+- clona ou atualiza `pma-voice`
 
-## O que o instalador não faz hoje
-- não instala FXServer artifacts
-- não baixa `cfx-server-data`
-- não provisiona os recursos stock do FiveM
+## O que o instalador nao faz hoje
+- nao instala FXServer artifacts
+- nao provisiona a base stock completa do FiveM
+- nao substitui configuracoes locais do servidor
 
-## Instalação rápida
-1. Prepare um ambiente FiveM com estrutura de `server-data` e recursos stock disponíveis.
+## Instalacao rapida
+1. Prepare os FXServer artifacts do ambiente.
 2. Configure o banco em `cfg/database.cfg`.
 3. Configure a license key em `cfg/base.cfg`.
 4. Rode `tools/install_deps.bat` ou `tools/install_deps.sh`.
 5. Inicie o servidor a partir da raiz deste projeto.
 
-## Documentação
-- [Instalação](docs/install.md)
+## Documentacao
+- [Instalacao](docs/install.md)
 - [Estrutura do ambiente](docs/structure.md)
