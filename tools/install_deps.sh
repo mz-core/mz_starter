@@ -127,11 +127,13 @@ curl -L "https://github.com/overextended/oxmysql/releases/latest/download/oxmysq
 echo "Baixando ox_lib release..."
 curl -L "https://github.com/overextended/ox_lib/releases/latest/download/ox_lib.zip" -o "$OXLIB_ZIP"
 
+# Os zips do overextended ja incluem a pasta raiz do recurso.
+# Extraindo em resources/[ox] evitamos criar resources/[ox]/ox_lib/ox_lib e similares.
 echo "Extraindo oxmysql..."
-unzip -oq "$OXMYSQL_ZIP" -d "resources/[ox]/oxmysql"
+unzip -oq "$OXMYSQL_ZIP" -d "resources/[ox]"
 
 echo "Extraindo ox_lib..."
-unzip -oq "$OXLIB_ZIP" -d "resources/[ox]/ox_lib"
+unzip -oq "$OXLIB_ZIP" -d "resources/[ox]"
 
 cleanup_zip "$OXMYSQL_ZIP"
 cleanup_zip "$OXLIB_ZIP"

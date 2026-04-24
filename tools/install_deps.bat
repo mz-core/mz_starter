@@ -15,6 +15,8 @@ if not exist "tmp" mkdir "tmp"
 
 set "OXMYSQL_ZIP=tmp\oxmysql.zip"
 set "OXLIB_ZIP=tmp\ox_lib.zip"
+set "OXMYSQL_TMP=tmp\extract_oxmysql"
+set "OXLIB_TMP=tmp\extract_ox_lib"
 set "CFX_SERVER_DATA_TMP=tmp\cfx-server-data"
 
 echo Removendo instalacoes antigas do oxmysql e ox_lib...
@@ -22,6 +24,8 @@ if exist "resources\[ox]\oxmysql" rmdir /s /q "resources\[ox]\oxmysql"
 if exist "resources\[ox]\ox_lib" rmdir /s /q "resources\[ox]\ox_lib"
 if exist "%OXMYSQL_ZIP%" del /f /q "%OXMYSQL_ZIP%"
 if exist "%OXLIB_ZIP%" del /f /q "%OXLIB_ZIP%"
+if exist "%OXMYSQL_TMP%" rmdir /s /q "%OXMYSQL_TMP%"
+if exist "%OXLIB_TMP%" rmdir /s /q "%OXLIB_TMP%"
 
 echo Baixando oxmysql release...
 powershell -NoProfile -ExecutionPolicy Bypass -Command "Invoke-WebRequest -Uri 'https://github.com/overextended/oxmysql/releases/latest/download/oxmysql.zip' -OutFile '%OXMYSQL_ZIP%'"
@@ -31,12 +35,14 @@ echo Baixando ox_lib release...
 powershell -NoProfile -ExecutionPolicy Bypass -Command "Invoke-WebRequest -Uri 'https://github.com/overextended/ox_lib/releases/latest/download/ox_lib.zip' -OutFile '%OXLIB_ZIP%'"
 if errorlevel 1 goto :download_error
 
+rem Os zips do overextended ja incluem a pasta raiz do recurso.
+rem No Windows extraimos primeiro em tmp e movemos a pasta final para evitar duplicidade.
 echo Extraindo oxmysql...
-powershell -NoProfile -ExecutionPolicy Bypass -Command "Expand-Archive -Path '%OXMYSQL_ZIP%' -DestinationPath 'resources\[ox]\oxmysql' -Force"
+call :extract_release_resource "%OXMYSQL_ZIP%" "%OXMYSQL_TMP%" "oxmysql"
 if errorlevel 1 goto :extract_error
 
 echo Extraindo ox_lib...
-powershell -NoProfile -ExecutionPolicy Bypass -Command "Expand-Archive -Path '%OXLIB_ZIP%' -DestinationPath 'resources\[ox]\ox_lib' -Force"
+call :extract_release_resource "%OXLIB_ZIP%" "%OXLIB_TMP%" "ox_lib"
 if errorlevel 1 goto :extract_error
 
 if exist "%OXMYSQL_ZIP%" del /f /q "%OXMYSQL_ZIP%"
@@ -91,6 +97,27 @@ if errorlevel 1 (
 )
 
 echo [preflight] Estrutura minima encontrada. Prosseguindo com a instalacao das dependencias do projeto...
+exit /b 0
+
+:extract_release_resource
+set "ARCHIVE_PATH=%~1"
+set "EXTRACT_TMP=%~2"
+set "RESOURCE_NAME=%~3"
+
+if exist "%EXTRACT_TMP%" rmdir /s /q "%EXTRACT_TMP%"
+powershell -NoProfile -ExecutionPolicy Bypass -Command "Expand-Archive -Path '%ARCHIVE_PATH%' -DestinationPath '%EXTRACT_TMP%' -Force"
+if errorlevel 1 exit /b 1
+
+if not exist "%EXTRACT_TMP%\%RESOURCE_NAME%" (
+  echo Nao foi possivel localizar a pasta %RESOURCE_NAME% dentro do zip baixado.
+  exit /b 1
+)
+
+robocopy "%EXTRACT_TMP%\%RESOURCE_NAME%" "resources\[ox]\%RESOURCE_NAME%" /E >nul
+set "ROBOCOPY_EXIT=%errorlevel%"
+if %ROBOCOPY_EXIT% GEQ 8 exit /b 1
+
+if exist "%EXTRACT_TMP%" rmdir /s /q "%EXTRACT_TMP%"
 exit /b 0
 
 :prepare_cfx_server_data
