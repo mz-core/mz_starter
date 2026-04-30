@@ -29,6 +29,10 @@ No estado atual deste projeto, o instalador usa o repositorio oficial `citizenfx
 - `mapmanager`
 - `spawnmanager`
 - `sessionmanager`
+- `baseevents`
+- `chat`
+- `yarn`
+- `webpack`
 
 O restante da base stock continua fora do escopo do `mz_starter`.
 
@@ -62,10 +66,20 @@ Antes de rodar o instalador, o ambiente precisa ter:
 ## O que o instalador faz hoje
 - baixa a release estavel do `oxmysql`
 - baixa a release estavel do `ox_lib`
-- sincroniza `mapmanager`, `spawnmanager` e `sessionmanager` do repositorio oficial `citizenfx/cfx-server-data`
+- sincroniza `mapmanager`, `spawnmanager`, `sessionmanager`, `baseevents`, `chat`, `yarn` e `webpack` do repositorio oficial `citizenfx/cfx-server-data`
 - clona ou atualiza `mz_core`
 - clona ou atualiza `mz_notify`
 - clona ou atualiza `mz_sync`
+- clona ou atualiza `mz_settings`
+- clona ou atualiza `mz_interact`
+- clona ou atualiza `mz_vehicles`
+- clona ou atualiza `mz_inventory`
+- clona ou atualiza `mz_target`
+- clona ou atualiza `mz_radio`
+- clona ou atualiza `mz_creator`
+- clona ou atualiza `mz_garagem`
+- clona ou atualiza `mz_hud`
+- clona ou atualiza `mz_admin`
 - clona ou atualiza `pma-voice`
 
 ## O que o instalador nao faz hoje
@@ -90,9 +104,14 @@ Ao final desta etapa, o ambiente deve ter:
 - `mapmanager` em `resources/[managers]/mapmanager`
 - `spawnmanager` em `resources/[managers]/spawnmanager`
 - `sessionmanager` em `resources/[system]/sessionmanager`
+- `baseevents` em `resources/[system]/baseevents`
+- `chat` em `resources/[gameplay]/chat`
+- `yarn` em `resources/[system]/[builders]/yarn`
+- `webpack` em `resources/[system]/[builders]/webpack`
 - `pma-voice` em `resources/[som]/pma-voice`
 - `mz_core` em `resources/[mz]/mz_core`
 - `mz_notify` em `resources/[mz]/mz_notify`
 - `mz_sync` em `resources/[mz]/mz_sync`
+- `mz_settings`, `mz_interact`, `mz_vehicles`, `mz_inventory`, `mz_target`, `mz_radio`, `mz_creator`, `mz_garagem`, `mz_hud` e `mz_admin` em `resources/[mz]/`
 
 Para a visao de fronteira entre os repositorios e a estrutura esperada do diretorio, veja [docs/structure.md](structure.md).

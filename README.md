@@ -12,15 +12,16 @@ Camada de boot, configuracao e instalacao para subir um servidor FiveM usando `m
 
 ## Relacao com recursos oficiais
 - O instalador sincroniza os recursos stock necessarios para o boot atual a partir do repositorio oficial `citizenfx/cfx-server-data`.
-- Hoje ele traz `mapmanager`, `spawnmanager` e `sessionmanager`, mantendo o restante da base stock fora do escopo deste repositorio.
+- Hoje ele traz `mapmanager`, `spawnmanager`, `sessionmanager`, `baseevents`, `chat` e os builders `yarn`/`webpack` usados pelo chat, mantendo o restante da base stock fora do escopo deste repositorio.
 
 ## O que o instalador faz hoje
 - baixa `oxmysql`
 - baixa `ox_lib`
-- sincroniza `mapmanager`, `spawnmanager` e `sessionmanager` do repositorio oficial `citizenfx/cfx-server-data`
+- sincroniza os recursos CFX base usados no `cfg/resources.cfg`
 - clona ou atualiza `mz_core`
 - clona ou atualiza `mz_notify`
 - clona ou atualiza `mz_sync`
+- clona ou atualiza os resources MZ listados no boot atual
 - clona ou atualiza `pma-voice`
 
 ## O que o instalador nao faz hoje

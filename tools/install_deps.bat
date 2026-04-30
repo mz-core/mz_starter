@@ -11,6 +11,8 @@ if not exist "resources\[mz]" mkdir "resources\[mz]"
 if not exist "resources\[som]" mkdir "resources\[som]"
 if not exist "resources\[managers]" mkdir "resources\[managers]"
 if not exist "resources\[system]" mkdir "resources\[system]"
+if not exist "resources\[system]\[builders]" mkdir "resources\[system]\[builders]"
+if not exist "resources\[gameplay]" mkdir "resources\[gameplay]"
 if not exist "tmp" mkdir "tmp"
 
 set "OXMYSQL_ZIP=tmp\oxmysql.zip"
@@ -60,7 +62,19 @@ if errorlevel 1 goto :sync_error
 call :sync_cfx_resource sessionmanager "%CFX_SERVER_DATA_TMP%\resources\[system]\sessionmanager" "resources\[system]\sessionmanager"
 if errorlevel 1 goto :sync_error
 
-call :sync_git_repo mz_core https://github.com/mz-core/mz_core.git "resources\[mz]\mz_core"
+call :sync_cfx_resource baseevents "%CFX_SERVER_DATA_TMP%\resources\[system]\baseevents" "resources\[system]\baseevents"
+if errorlevel 1 goto :sync_error
+
+call :sync_cfx_resource yarn "%CFX_SERVER_DATA_TMP%\resources\[system]\[builders]\yarn" "resources\[system]\[builders]\yarn"
+if errorlevel 1 goto :sync_error
+
+call :sync_cfx_resource webpack "%CFX_SERVER_DATA_TMP%\resources\[system]\[builders]\webpack" "resources\[system]\[builders]\webpack"
+if errorlevel 1 goto :sync_error
+
+call :sync_cfx_resource chat "%CFX_SERVER_DATA_TMP%\resources\[gameplay]\chat" "resources\[gameplay]\chat"
+if errorlevel 1 goto :sync_error
+
+call :sync_git_repo pma-voice https://github.com/AvarianKnight/pma-voice.git "resources\[som]\pma-voice"
 if errorlevel 1 goto :git_error
 
 call :sync_git_repo mz_notify https://github.com/mz-core/mz_notify.git "resources\[mz]\mz_notify"
@@ -69,7 +83,37 @@ if errorlevel 1 goto :git_error
 call :sync_git_repo mz_sync https://github.com/mz-core/mz_sync.git "resources\[mz]\mz_sync"
 if errorlevel 1 goto :git_error
 
-call :sync_git_repo pma-voice https://github.com/AvarianKnight/pma-voice.git "resources\[som]\pma-voice"
+call :sync_git_repo mz_core https://github.com/mz-core/mz_core.git "resources\[mz]\mz_core"
+if errorlevel 1 goto :git_error
+
+call :sync_git_repo mz_settings https://github.com/mz-core/mz_settings.git "resources\[mz]\mz_settings"
+if errorlevel 1 goto :git_error
+
+call :sync_git_repo mz_interact https://github.com/mz-core/mz_interact.git "resources\[mz]\mz_interact"
+if errorlevel 1 goto :git_error
+
+call :sync_git_repo mz_vehicles https://github.com/mz-core/mz_vehicles.git "resources\[mz]\mz_vehicles"
+if errorlevel 1 goto :git_error
+
+call :sync_git_repo mz_inventory https://github.com/mz-core/mz_inventory.git "resources\[mz]\mz_inventory"
+if errorlevel 1 goto :git_error
+
+call :sync_git_repo mz_target https://github.com/mz-core/mz_target.git "resources\[mz]\mz_target"
+if errorlevel 1 goto :git_error
+
+call :sync_git_repo mz_radio https://github.com/mz-core/mz_radio.git "resources\[mz]\mz_radio"
+if errorlevel 1 goto :git_error
+
+call :sync_git_repo mz_creator https://github.com/mz-core/mz_creator.git "resources\[mz]\mz_creator"
+if errorlevel 1 goto :git_error
+
+call :sync_git_repo mz_garagem https://github.com/mz-core/mz_garagem.git "resources\[mz]\mz_garagem"
+if errorlevel 1 goto :git_error
+
+call :sync_git_repo mz_hud https://github.com/mz-core/mz_hud.git "resources\[mz]\mz_hud"
+if errorlevel 1 goto :git_error
+
+call :sync_git_repo mz_admin https://github.com/mz-core/mz_admin.git "resources\[mz]\mz_admin"
 if errorlevel 1 goto :git_error
 
 echo Dependencias do projeto instaladas.

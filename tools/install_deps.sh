@@ -110,6 +110,8 @@ mkdir -p \
   "resources/[som]" \
   "resources/[managers]" \
   "resources/[system]" \
+  "resources/[system]/[builders]" \
+  "resources/[gameplay]" \
   "tmp"
 
 OXMYSQL_ZIP="tmp/oxmysql.zip"
@@ -142,10 +144,24 @@ prepare_cfx_server_data "$CFX_SERVER_DATA_TMP"
 sync_cfx_resource "mapmanager" "$CFX_SERVER_DATA_TMP/resources/[managers]/mapmanager" "resources/[managers]/mapmanager"
 sync_cfx_resource "spawnmanager" "$CFX_SERVER_DATA_TMP/resources/[managers]/spawnmanager" "resources/[managers]/spawnmanager"
 sync_cfx_resource "sessionmanager" "$CFX_SERVER_DATA_TMP/resources/[system]/sessionmanager" "resources/[system]/sessionmanager"
+sync_cfx_resource "baseevents" "$CFX_SERVER_DATA_TMP/resources/[system]/baseevents" "resources/[system]/baseevents"
+sync_cfx_resource "yarn" "$CFX_SERVER_DATA_TMP/resources/[system]/[builders]/yarn" "resources/[system]/[builders]/yarn"
+sync_cfx_resource "webpack" "$CFX_SERVER_DATA_TMP/resources/[system]/[builders]/webpack" "resources/[system]/[builders]/webpack"
+sync_cfx_resource "chat" "$CFX_SERVER_DATA_TMP/resources/[gameplay]/chat" "resources/[gameplay]/chat"
 
-sync_git_repo "mz_core" "https://github.com/mz-core/mz_core.git" "resources/[mz]/mz_core"
+sync_git_repo "pma-voice" "https://github.com/AvarianKnight/pma-voice.git" "resources/[som]/pma-voice"
 sync_git_repo "mz_notify" "https://github.com/mz-core/mz_notify.git" "resources/[mz]/mz_notify"
 sync_git_repo "mz_sync" "https://github.com/mz-core/mz_sync.git" "resources/[mz]/mz_sync"
-sync_git_repo "pma-voice" "https://github.com/AvarianKnight/pma-voice.git" "resources/[som]/pma-voice"
+sync_git_repo "mz_core" "https://github.com/mz-core/mz_core.git" "resources/[mz]/mz_core"
+sync_git_repo "mz_settings" "https://github.com/mz-core/mz_settings.git" "resources/[mz]/mz_settings"
+sync_git_repo "mz_interact" "https://github.com/mz-core/mz_interact.git" "resources/[mz]/mz_interact"
+sync_git_repo "mz_vehicles" "https://github.com/mz-core/mz_vehicles.git" "resources/[mz]/mz_vehicles"
+sync_git_repo "mz_inventory" "https://github.com/mz-core/mz_inventory.git" "resources/[mz]/mz_inventory"
+sync_git_repo "mz_target" "https://github.com/mz-core/mz_target.git" "resources/[mz]/mz_target"
+sync_git_repo "mz_radio" "https://github.com/mz-core/mz_radio.git" "resources/[mz]/mz_radio"
+sync_git_repo "mz_creator" "https://github.com/mz-core/mz_creator.git" "resources/[mz]/mz_creator"
+sync_git_repo "mz_garagem" "https://github.com/mz-core/mz_garagem.git" "resources/[mz]/mz_garagem"
+sync_git_repo "mz_hud" "https://github.com/mz-core/mz_hud.git" "resources/[mz]/mz_hud"
+sync_git_repo "mz_admin" "https://github.com/mz-core/mz_admin.git" "resources/[mz]/mz_admin"
 
 echo "Dependencias do projeto instaladas."

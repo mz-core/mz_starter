@@ -18,7 +18,7 @@ Este repositorio e responsavel por:
 - definir o boot via `server.cfg`
 - separar a configuracao em arquivos dentro de `cfg/`
 - documentar o setup operacional
-- instalar dependencias do projeto, como `oxmysql`, `ox_lib`, `mz_core`, `mz_notify`, `mz_sync` e `pma-voice`
+- instalar dependencias do projeto, como `oxmysql`, `ox_lib`, `pma-voice` e os resources `mz_` usados no boot atual
 - sincronizar os recursos oficiais minimos para o boot atual
 
 O `mz_starter` deve continuar enxuto e focado em ambiente.
@@ -39,6 +39,10 @@ O instalador sincroniza apenas os recursos oficiais necessarios para o boot atua
 - `mapmanager`
 - `spawnmanager`
 - `sessionmanager`
+- `baseevents`
+- `chat`
+- `yarn`
+- `webpack`
 
 Isso nao transforma o `mz_starter` em uma copia completa do `cfx-server-data`.
 Se voce precisar de outros recursos stock do FiveM, eles continuam sendo uma decisao separada do setup.
@@ -60,20 +64,36 @@ server-data/
 |   |-- resources.cfg
 |   `-- tags.cfg
 |-- resources/
+|   |-- [gameplay]/
+|   |   `-- chat
 |   |-- [managers]/
 |   |   |-- mapmanager
 |   |   `-- spawnmanager
 |   |-- [mz]/
 |   |   |-- mz_core
 |   |   |-- mz_notify
-|   |   `-- mz_sync
+|   |   |-- mz_sync
+|   |   |-- mz_settings
+|   |   |-- mz_interact
+|   |   |-- mz_vehicles
+|   |   |-- mz_inventory
+|   |   |-- mz_target
+|   |   |-- mz_radio
+|   |   |-- mz_creator
+|   |   |-- mz_garagem
+|   |   |-- mz_hud
+|   |   `-- mz_admin
 |   |-- [ox]/
 |   |   |-- oxmysql
 |   |   `-- ox_lib
 |   |-- [som]/
 |   |   `-- pma-voice
 |   `-- [system]/
-|       `-- sessionmanager
+|       |-- sessionmanager
+|       |-- baseevents
+|       `-- [builders]/
+|           |-- yarn
+|           `-- webpack
 `-- tmp/
 ```
 
