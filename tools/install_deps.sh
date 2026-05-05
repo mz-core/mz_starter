@@ -160,6 +160,7 @@ sync_git_repo "mz_inventory" "https://github.com/mz-core/mz_inventory.git" "reso
 sync_git_repo "mz_target" "https://github.com/mz-core/mz_target.git" "resources/[mz]/mz_target"
 sync_git_repo "mz_radio" "https://github.com/mz-core/mz_radio.git" "resources/[mz]/mz_radio"
 sync_git_repo "mz_creator" "https://github.com/mz-core/mz_creator.git" "resources/[mz]/mz_creator"
+sync_git_repo "mz_clothing" "https://github.com/mz-core/mz_clothing.git" "resources/[mz]/mz_clothing"
 sync_git_repo "mz_garagem" "https://github.com/mz-core/mz_garagem.git" "resources/[mz]/mz_garagem"
 sync_git_repo "mz_hud" "https://github.com/mz-core/mz_hud.git" "resources/[mz]/mz_hud"
 sync_git_repo "mz_admin" "https://github.com/mz-core/mz_admin.git" "resources/[mz]/mz_admin"

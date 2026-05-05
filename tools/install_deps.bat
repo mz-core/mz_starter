@@ -107,6 +107,9 @@ if errorlevel 1 goto :git_error
 call :sync_git_repo mz_creator https://github.com/mz-core/mz_creator.git "resources\[mz]\mz_creator"
 if errorlevel 1 goto :git_error
 
+call :sync_git_repo mz_clothing https://github.com/mz-core/mz_clothing.git "resources\[mz]\mz_clothing"
+if errorlevel 1 goto :git_error
+
 call :sync_git_repo mz_garagem https://github.com/mz-core/mz_garagem.git "resources\[mz]\mz_garagem"
 if errorlevel 1 goto :git_error
 
