@@ -18,6 +18,7 @@ O instalador:
 - atualiza repositorios Git ja existentes com `git pull --ff-only`
 - baixa novamente as releases de `oxmysql` e `ox_lib`
 - sincroniza os recursos CFX base usados no `cfg/resources.cfg`
+- instala/atualiza `screenshot-basic` em `resources/[standalone]/screenshot-basic`
 - mantem pastas locais que existam sem `.git`, para evitar sobrescrever alteracoes manuais
 
 ## Conferir estrutura

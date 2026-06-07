@@ -70,6 +70,7 @@ Antes de rodar o instalador, o ambiente precisa ter:
 - clona ou atualiza `mz_core`
 - clona ou atualiza `mz_notify`
 - clona ou atualiza `mz_sync`
+- clona ou atualiza `screenshot-basic`
 - clona ou atualiza `mz_settings`
 - clona ou atualiza `mz_interact`
 - clona ou atualiza `mz_vehicles`
@@ -94,6 +95,7 @@ Antes de rodar o instalador, o ambiente precisa ter:
 - O `mz_notify` entra em `resources/[mz]/mz_notify`.
 - O `mz_sync` entra em `resources/[mz]/mz_sync`.
 - O `pma-voice` entra em `resources/[som]/pma-voice`.
+- O `screenshot-basic` entra em `resources/[standalone]/screenshot-basic`.
 - Os recursos oficiais do boot atual entram em `resources/[managers]` e `resources/[system]`.
 
 ## Resultado esperado
@@ -109,9 +111,28 @@ Ao final desta etapa, o ambiente deve ter:
 - `yarn` em `resources/[system]/[builders]/yarn`
 - `webpack` em `resources/[system]/[builders]/webpack`
 - `pma-voice` em `resources/[som]/pma-voice`
+- `screenshot-basic` em `resources/[standalone]/screenshot-basic`
 - `mz_core` em `resources/[mz]/mz_core`
 - `mz_notify` em `resources/[mz]/mz_notify`
 - `mz_sync` em `resources/[mz]/mz_sync`
 - `mz_settings`, `mz_interact`, `mz_vehicles`, `mz_inventory`, `mz_target`, `mz_radio`, `mz_creator`, `mz_garagem`, `mz_hud` e `mz_admin` em `resources/[mz]/`
 
 Para a visao de fronteira entre os repositorios e a estrutura esperada do diretorio, veja [docs/structure.md](structure.md).
+
+## Instalacao manual de screenshot-basic
+
+Se o instalador nao for usado, instale manualmente:
+
+```sh
+mkdir -p "resources/[standalone]"
+git clone https://github.com/citizenfx/screenshot-basic.git "resources/[standalone]/screenshot-basic"
+```
+
+No Windows PowerShell:
+
+```powershell
+New-Item -ItemType Directory -Force "resources/[standalone]"
+git clone https://github.com/citizenfx/screenshot-basic.git "resources/[standalone]/screenshot-basic"
+```
+
+O resource deve iniciar antes de `mz_realestate` quando o `mz_realestate` estiver no boot do ambiente.

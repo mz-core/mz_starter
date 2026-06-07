@@ -58,6 +58,18 @@ for %%D in (
 )
 
 echo.
+echo Verificando dependencias opcionais/preparatorias...
+for %%D in (
+  "resources\[standalone]\screenshot-basic"
+) do (
+  if exist "%%~D\" (
+    echo [OK] %%~D
+  ) else (
+    echo [OPTIONAL MISSING] %%~D
+  )
+)
+
+echo.
 echo Verificando resources MZ...
 for %%D in (
   "resources\[mz]\mz_notify"

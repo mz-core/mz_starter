@@ -69,6 +69,8 @@ server-data/
 |   |-- [managers]/
 |   |   |-- mapmanager
 |   |   `-- spawnmanager
+|   |-- [standalone]/
+|   |   `-- screenshot-basic
 |   |-- [mz]/
 |   |   |-- mz_core
 |   |   |-- mz_notify
@@ -117,3 +119,30 @@ Antes de mexer no projeto, vale validar:
 - esta mudanca deixaria o `mz_starter` mais perto de um framework?
 
 Se a resposta para a ultima pergunta for "sim", o mais provavel e que a mudanca esteja indo para o repositorio errado.
+
+## screenshot-basic e fotos futuras
+
+`screenshot-basic` fica em `resources/[standalone]/screenshot-basic` por ser dependencia de infraestrutura, nao regra de dominio.
+
+Ele prepara uma fase futura do `mz_realestate` para fotos de imoveis:
+
+- `/mre_photo_take listing_000001`
+- salvar imagem no servidor/storage
+- tabela futura `mz_realestate_listing_photos`
+- galeria no detalhe do anuncio
+- futuramente site/API publica
+
+Tabela futura sugerida, ainda nao criada:
+
+```text
+mz_realestate_listing_photos
+- id
+- listing_code
+- image_url
+- caption
+- sort_order
+- uploaded_by
+- created_at
+```
+
+Quando essa fase for implementada, evite trafegar base64 grande por eventos; prefira fluxo controlado de upload, arquivo ou endpoint.

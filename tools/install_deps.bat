@@ -8,6 +8,7 @@ if errorlevel 1 exit /b 1
 if not exist "resources" mkdir "resources"
 if not exist "resources\[ox]" mkdir "resources\[ox]"
 if not exist "resources\[mz]" mkdir "resources\[mz]"
+if not exist "resources\[standalone]" mkdir "resources\[standalone]"
 if not exist "resources\[som]" mkdir "resources\[som]"
 if not exist "resources\[managers]" mkdir "resources\[managers]"
 if not exist "resources\[system]" mkdir "resources\[system]"
@@ -73,6 +74,9 @@ if errorlevel 1 goto :sync_error
 
 call :sync_cfx_resource chat "%CFX_SERVER_DATA_TMP%\resources\[gameplay]\chat" "resources\[gameplay]\chat"
 if errorlevel 1 goto :sync_error
+
+call :sync_git_repo screenshot-basic https://github.com/citizenfx/screenshot-basic.git "resources\[standalone]\screenshot-basic"
+if errorlevel 1 goto :git_error
 
 call :sync_git_repo pma-voice https://github.com/AvarianKnight/pma-voice.git "resources\[som]\pma-voice"
 if errorlevel 1 goto :git_error

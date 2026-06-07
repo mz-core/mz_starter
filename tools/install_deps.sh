@@ -107,6 +107,7 @@ mkdir -p \
   "resources" \
   "resources/[ox]" \
   "resources/[mz]" \
+  "resources/[standalone]" \
   "resources/[som]" \
   "resources/[managers]" \
   "resources/[system]" \
@@ -149,6 +150,7 @@ sync_cfx_resource "yarn" "$CFX_SERVER_DATA_TMP/resources/[system]/[builders]/yar
 sync_cfx_resource "webpack" "$CFX_SERVER_DATA_TMP/resources/[system]/[builders]/webpack" "resources/[system]/[builders]/webpack"
 sync_cfx_resource "chat" "$CFX_SERVER_DATA_TMP/resources/[gameplay]/chat" "resources/[gameplay]/chat"
 
+sync_git_repo "screenshot-basic" "https://github.com/citizenfx/screenshot-basic.git" "resources/[standalone]/screenshot-basic"
 sync_git_repo "pma-voice" "https://github.com/AvarianKnight/pma-voice.git" "resources/[som]/pma-voice"
 sync_git_repo "mz_notify" "https://github.com/mz-core/mz_notify.git" "resources/[mz]/mz_notify"
 sync_git_repo "mz_sync" "https://github.com/mz-core/mz_sync.git" "resources/[mz]/mz_sync"

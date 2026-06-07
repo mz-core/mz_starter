@@ -22,6 +22,7 @@ Camada de boot, configuracao e instalacao para subir um servidor FiveM usando `m
 - clona ou atualiza `mz_notify`
 - clona ou atualiza `mz_sync`
 - clona ou atualiza os resources MZ listados no boot atual
+- clona ou atualiza `screenshot-basic` em `resources/[standalone]`
 - clona ou atualiza `pma-voice`
 
 ## O que o instalador nao faz hoje
@@ -39,3 +40,16 @@ Camada de boot, configuracao e instalacao para subir um servidor FiveM usando `m
 ## Documentacao
 - [Instalacao](docs/install.md)
 - [Estrutura do ambiente](docs/structure.md)
+
+## screenshot-basic
+
+O `screenshot-basic` e preparado como dependencia base/opcional em `resources/[standalone]/screenshot-basic` e iniciado em `cfg/resources.cfg` antes dos resources MZ.
+
+Ele sera usado em uma fase futura do `mz_realestate` para fotos de imoveis. No estado atual, anuncios, placas e detalhes publicos continuam funcionando sem implementar captura de imagens.
+
+Instalacao manual, se necessario:
+
+```sh
+mkdir -p "resources/[standalone]"
+git clone https://github.com/citizenfx/screenshot-basic.git "resources/[standalone]/screenshot-basic"
+```
