@@ -120,6 +120,9 @@ if errorlevel 1 goto :git_error
 call :sync_git_repo mz_hud https://github.com/mz-core/mz_hud.git "resources\[mz]\mz_hud"
 if errorlevel 1 goto :git_error
 
+call :sync_git_repo mz_banguard https://github.com/mz-core/mz_banguard.git "resources\[mz]\mz_banguard"
+if errorlevel 1 goto :git_error
+
 call :sync_git_repo mz_admin https://github.com/mz-core/mz_admin.git "resources\[mz]\mz_admin"
 if errorlevel 1 goto :git_error
 

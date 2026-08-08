@@ -84,6 +84,7 @@ server-data/
 |   |   |-- mz_creator
 |   |   |-- mz_garagem
 |   |   |-- mz_hud
+|   |   |-- mz_banguard
 |   |   `-- mz_admin
 |   |-- [ox]/
 |   |   |-- oxmysql

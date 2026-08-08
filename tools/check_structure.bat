@@ -84,6 +84,7 @@ for %%D in (
   "resources\[mz]\mz_creator"
   "resources\[mz]\mz_garagem"
   "resources\[mz]\mz_hud"
+  "resources\[mz]\mz_banguard"
   "resources\[mz]\mz_admin"
 ) do (
   if exist "%%~D\" (

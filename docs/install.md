@@ -80,6 +80,7 @@ Antes de rodar o instalador, o ambiente precisa ter:
 - clona ou atualiza `mz_creator`
 - clona ou atualiza `mz_garagem`
 - clona ou atualiza `mz_hud`
+- clona ou atualiza `mz_banguard`
 - clona ou atualiza `mz_admin`
 - clona ou atualiza `pma-voice`
 
@@ -115,7 +116,7 @@ Ao final desta etapa, o ambiente deve ter:
 - `mz_core` em `resources/[mz]/mz_core`
 - `mz_notify` em `resources/[mz]/mz_notify`
 - `mz_sync` em `resources/[mz]/mz_sync`
-- `mz_settings`, `mz_interact`, `mz_vehicles`, `mz_inventory`, `mz_target`, `mz_radio`, `mz_creator`, `mz_garagem`, `mz_hud` e `mz_admin` em `resources/[mz]/`
+- `mz_settings`, `mz_interact`, `mz_vehicles`, `mz_inventory`, `mz_target`, `mz_radio`, `mz_creator`, `mz_garagem`, `mz_hud`, `mz_banguard` e `mz_admin` em `resources/[mz]/`
 
 Para a visao de fronteira entre os repositorios e a estrutura esperada do diretorio, veja [docs/structure.md](structure.md).
 

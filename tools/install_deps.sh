@@ -165,6 +165,7 @@ sync_git_repo "mz_creator" "https://github.com/mz-core/mz_creator.git" "resource
 sync_git_repo "mz_clothing" "https://github.com/mz-core/mz_clothing.git" "resources/[mz]/mz_clothing"
 sync_git_repo "mz_garagem" "https://github.com/mz-core/mz_garagem.git" "resources/[mz]/mz_garagem"
 sync_git_repo "mz_hud" "https://github.com/mz-core/mz_hud.git" "resources/[mz]/mz_hud"
+sync_git_repo "mz_banguard" "https://github.com/mz-core/mz_banguard.git" "resources/[mz]/mz_banguard"
 sync_git_repo "mz_admin" "https://github.com/mz-core/mz_admin.git" "resources/[mz]/mz_admin"
 
 echo "Dependencias do projeto instaladas."
