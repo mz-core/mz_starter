@@ -1,0 +1,11 @@
+diff --git a/server/module/phone.lua b/server/module/phone.lua
+--- a/server/module/phone.lua
++++ b/server/module/phone.lua
+@@ -65,7 +65,3 @@ function setPlayerCall(source, _callChannel)
+     end
+ end
+ exports('setPlayerCall', setPlayerCall)
+-
+-RegisterNetEvent('pma-voice:setPlayerCall', function(callChannel)
+-    setPlayerCall(source, callChannel)
+-end)

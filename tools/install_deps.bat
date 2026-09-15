@@ -2,6 +2,12 @@
 setlocal EnableExtensions EnableDelayedExpansion
 cd /d %~dp0\..
 
+set "PMA_REPOSITORY=https://github.com/AvarianKnight/pma-voice.git"
+set "PMA_VERSION=7.0.0"
+set "PMA_TAG=v7.0.0"
+set "PMA_COMMIT=3379e45dcf7aaa8b7651317190c108095a121553"
+set "PMA_PATCH=%CD%\patches\pma-voice-server-authoritative-calls.patch"
+
 call :preflight
 if errorlevel 1 exit /b 1
 
@@ -78,7 +84,7 @@ if errorlevel 1 goto :sync_error
 call :sync_git_repo screenshot-basic https://github.com/citizenfx/screenshot-basic.git "resources\[standalone]\screenshot-basic"
 if errorlevel 1 goto :git_error
 
-call :sync_git_repo pma-voice https://github.com/AvarianKnight/pma-voice.git "resources\[som]\pma-voice"
+call :sync_pma_voice
 if errorlevel 1 goto :git_error
 
 call :sync_git_repo mz_notify https://github.com/mz-core/mz_notify.git "resources\[mz]\mz_notify"
@@ -234,6 +240,108 @@ if exist "%REPO_TARGET%\.git" (
   )
 )
 
+exit /b 0
+
+:verify_pma_voice
+set "PMA_TARGET=%~1"
+set "PMA_CURRENT_COMMIT="
+for /f "delims=" %%H in ('git -C "%PMA_TARGET%" rev-parse HEAD') do set "PMA_CURRENT_COMMIT=%%H"
+if /I not "%PMA_CURRENT_COMMIT%"=="%PMA_COMMIT%" (
+  echo pma-voice commit inesperado: %PMA_CURRENT_COMMIT% ^(esperado: %PMA_COMMIT%^).
+  exit /b 1
+)
+
+set "PMA_CHANGED_COUNT=0"
+set "PMA_CHANGED_CODE="
+set "PMA_CHANGED_PATH="
+for /f "tokens=1,*" %%A in ('git -C "%PMA_TARGET%" status --porcelain --untracked-files^=all') do (
+  set /a PMA_CHANGED_COUNT+=1
+  set "PMA_CHANGED_CODE=%%A"
+  set "PMA_CHANGED_PATH=%%B"
+)
+if not "%PMA_CHANGED_COUNT%"=="1" (
+  echo pma-voice possui quantidade inesperada de arquivos alterados: %PMA_CHANGED_COUNT%.
+  exit /b 1
+)
+if /I not "%PMA_CHANGED_PATH%"=="server/module/phone.lua" (
+  echo pma-voice possui alteracao inesperada em %PMA_CHANGED_PATH%.
+  exit /b 1
+)
+
+git -C "%PMA_TARGET%" apply --reverse --check "%PMA_PATCH%" >nul 2>nul
+if errorlevel 1 (
+  echo O patch server-authoritative do pma-voice nao esta aplicado como esperado.
+  exit /b 1
+)
+
+findstr /c:"RegisterNetEvent('pma-voice:setPlayerCall'" "%PMA_TARGET%\server\module\phone.lua" >nul
+if not errorlevel 1 (
+  echo O handler client-authoritative de call channel ainda esta presente no pma-voice.
+  exit /b 1
+)
+findstr /c:"exports('setPlayerCall', setPlayerCall)" "%PMA_TARGET%\server\module\phone.lua" >nul
+if errorlevel 1 (
+  echo O export server setPlayerCall esperado nao foi encontrado no pma-voice.
+  exit /b 1
+)
+exit /b 0
+
+:sync_pma_voice
+set "PMA_TARGET=resources\[som]\pma-voice"
+if exist "%PMA_TARGET%" if not exist "%PMA_TARGET%\.git" (
+  echo pma-voice existe sem .git; nao e possivel validar tag, commit e patch.
+  echo Remova ou mova %PMA_TARGET% e rode o instalador novamente.
+  exit /b 1
+)
+
+if not exist "%PMA_TARGET%\.git" (
+  echo Clonando pma-voice %PMA_TAG%...
+  git clone --branch "%PMA_TAG%" --depth 1 "%PMA_REPOSITORY%" "%PMA_TARGET%"
+  if errorlevel 1 exit /b 1
+) else (
+  set "PMA_CURRENT_COMMIT="
+  for /f "delims=" %%H in ('git -C "%PMA_TARGET%" rev-parse HEAD') do set "PMA_CURRENT_COMMIT=%%H"
+  set "PMA_CHANGED_COUNT=0"
+  for /f "delims=" %%S in ('git -C "%PMA_TARGET%" status --porcelain --untracked-files^=all') do set /a PMA_CHANGED_COUNT+=1
+  if not "!PMA_CHANGED_COUNT!"=="0" (
+    if /I "!PMA_CURRENT_COMMIT!"=="%PMA_COMMIT%" (
+      call :verify_pma_voice "%PMA_TARGET%"
+      if not errorlevel 1 (
+        echo pma-voice %PMA_TAG% ja esta pinado e hardened.
+        exit /b 0
+      )
+    )
+    echo pma-voice possui alteracoes locais inesperadas; pin abortado sem sobrescrever arquivos.
+    exit /b 1
+  )
+
+  echo Fixando pma-voice em %PMA_TAG% ^(%PMA_COMMIT%^)...
+  git -C "%PMA_TARGET%" fetch --depth 1 origin "refs/tags/%PMA_TAG%"
+  if errorlevel 1 exit /b 1
+  set "PMA_FETCHED_COMMIT="
+  for /f "delims=" %%H in ('git -C "%PMA_TARGET%" rev-parse FETCH_HEAD') do set "PMA_FETCHED_COMMIT=%%H"
+  if /I not "!PMA_FETCHED_COMMIT!"=="%PMA_COMMIT%" (
+    echo A tag %PMA_TAG% nao corresponde ao commit aprovado.
+    exit /b 1
+  )
+  git -C "%PMA_TARGET%" checkout --detach "%PMA_COMMIT%"
+  if errorlevel 1 exit /b 1
+)
+
+set "PMA_CURRENT_COMMIT="
+for /f "delims=" %%H in ('git -C "%PMA_TARGET%" rev-parse HEAD') do set "PMA_CURRENT_COMMIT=%%H"
+if /I not "%PMA_CURRENT_COMMIT%"=="%PMA_COMMIT%" (
+  echo Clone do pma-voice nao corresponde ao commit aprovado.
+  exit /b 1
+)
+
+git -C "%PMA_TARGET%" apply --check "%PMA_PATCH%"
+if errorlevel 1 exit /b 1
+git -C "%PMA_TARGET%" apply "%PMA_PATCH%"
+if errorlevel 1 exit /b 1
+call :verify_pma_voice "%PMA_TARGET%"
+if errorlevel 1 exit /b 1
+echo pma-voice %PMA_VERSION% instalado com call membership server-authoritative.
 exit /b 0
 
 :download_error

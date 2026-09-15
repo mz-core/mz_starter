@@ -4,6 +4,12 @@ set -euo pipefail
 ROOT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$ROOT_DIR"
 
+PMA_REPOSITORY="https://github.com/AvarianKnight/pma-voice.git"
+PMA_VERSION="7.0.0"
+PMA_TAG="v7.0.0"
+PMA_COMMIT="3379e45dcf7aaa8b7651317190c108095a121553"
+PMA_PATCH="$ROOT_DIR/patches/pma-voice-server-authoritative-calls.patch"
+
 preflight() {
   if [ ! -f "server.cfg" ]; then
     echo "[preflight] server.cfg nao foi encontrado na raiz do projeto."
@@ -58,6 +64,87 @@ sync_git_repo() {
     echo "Clonando $label..."
     git clone --depth 1 "$repo_url" "$target"
   fi
+}
+
+verify_pma_voice() {
+  local target="$1"
+  local current_commit=""
+  local status=""
+
+  current_commit="$(git -C "$target" rev-parse HEAD)"
+  if [ "$current_commit" != "$PMA_COMMIT" ]; then
+    echo "pma-voice commit inesperado: $current_commit (esperado: $PMA_COMMIT)."
+    return 1
+  fi
+
+  status="$(git -C "$target" status --porcelain --untracked-files=all)"
+  if [ "$status" != " M server/module/phone.lua" ]; then
+    echo "pma-voice possui alteracoes diferentes do patch MZ esperado:"
+    echo "$status"
+    return 1
+  fi
+
+  if ! git -C "$target" apply --reverse --check "$PMA_PATCH" >/dev/null 2>&1; then
+    echo "O patch server-authoritative do pma-voice nao esta aplicado como esperado."
+    return 1
+  fi
+
+  if grep -Fq "RegisterNetEvent('pma-voice:setPlayerCall'" "$target/server/module/phone.lua"; then
+    echo "O handler client-authoritative de call channel ainda esta presente no pma-voice."
+    return 1
+  fi
+
+  if ! grep -Fq "exports('setPlayerCall', setPlayerCall)" "$target/server/module/phone.lua"; then
+    echo "O export server setPlayerCall esperado nao foi encontrado no pma-voice."
+    return 1
+  fi
+}
+
+sync_pma_voice() {
+  local target="resources/[som]/pma-voice"
+  local current_commit=""
+  local status=""
+
+  if [ -d "$target" ] && [ ! -d "$target/.git" ]; then
+    echo "pma-voice existe sem .git; nao e possivel validar tag, commit e patch."
+    echo "Remova ou mova $target e rode o instalador novamente."
+    return 1
+  fi
+
+  if [ ! -d "$target/.git" ]; then
+    echo "Clonando pma-voice $PMA_TAG..."
+    git clone --branch "$PMA_TAG" --depth 1 "$PMA_REPOSITORY" "$target"
+  else
+    current_commit="$(git -C "$target" rev-parse HEAD)"
+    status="$(git -C "$target" status --porcelain --untracked-files=all)"
+
+    if [ -n "$status" ]; then
+      if [ "$current_commit" = "$PMA_COMMIT" ] && verify_pma_voice "$target"; then
+        echo "pma-voice $PMA_TAG ja esta pinado e hardened."
+        return 0
+      fi
+      echo "pma-voice possui alteracoes locais inesperadas; pin abortado sem sobrescrever arquivos."
+      return 1
+    fi
+
+    echo "Fixando pma-voice em $PMA_TAG ($PMA_COMMIT)..."
+    git -C "$target" fetch --depth 1 origin "refs/tags/$PMA_TAG"
+    if [ "$(git -C "$target" rev-parse FETCH_HEAD)" != "$PMA_COMMIT" ]; then
+      echo "A tag $PMA_TAG nao corresponde ao commit aprovado."
+      return 1
+    fi
+    git -C "$target" checkout --detach "$PMA_COMMIT"
+  fi
+
+  if [ "$(git -C "$target" rev-parse HEAD)" != "$PMA_COMMIT" ]; then
+    echo "Clone do pma-voice nao corresponde ao commit aprovado."
+    return 1
+  fi
+
+  git -C "$target" apply --check "$PMA_PATCH"
+  git -C "$target" apply "$PMA_PATCH"
+  verify_pma_voice "$target"
+  echo "pma-voice $PMA_VERSION instalado com call membership server-authoritative."
 }
 
 prepare_cfx_server_data() {
@@ -151,7 +238,7 @@ sync_cfx_resource "webpack" "$CFX_SERVER_DATA_TMP/resources/[system]/[builders]/
 sync_cfx_resource "chat" "$CFX_SERVER_DATA_TMP/resources/[gameplay]/chat" "resources/[gameplay]/chat"
 
 sync_git_repo "screenshot-basic" "https://github.com/citizenfx/screenshot-basic.git" "resources/[standalone]/screenshot-basic"
-sync_git_repo "pma-voice" "https://github.com/AvarianKnight/pma-voice.git" "resources/[som]/pma-voice"
+sync_pma_voice
 sync_git_repo "mz_notify" "https://github.com/mz-core/mz_notify.git" "resources/[mz]/mz_notify"
 sync_git_repo "mz_sync" "https://github.com/mz-core/mz_sync.git" "resources/[mz]/mz_sync"
 sync_git_repo "mz_core" "https://github.com/mz-core/mz_core.git" "resources/[mz]/mz_core"

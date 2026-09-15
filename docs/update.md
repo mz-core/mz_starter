@@ -20,6 +20,9 @@ O instalador:
 - sincroniza os recursos CFX base usados no `cfg/resources.cfg`
 - instala/atualiza `screenshot-basic` em `resources/[standalone]/screenshot-basic`
 - mantem pastas locais que existam sem `.git`, para evitar sobrescrever alteracoes manuais
+- mantem `pma-voice` fixado em v7.0.0/`3379e45dcf7aaa8b7651317190c108095a121553` e reaplica/verifica o patch server-authoritative de calls
+
+`pma-voice` e a excecao ao `git pull --ff-only`: o instalador confere o commit exato e aceita somente a modificacao prevista em `server/module/phone.lua`. Qualquer outra mudanca local interrompe a atualizacao sem sobrescrever o resource. Uma nova versao exige atualizar o pin, revisar a API e revalidar o patch.
 
 ## Conferir estrutura
 No Windows, use:

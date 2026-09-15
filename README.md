@@ -23,7 +23,8 @@ Camada de boot, configuracao e instalacao para subir um servidor FiveM usando `m
 - clona ou atualiza `mz_sync`
 - clona ou atualiza os resources MZ listados no boot atual
 - clona ou atualiza `screenshot-basic` em `resources/[standalone]`
-- clona ou atualiza `pma-voice`
+- instala `pma-voice` v7.0.0 no commit `3379e45dcf7aaa8b7651317190c108095a121553`
+- aplica e verifica o patch MZ que remove o ingresso em call channel solicitado pelo client, preservando o export server `setPlayerCall`
 
 ## O que o instalador nao faz hoje
 - nao instala FXServer artifacts
@@ -53,3 +54,9 @@ Instalacao manual, se necessario:
 mkdir -p "resources/[standalone]"
 git clone https://github.com/citizenfx/screenshot-basic.git "resources/[standalone]/screenshot-basic"
 ```
+
+## pma-voice
+
+O `pma-voice` e instalado em `resources/[som]/pma-voice` antes de `mz_phone` e `mz_radio`. O pin e o patch fazem parte do contrato de seguranca do telefone: apenas resources server-side podem atribuir membership de chamada. O instalador aborta sem sobrescrever quando encontra uma copia sem `.git` ou alteracoes locais diferentes do patch esperado.
+
+Nao atualize esse resource com `git pull` isolado. Para atualizar, mude tag, commit e patch juntos nos dois instaladores, valide o spoof de `pma-voice:setPlayerCall` e execute as regressões de `mz_phone` e `mz_radio`.

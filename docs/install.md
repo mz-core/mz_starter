@@ -82,7 +82,8 @@ Antes de rodar o instalador, o ambiente precisa ter:
 - clona ou atualiza `mz_hud`
 - clona ou atualiza `mz_banguard`
 - clona ou atualiza `mz_admin`
-- clona ou atualiza `pma-voice`
+- instala `pma-voice` v7.0.0 no commit `3379e45dcf7aaa8b7651317190c108095a121553`
+- aplica e verifica o patch `patches/pma-voice-server-authoritative-calls.patch`
 
 ## O que o instalador nao faz hoje
 - nao instala FXServer artifacts
@@ -96,6 +97,7 @@ Antes de rodar o instalador, o ambiente precisa ter:
 - O `mz_notify` entra em `resources/[mz]/mz_notify`.
 - O `mz_sync` entra em `resources/[mz]/mz_sync`.
 - O `pma-voice` entra em `resources/[som]/pma-voice`.
+- O `pma-voice` fica em detached HEAD no commit aprovado e com somente `server/module/phone.lua` modificado pelo patch MZ. O instalador falha se encontrar outro estado local, em vez de sobrescreve-lo.
 - O `screenshot-basic` entra em `resources/[standalone]/screenshot-basic`.
 - Os recursos oficiais do boot atual entram em `resources/[managers]` e `resources/[system]`.
 
@@ -137,3 +139,17 @@ git clone https://github.com/citizenfx/screenshot-basic.git "resources/[standalo
 ```
 
 O resource deve iniciar antes de `mz_realestate` quando o `mz_realestate` estiver no boot do ambiente.
+
+## Contrato de voz do telefone
+
+O setup define OneSync e os convars de calls, radios, native audio, sending range e submix em `cfg/onesync.cfg`. `pma-voice` inicia antes de `mz_phone`; o telefone usa exclusivamente o export server `setPlayerCall(source, channel)`. O patch remove o handler upstream que aceitava `pma-voice:setPlayerCall` enviado pelo client.
+
+Uma instalacao manual precisa reproduzir exatamente o pin e aplicar o patch:
+
+```sh
+git clone --branch v7.0.0 --depth 1 https://github.com/AvarianKnight/pma-voice.git "resources/[som]/pma-voice"
+git -C "resources/[som]/pma-voice" checkout --detach 3379e45dcf7aaa8b7651317190c108095a121553
+git -C "resources/[som]/pma-voice" apply "$(pwd)/patches/pma-voice-server-authoritative-calls.patch"
+```
+
+O hash da tag e a ausencia do handler client-authoritative devem ser verificados antes do boot. O runtime instalado na VPS nao foi acessado durante esta mudanca; sua versao deve ser comparada com esse commit no rollout.
