@@ -1,15 +1,16 @@
 param(
   [string]$SourceRoot = (Resolve-Path (Join-Path $PSScriptRoot '..\..')).Path,
   [string]$OutputRoot = (Join-Path (Resolve-Path (Join-Path $PSScriptRoot '..\..')).Path 'release-artifacts'),
-  [string]$ReleaseName = ('mz-police-p1-p7-rc-{0}' -f (Get-Date).ToUniversalTime().ToString('yyyyMMddTHHmmssZ')),
+  [string]$ReleaseName = ('mz-police-p9-advanced-rc-{0}' -f (Get-Date).ToUniversalTime().ToString('yyyyMMddTHHmmssZ')),
   [switch]$SkipArchive
 )
 
 $ErrorActionPreference = 'Stop'
 
 $resourceNames = @(
-  'mz_core', 'mz_economy', 'mz_menu', 'mz_interact', 'mz_vehicles',
-  'mz_org', 'mz_inventory', 'mz_fuel', 'mz_garagem', 'mz_police', 'mz_prison'
+  'mz_notify', 'mz_core', 'mz_economy', 'mz_progress', 'mz_menu', 'mz_interact',
+  'mz_world_editor', 'mz_vehicles', 'mz_org', 'mz_inventory', 'mz_target', 'mz_radialmenu', 'mz_fuel',
+  'mz_garagem', 'mz_prison', 'mz_dispatch', 'mz_police', 'mz_medical', 'mz_phone'
 )
 $runtimeDirectories = @('client', 'server', 'shared', 'web', 'stream')
 $runtimeRootFiles = @('fxmanifest.lua', 'config.lua')
@@ -96,20 +97,31 @@ foreach ($resourceName in $resourceNames) {
       Copy-ReleaseFile $_ (Join-Path "resources\$resourceName" $childRelative)
     }
   }
+  if ($resourceName -in @('mz_dispatch', 'mz_police')) {
+    foreach ($directory in @('sql', 'docs')) {
+      $candidate = Join-Path $resourcePath $directory
+      if (-not (Test-Path -LiteralPath $candidate -PathType Container)) { continue }
+      Get-ChildItem -LiteralPath $candidate -File -Recurse | ForEach-Object {
+        $childRelative = $_.FullName.Substring($resourcePath.Length).TrimStart('\', '/')
+        Copy-ReleaseFile $_ (Join-Path "resources\$resourceName" $childRelative)
+      }
+    }
+  }
 
   $manifest = Get-Content -LiteralPath $manifestPath -Raw
   $versionMatch = [regex]::Match($manifest, '(?m)^version\s+[''"]([^''"]+)[''"]')
-  $commit = (& git -C $resourcePath rev-parse HEAD 2>$null)
-  if ($LASTEXITCODE -ne 0) { throw "Unable to resolve Git commit for $resourceName" }
-  $branch = (& git -C $resourcePath branch --show-current 2>$null)
-  $statusLines = @(& git -C $resourcePath status --porcelain 2>$null)
+  $vcsAvailable = Test-Path -LiteralPath (Join-Path $resourcePath '.git')
+  $commit = if ($vcsAvailable) { (& git -C $resourcePath rev-parse HEAD 2>$null) } else { $null }
+  $branch = if ($vcsAvailable) { (& git -C $resourcePath branch --show-current 2>$null) } else { $null }
+  $statusLines = if ($vcsAvailable) { @(& git -C $resourcePath status --porcelain 2>$null) } else { @() }
   $resourceStates += [ordered]@{
     name = $resourceName
     version = if ($versionMatch.Success) { $versionMatch.Groups[1].Value } else { $null }
-    commit = [string]$commit
-    branch = [string]$branch
-    dirty = $statusLines.Count -gt 0
-    statusEntryCount = $statusLines.Count
+    commit = if ($vcsAvailable) { [string]$commit } else { $null }
+    branch = if ($vcsAvailable) { [string]$branch } else { $null }
+    vcsAvailable = $vcsAvailable
+    dirty = if ($vcsAvailable) { $statusLines.Count -gt 0 } else { $null }
+    statusEntryCount = if ($vcsAvailable) { $statusLines.Count } else { $null }
   }
 }
 
@@ -133,19 +145,47 @@ $starterState = [ordered]@{
   statusEntryCount = $starterStatus.Count
 }
 
+$documentationFiles = @(
+  'police/POLICE_GAMEPLAY_GUIDE.md',
+  'police/POLICE_STAGING_OPERATIONAL_CONFIGURATION.md',
+  'police/P8_DISPATCH_IMPLEMENTATION_REPORT.md',
+  'police/P9_IMPLEMENTATION_REPORT.md',
+  'police/P9_POLICE_OPERATIONAL_GUIDE.md'
+)
+foreach ($relative in $documentationFiles) {
+  $candidate = Join-Path (Join-Path $sourcePath 'mz_docs') $relative
+  if (-not (Test-Path -LiteralPath $candidate -PathType Leaf)) {
+    throw "Missing release documentation: $candidate"
+  }
+  Copy-ReleaseFile (Get-Item -LiteralPath $candidate) (Join-Path 'docs' $relative)
+}
+
 $manifest = [ordered]@{
   release = $ReleaseName
   generatedAtUtc = (Get-Date).ToUniversalTime().ToString('o')
   sourceRoot = $sourcePath
   includesWorkingTreeState = $true
-  externalDependencies = @('FXServer', 'oxmysql', 'ox_lib', 'spawnmanager', 'MySQL/MariaDB')
+  externalDependencies = @(
+    'FXServer', 'oxmysql', 'ox_lib', 'spawnmanager', 'pma-voice', 'screenshot-basic', 'MySQL/MariaDB'
+  )
   bootOrder = @(
-    'oxmysql', 'ox_lib', 'mz_core', 'mz_economy', 'mz_menu', 'mz_interact',
-    'mz_vehicles', 'mz_org', 'mz_inventory', 'mz_fuel', 'mz_garagem', 'mz_police', 'mz_prison'
+    'oxmysql', 'ox_lib', 'spawnmanager', 'pma-voice', 'screenshot-basic', 'mz_notify',
+    'mz_core', 'mz_economy', 'mz_progress', 'mz_menu', 'mz_interact', 'mz_world_editor',
+    'mz_vehicles', 'mz_org', 'mz_inventory', 'mz_target', 'mz_radialmenu', 'mz_fuel', 'mz_garagem',
+    'mz_prison', 'mz_dispatch', 'mz_police', 'mz_medical', 'mz_phone'
+  )
+  activationRequired = @(
+    'Verify that mz_dispatch creates and validates its schema at boot; apply resources/mz_dispatch/sql/mz_dispatch.sql manually only as a fallback',
+    'Add ensure mz_dispatch to the approved server boot configuration',
+    'Set MZDispatchConfig.enabled only after schema and dependencies are verified',
+    'Verify that mz_police creates/validates mz_police_forensic_results at boot; resources/mz_police/sql/records_schema_additive.sql is a manual fallback only',
+    'Configure P9 capabilities, approved vehicle models, FLIR offset and real CCTV coordinates',
+    'Keep MZPoliceConfig.Advanced.enabled false until the staging runtime gate is ready'
   )
   resources = $resourceStates
   starter = $starterState
   starterFiles = $starterFiles
+  documentationFiles = $documentationFiles
 }
 $manifestPath = Join-Path $releasePath 'release-manifest.json'
 $utf8WithoutBom = New-Object System.Text.UTF8Encoding($false)

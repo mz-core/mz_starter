@@ -40,3 +40,25 @@ test("boot order and voice convars match the pinned provider contract", () => {
   assert.match(onesync, /setr voice_enableRadios 1/);
   assert.match(onesync, /setr voice_useSendingRangeOnly true/);
 });
+
+test("OneSync profile does not install or start legacy sessionmanager", () => {
+  const resources = read("cfg/resources.cfg");
+  const structure = read("tools/check_structure.bat");
+
+  assert.doesNotMatch(resources, /ensure\s+sessionmanager(?:\s|$)/);
+  assert.doesNotMatch(structure, /sessionmanager/i);
+  for (const script of [read("tools/install_deps.sh"), read("tools/install_deps.bat")]) {
+    assert.doesNotMatch(script, /sessionmanager/i);
+  }
+});
+
+test("current FXServer artifact owns chat and builders", () => {
+  const structure = read("tools/check_structure.bat");
+
+  assert.match(structure, /server\\citizen\\system_resources\\chat/i);
+  assert.match(structure, /server\\citizen\\system_resources\\yarn/i);
+  assert.match(structure, /server\\citizen\\system_resources\\webpack/i);
+  for (const script of [read("tools/install_deps.sh"), read("tools/install_deps.bat")]) {
+    assert.doesNotMatch(script, /sync_cfx_resource ["']?(?:chat|yarn|webpack)/i);
+  }
+});

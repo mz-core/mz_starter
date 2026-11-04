@@ -4,11 +4,34 @@ set -euo pipefail
 ROOT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$ROOT_DIR"
 
+OX_ONLY=0
+RUNTIME_DEPS_ONLY=0
+case "${1:-}" in
+  --help)
+    echo "Uso: install_deps.sh [--ox-only|--runtime-deps-only]"
+    echo "--ox-only instala apenas oxmysql e ox_lib; nao sincroniza Cfx ou repositorios MZ."
+    echo "--runtime-deps-only instala ox, Cfx, screenshot-basic, pma-voice e bob74_ipl; nao sincroniza repositorios MZ."
+    exit 0
+    ;;
+  --ox-only) OX_ONLY=1 ;;
+  --runtime-deps-only) RUNTIME_DEPS_ONLY=1 ;;
+  '') ;;
+  *) echo "Argumento desconhecido: $1" >&2; exit 1 ;;
+esac
+if [ "$#" -gt 1 ]; then
+  echo "Argumentos extras nao sao aceitos." >&2
+  exit 1
+fi
+
 PMA_REPOSITORY="https://github.com/AvarianKnight/pma-voice.git"
 PMA_VERSION="7.0.0"
 PMA_TAG="v7.0.0"
 PMA_COMMIT="3379e45dcf7aaa8b7651317190c108095a121553"
 PMA_PATCH="$ROOT_DIR/patches/pma-voice-server-authoritative-calls.patch"
+BOB74_REPOSITORY="https://github.com/Bob74/bob74_ipl.git"
+BOB74_VERSION="2.7.1"
+BOB74_TAG="2.7.1"
+BOB74_COMMIT="037dd6c71f6894be771e9343008223d7a3305d79"
 
 preflight() {
   if [ ! -f "server.cfg" ]; then
@@ -23,7 +46,7 @@ preflight() {
     exit 1
   fi
 
-  if ! command -v git >/dev/null 2>&1; then
+  if [ "$OX_ONLY" -eq 0 ] && ! command -v git >/dev/null 2>&1; then
     echo "[preflight] Git nao foi encontrado no PATH."
     echo "[preflight] Instale o Git antes de rodar este instalador."
     exit 1
@@ -41,13 +64,64 @@ preflight() {
     exit 1
   fi
 
+  if [ -n "${MZ_RESOURCE_SOURCE_ROOT:-}" ] && ! command -v tar >/dev/null 2>&1; then
+    echo "[preflight] tar nao foi encontrado no PATH." >&2
+    echo "[preflight] Instale o tar para copiar a distribuicao local MZ." >&2
+    exit 1
+  fi
+
+  if [ "$OX_ONLY" -eq 0 ] && [ "$RUNTIME_DEPS_ONLY" -eq 0 ]; then
+    preflight_distribution_resources
+  fi
+
   echo "[preflight] Estrutura minima encontrada. Prosseguindo com a instalacao das dependencias do projeto..."
 }
 
-cleanup_zip() {
-  local file="$1"
-  [ -f "$file" ] && rm -f "$file"
-  return 0
+preflight_distribution_resources() {
+  local resource=""
+  local missing=0
+  local distribution_resources=(
+    mz_status
+    mz_medical
+    mz_world_editor
+    mz_police
+    mz_prison
+    mz_furniture
+    mz_computer
+    mz_transport
+    mz_multichar
+    mz_warns
+    mz_feedback
+  )
+
+  for resource in "${distribution_resources[@]}"; do
+    if [ -f "resources/[mz]/$resource/fxmanifest.lua" ]; then
+      continue
+    fi
+    if [ -z "${MZ_RESOURCE_SOURCE_ROOT:-}" ]; then
+      echo "[preflight] $resource nao esta instalado e MZ_RESOURCE_SOURCE_ROOT nao foi definido." >&2
+      missing=1
+    elif [ ! -f "$MZ_RESOURCE_SOURCE_ROOT/$resource/fxmanifest.lua" ]; then
+      echo "[preflight] $resource nao foi encontrado em $MZ_RESOURCE_SOURCE_ROOT/$resource." >&2
+      missing=1
+    fi
+  done
+
+  if [ ! -f "resources/[maps]/mz_cayo/fxmanifest.lua" ]; then
+    if [ -z "${MZ_RESOURCE_SOURCE_ROOT:-}" ]; then
+      echo "[preflight] mz_cayo nao esta instalado e MZ_RESOURCE_SOURCE_ROOT nao foi definido." >&2
+      missing=1
+    elif [ ! -f "$MZ_RESOURCE_SOURCE_ROOT/mz_cayo/fxmanifest.lua" ]; then
+      echo "[preflight] mz_cayo nao foi encontrado em $MZ_RESOURCE_SOURCE_ROOT/mz_cayo." >&2
+      missing=1
+    fi
+  fi
+
+  if [ "$missing" -ne 0 ]; then
+    echo "[preflight] A distribuicao MZ esta incompleta; nenhuma dependencia foi alterada." >&2
+    echo "[preflight] Aponte MZ_RESOURCE_SOURCE_ROOT para a raiz que contem os resources mz_* atuais." >&2
+    return 1
+  fi
 }
 
 sync_git_repo() {
@@ -63,6 +137,42 @@ sync_git_repo() {
   else
     echo "Clonando $label..."
     git clone --depth 1 "$repo_url" "$target"
+  fi
+}
+
+sync_mz_resource() {
+  local label="$1"
+  local repo_url="$2"
+  local target="resources/[mz]/$label"
+  local source="${MZ_RESOURCE_SOURCE_ROOT:-}/$label"
+
+  if [ -d "$target" ]; then
+    if [ -n "$repo_url" ] && [ -d "$target/.git" ]; then
+      sync_git_repo "$label" "$repo_url" "$target"
+    else
+      echo "$label ja existe sem repositorio atualizavel; mantendo como esta."
+    fi
+  elif [ -n "${MZ_RESOURCE_SOURCE_ROOT:-}" ] && [ -f "$source/fxmanifest.lua" ]; then
+    echo "Instalando $label da distribuicao local MZ..."
+    mkdir -p "$target"
+    (
+      cd "$source"
+      tar --exclude=.git --exclude=graphify-out --exclude=node_modules -cf - .
+    ) | (
+      cd "$ROOT_DIR/$target"
+      tar -xf -
+    )
+  elif [ -n "$repo_url" ]; then
+    sync_git_repo "$label" "$repo_url" "$target"
+  else
+    echo "$label nao esta instalado e nao possui repositorio publico configurado." >&2
+    echo "Defina MZ_RESOURCE_SOURCE_ROOT para uma distribuicao MZ completa." >&2
+    return 1
+  fi
+
+  if [ ! -f "$target/fxmanifest.lua" ]; then
+    echo "$label foi resolvido sem fxmanifest.lua em $target." >&2
+    return 1
   fi
 }
 
@@ -147,6 +257,154 @@ sync_pma_voice() {
   echo "pma-voice $PMA_VERSION instalado com call membership server-authoritative."
 }
 
+verify_bob74_ipl() {
+  local target="$1"
+  local current_commit=""
+  local status=""
+  local required_file=""
+
+  for required_file in fxmanifest.lua LICENSE client.lua gtav/base.lua dlc_cayoperico/base.lua; do
+    if [ ! -f "$target/$required_file" ]; then
+      echo "bob74_ipl sem arquivo obrigatório: $target/$required_file." >&2
+      return 1
+    fi
+  done
+
+  if ! grep -Fq "version '$BOB74_VERSION'" "$target/fxmanifest.lua"; then
+    echo "bob74_ipl em $target não corresponde à versão $BOB74_VERSION." >&2
+    return 1
+  fi
+
+  if [ -d "$target/.git" ]; then
+    current_commit="$(git -C "$target" rev-parse HEAD)"
+    if [ "$current_commit" != "$BOB74_COMMIT" ]; then
+      echo "bob74_ipl commit inesperado: $current_commit (esperado: $BOB74_COMMIT)." >&2
+      return 1
+    fi
+    status="$(git -C "$target" status --porcelain --untracked-files=all)"
+    if [ -n "$status" ]; then
+      echo "bob74_ipl possui alterações locais; nenhuma atualização automática foi feita:" >&2
+      echo "$status" >&2
+      return 1
+    fi
+  fi
+}
+
+sync_bob74_ipl() {
+  local target="resources/[maps]/bob74_ipl"
+  local legacy="resources/[standalone]/bob74_ipl"
+  local existing=""
+  local -a matches=()
+
+  mapfile -t matches < <(find "resources" \( -type d -o -type l \) -name "bob74_ipl" -print)
+  if [ "${#matches[@]}" -gt 1 ]; then
+    echo "Foram encontradas várias instalações de bob74_ipl; nenhuma foi alterada:" >&2
+    printf '%s\n' "${matches[@]}" >&2
+    return 1
+  fi
+
+  if [ "${#matches[@]}" -eq 1 ]; then
+    existing="${matches[0]}"
+    if [ "$existing" != "$target" ]; then
+      if [ "$existing" != "$legacy" ]; then
+        echo "bob74_ipl está em caminho inesperado ($existing); mova-o manualmente para $target." >&2
+        return 1
+      fi
+      if [ ! -d "$existing/.git" ]; then
+        echo "bob74_ipl no caminho antigo nao tem .git; pin/limpeza nao podem ser verificados. Migre manualmente apos backup." >&2
+        return 1
+      fi
+      verify_bob74_ipl "$existing" || return 1
+      if [ -e "$target" ] || [ -L "$target" ]; then
+        echo "Destino $target ja existe; nenhuma copia Bob foi movida ou sobrescrita." >&2
+        return 1
+      fi
+      mkdir -p "resources/[maps]"
+      echo "Movendo bob74_ipl validado de $legacy para $target..."
+      mv -- "$existing" "$target" || return 1
+    else
+      echo "Reutilizando bob74_ipl existente em $existing..."
+    fi
+  else
+    mkdir -p "resources/[maps]"
+    echo "Clonando bob74_ipl $BOB74_TAG..."
+    git clone --branch "$BOB74_TAG" --depth 1 "$BOB74_REPOSITORY" "$target"
+  fi
+
+  verify_bob74_ipl "$target"
+}
+
+sync_maps_resource() {
+  local label="$1"
+  local target="resources/[maps]/$label"
+  local source="${MZ_RESOURCE_SOURCE_ROOT:-}/$label"
+  local existing=""
+  local -a matches=()
+
+  mapfile -t matches < <(find "resources" \( -type d -o -type l \) -name "$label" -print)
+  if [ "${#matches[@]}" -gt 1 ]; then
+    echo "Foram encontradas varias instalacoes de $label; nenhuma foi alterada:" >&2
+    printf '%s\n' "${matches[@]}" >&2
+    return 1
+  fi
+
+  if [ "${#matches[@]}" -eq 1 ]; then
+    existing="${matches[0]}"
+    if [ "$existing" != "$target" ]; then
+      echo "$label existe fora de $target; mova a copia manualmente apos validar o destino." >&2
+      return 1
+    fi
+    for required_file in fxmanifest.lua config.lua client/ipl_data.lua client/main.lua; do
+      if [ ! -f "$target/$required_file" ]; then
+        echo "$label existente nao tem $required_file em $target." >&2
+        return 1
+      fi
+    done
+    echo "Reutilizando $label existente em $target..."
+    return 0
+  fi
+
+  if [ ! -f "$source/fxmanifest.lua" ]; then
+    echo "$label nao foi encontrado em $source; nenhuma copia foi instalada." >&2
+    return 1
+  fi
+
+  if [ -e "$target" ] || [ -L "$target" ]; then
+    echo "O destino $target existe sem ser uma pasta de resource reconhecida." >&2
+    return 1
+  fi
+
+  local staging=""
+  mkdir -p "resources/[maps]"
+  staging="$(mktemp -d "resources/[maps]/.${label}.install.XXXXXX")"
+  echo "Instalando $label da distribuicao local MZ..."
+  if ! (
+    cd "$source"
+    tar --exclude=.git --exclude=graphify-out --exclude=node_modules -cf - .
+  ) | (
+    cd "$ROOT_DIR/$staging"
+    tar -xf -
+  ); then
+    rm -rf -- "$staging"
+    echo "Falha ao copiar $label; staging removido e destino preservado." >&2
+    return 1
+  fi
+
+  for required_file in fxmanifest.lua config.lua client/ipl_data.lua client/main.lua; do
+    if [ ! -f "$staging/$required_file" ]; then
+      rm -rf -- "$staging"
+      echo "$label foi copiado sem $required_file; staging removido." >&2
+      return 1
+    fi
+  done
+
+  if ! mv -- "$staging" "$target"; then
+    rm -rf -- "$staging"
+    echo "Falha ao publicar $label em $target; nenhuma copia existente foi sobrescrita." >&2
+    return 1
+  fi
+}
+
 prepare_cfx_server_data() {
   local repo_path="$1"
 
@@ -195,6 +453,7 @@ mkdir -p \
   "resources/[ox]" \
   "resources/[mz]" \
   "resources/[standalone]" \
+  "resources/[maps]" \
   "resources/[som]" \
   "resources/[managers]" \
   "resources/[system]" \
@@ -202,57 +461,63 @@ mkdir -p \
   "resources/[gameplay]" \
   "tmp"
 
-OXMYSQL_ZIP="tmp/oxmysql.zip"
-OXLIB_ZIP="tmp/ox_lib.zip"
 CFX_SERVER_DATA_TMP="tmp/cfx-server-data"
 
-cleanup_zip "$OXMYSQL_ZIP"
-cleanup_zip "$OXLIB_ZIP"
-
-rm -rf "resources/[ox]/oxmysql" "resources/[ox]/ox_lib"
-
-echo "Baixando oxmysql release..."
-curl -L "https://github.com/overextended/oxmysql/releases/latest/download/oxmysql.zip" -o "$OXMYSQL_ZIP"
-
-echo "Baixando ox_lib release..."
-curl -L "https://github.com/overextended/ox_lib/releases/latest/download/ox_lib.zip" -o "$OXLIB_ZIP"
-
-# Os zips do overextended ja incluem a pasta raiz do recurso.
-# Extraindo em resources/[ox] evitamos criar resources/[ox]/ox_lib/ox_lib e similares.
-echo "Extraindo oxmysql..."
-unzip -oq "$OXMYSQL_ZIP" -d "resources/[ox]"
-
-echo "Extraindo ox_lib..."
-unzip -oq "$OXLIB_ZIP" -d "resources/[ox]"
-
-cleanup_zip "$OXMYSQL_ZIP"
-cleanup_zip "$OXLIB_ZIP"
+bash "$ROOT_DIR/tools/install_ox.sh"
+if [ "$OX_ONLY" -eq 1 ]; then
+  echo "Dependencias ox instaladas sem sincronizar Cfx ou repositorios MZ."
+  exit 0
+fi
 
 prepare_cfx_server_data "$CFX_SERVER_DATA_TMP"
 sync_cfx_resource "mapmanager" "$CFX_SERVER_DATA_TMP/resources/[managers]/mapmanager" "resources/[managers]/mapmanager"
 sync_cfx_resource "spawnmanager" "$CFX_SERVER_DATA_TMP/resources/[managers]/spawnmanager" "resources/[managers]/spawnmanager"
-sync_cfx_resource "sessionmanager" "$CFX_SERVER_DATA_TMP/resources/[system]/sessionmanager" "resources/[system]/sessionmanager"
 sync_cfx_resource "baseevents" "$CFX_SERVER_DATA_TMP/resources/[system]/baseevents" "resources/[system]/baseevents"
-sync_cfx_resource "yarn" "$CFX_SERVER_DATA_TMP/resources/[system]/[builders]/yarn" "resources/[system]/[builders]/yarn"
-sync_cfx_resource "webpack" "$CFX_SERVER_DATA_TMP/resources/[system]/[builders]/webpack" "resources/[system]/[builders]/webpack"
-sync_cfx_resource "chat" "$CFX_SERVER_DATA_TMP/resources/[gameplay]/chat" "resources/[gameplay]/chat"
-
 sync_git_repo "screenshot-basic" "https://github.com/citizenfx/screenshot-basic.git" "resources/[standalone]/screenshot-basic"
 sync_pma_voice
-sync_git_repo "mz_notify" "https://github.com/mz-core/mz_notify.git" "resources/[mz]/mz_notify"
-sync_git_repo "mz_sync" "https://github.com/mz-core/mz_sync.git" "resources/[mz]/mz_sync"
-sync_git_repo "mz_core" "https://github.com/mz-core/mz_core.git" "resources/[mz]/mz_core"
-sync_git_repo "mz_settings" "https://github.com/mz-core/mz_settings.git" "resources/[mz]/mz_settings"
-sync_git_repo "mz_interact" "https://github.com/mz-core/mz_interact.git" "resources/[mz]/mz_interact"
-sync_git_repo "mz_vehicles" "https://github.com/mz-core/mz_vehicles.git" "resources/[mz]/mz_vehicles"
-sync_git_repo "mz_inventory" "https://github.com/mz-core/mz_inventory.git" "resources/[mz]/mz_inventory"
-sync_git_repo "mz_target" "https://github.com/mz-core/mz_target.git" "resources/[mz]/mz_target"
-sync_git_repo "mz_radio" "https://github.com/mz-core/mz_radio.git" "resources/[mz]/mz_radio"
-sync_git_repo "mz_creator" "https://github.com/mz-core/mz_creator.git" "resources/[mz]/mz_creator"
-sync_git_repo "mz_clothing" "https://github.com/mz-core/mz_clothing.git" "resources/[mz]/mz_clothing"
-sync_git_repo "mz_garagem" "https://github.com/mz-core/mz_garagem.git" "resources/[mz]/mz_garagem"
-sync_git_repo "mz_hud" "https://github.com/mz-core/mz_hud.git" "resources/[mz]/mz_hud"
-sync_git_repo "mz_banguard" "https://github.com/mz-core/mz_banguard.git" "resources/[mz]/mz_banguard"
-sync_git_repo "mz_admin" "https://github.com/mz-core/mz_admin.git" "resources/[mz]/mz_admin"
+sync_bob74_ipl
+if [ "$RUNTIME_DEPS_ONLY" -eq 1 ]; then
+  echo "Dependencias runtime instaladas sem sincronizar repositorios MZ."
+  exit 0
+fi
+sync_mz_resource "mz_notify" "https://github.com/mz-core/mz_notify.git"
+sync_mz_resource "mz_sync" "https://github.com/mz-core/mz_sync.git"
+sync_mz_resource "mz_core" "https://github.com/mz-core/mz_core.git"
+sync_mz_resource "mz_assets" ""
+sync_mz_resource "mz_inventory" "https://github.com/mz-core/mz_inventory.git"
+sync_mz_resource "mz_economy" "https://github.com/mz-core/mz_economy.git"
+sync_mz_resource "mz_status" ""
+sync_mz_resource "mz_progress" "https://github.com/mz-core/mz_progress.git"
+sync_mz_resource "mz_settings" "https://github.com/mz-core/mz_settings.git"
+sync_maps_resource "mz_cayo"
+sync_mz_resource "mz_menu" "https://github.com/mz-core/mz_menu.git"
+sync_mz_resource "mz_interact" "https://github.com/mz-core/mz_interact.git"
+sync_mz_resource "mz_world_editor" ""
+sync_mz_resource "mz_vehicles" "https://github.com/mz-core/mz_vehicles.git"
+sync_mz_resource "mz_org" "https://github.com/mz-core/mz_org.git"
+sync_mz_resource "mz_target" "https://github.com/mz-core/mz_target.git"
+sync_mz_resource "mz_fuel" "https://github.com/mz-core/mz_fuel.git"
+sync_mz_resource "mz_garagem" "https://github.com/mz-core/mz_garagem.git"
+sync_mz_resource "mz_prison" ""
+sync_mz_resource "mz_dispatch" ""
+sync_mz_resource "mz_police" ""
+sync_mz_resource "mz_medical" ""
+sync_mz_resource "mz_bank" "https://github.com/mz-core/mz_bank.git"
+sync_mz_resource "mz_phone" "https://github.com/mz-core/mz_phone.git"
+sync_mz_resource "mz_transport" ""
+sync_mz_resource "mz_interiors" "https://github.com/mz-core/mz_interiors.git"
+sync_mz_resource "mz_houses" "https://github.com/mz-core/mz_houses.git"
+sync_mz_resource "mz_furniture" ""
+sync_mz_resource "mz_org_activities" "https://github.com/mz-core/mz_org_activities.git"
+sync_mz_resource "mz_computer" ""
+sync_mz_resource "mz_radio" "https://github.com/mz-core/mz_radio.git"
+sync_mz_resource "mz_creator" "https://github.com/mz-core/mz_creator.git"
+sync_mz_resource "mz_multichar" ""
+sync_mz_resource "mz_clothing" "https://github.com/mz-core/mz_clothing.git"
+sync_mz_resource "mz_hud" "https://github.com/mz-core/mz_hud.git"
+sync_mz_resource "mz_banguard" "https://github.com/mz-core/mz_banguard.git"
+sync_mz_resource "mz_warns" ""
+sync_mz_resource "mz_admin" "https://github.com/mz-core/mz_admin.git"
+sync_mz_resource "mz_feedback" ""
 
 echo "Dependencias do projeto instaladas."

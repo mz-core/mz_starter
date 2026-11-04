@@ -38,11 +38,9 @@ Se uma mudanca for de regra de negocio ou de comportamento do framework, ela per
 O instalador sincroniza apenas os recursos oficiais necessarios para o boot atual:
 - `mapmanager`
 - `spawnmanager`
-- `sessionmanager`
 - `baseevents`
-- `chat`
-- `yarn`
-- `webpack`
+
+`chat`, `yarn` e `webpack` pertencem ao `citizen/system_resources` dos artifacts atuais. O perfil FiveM/OneSync nao usa o `sessionmanager` legado.
 
 Isso nao transforma o `mz_starter` em uma copia completa do `cfx-server-data`.
 Se voce precisar de outros recursos stock do FiveM, eles continuam sendo uma decisao separada do setup.
@@ -54,6 +52,10 @@ A estrutura minima esperada e esta:
 
 ```text
 server-data/
+|-- server/citizen/system_resources/
+|   |-- chat
+|   |-- yarn
+|   `-- webpack
 |-- server.cfg
 |-- cfg/
 |   |-- base.cfg
@@ -64,39 +66,56 @@ server-data/
 |   |-- resources.cfg
 |   `-- tags.cfg
 |-- resources/
-|   |-- [gameplay]/
-|   |   `-- chat
 |   |-- [managers]/
 |   |   |-- mapmanager
 |   |   `-- spawnmanager
+|   |-- [maps]/
+|   |   |-- bob74_ipl
+|   |   `-- mz_cayo
 |   |-- [standalone]/
 |   |   `-- screenshot-basic
 |   |-- [mz]/
-|   |   |-- mz_core
 |   |   |-- mz_notify
 |   |   |-- mz_sync
-|   |   |-- mz_settings
-|   |   |-- mz_interact
-|   |   |-- mz_vehicles
+|   |   |-- mz_core
+|   |   |-- mz_economy
 |   |   |-- mz_inventory
+|   |   |-- mz_status
+|   |   |-- mz_progress
+|   |   |-- mz_medical
+|   |   |-- mz_bank
+|   |   |-- mz_settings
+|   |   |-- mz_menu
+|   |   |-- mz_interact
+|   |   |-- mz_world_editor
+|   |   |-- mz_phone
+|   |   |-- mz_transport
+|   |   |-- mz_org
+|   |   |-- mz_interiors
+|   |   |-- mz_houses
+|   |   |-- mz_furniture
+|   |   |-- mz_org_activities
+|   |   |-- mz_computer
+|   |   |-- mz_vehicles
 |   |   |-- mz_target
 |   |   |-- mz_radio
 |   |   |-- mz_creator
+|   |   |-- mz_multichar
+|   |   |-- mz_clothing
+|   |   |-- mz_fuel
 |   |   |-- mz_garagem
 |   |   |-- mz_hud
 |   |   |-- mz_banguard
-|   |   `-- mz_admin
+|   |   |-- mz_warns
+|   |   |-- mz_admin
+|   |   `-- mz_feedback
 |   |-- [ox]/
 |   |   |-- oxmysql
 |   |   `-- ox_lib
 |   |-- [som]/
 |   |   `-- pma-voice
 |   `-- [system]/
-|       |-- sessionmanager
-|       |-- baseevents
-|       `-- [builders]/
-|           |-- yarn
-|           `-- webpack
+|       `-- baseevents
 `-- tmp/
 ```
 
@@ -105,6 +124,12 @@ Use esta regra simples:
 - se a mudanca e de boot, install, configuracao ou documentacao operacional, ela tende a pertencer ao `mz_starter`
 - se a mudanca e de logica do framework, ela tende a pertencer ao `mz_core`
 - se a mudanca exige mais recursos stock alem dos que ja sao sincronizados aqui, trate isso como uma decisao de infraestrutura, nao de framework
+
+## Resources MZ sem repositorio publico
+
+O starter nao presume que uma URL com o mesmo nome do resource exista. Enquanto `mz_status`, `mz_medical`, `mz_world_editor`, `mz_police`, `mz_prison`, `mz_dispatch`, `mz_furniture`, `mz_computer`, `mz_transport`, `mz_multichar`, `mz_warns` e `mz_feedback` forem distribuicao local, o operador deve fornecer `MZ_RESOURCE_SOURCE_ROOT` apontando para a raiz que contem essas pastas.
+
+O preflight verifica esse conjunto antes de baixar ou alterar dependencias. Depois da instalacao, `tools/check_structure.bat` exige `fxmanifest.lua` para todo resource listado no boot. Isso torna ausencia de `mz_warns`/`mz_computer` um erro observavel de instalacao, nao uma degradacao silenciosa em runtime.
 
 ## O que nao deve crescer dentro do `mz_starter`
 Para manter a fronteira limpa, este repositorio nao deve absorver:
@@ -120,6 +145,13 @@ Antes de mexer no projeto, vale validar:
 - esta mudanca deixaria o `mz_starter` mais perto de um framework?
 
 Se a resposta para a ultima pergunta for "sim", o mais provavel e que a mudanca esteja indo para o repositorio errado.
+
+`bob74_ipl` e `mz_cayo` pertencem ao grupo runtime `[maps]`, mas iniciam por
+linhas `ensure` individuais em `cfg/resources.cfg` para garantir ordem
+determinística: Bob, Settings (inicialização geral de mapas MP), Cayo. O
+`mz_cayo` fonte permanece em sua própria
+pasta no workspace e é copiado pelo instalador a partir de
+`MZ_RESOURCE_SOURCE_ROOT`.
 
 ## screenshot-basic e fotos futuras
 

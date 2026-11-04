@@ -12,7 +12,7 @@ Camada de boot, configuracao e instalacao para subir um servidor FiveM usando `m
 
 ## Relacao com recursos oficiais
 - O instalador sincroniza os recursos stock necessarios para o boot atual a partir do repositorio oficial `citizenfx/cfx-server-data`.
-- Hoje ele traz `mapmanager`, `spawnmanager`, `sessionmanager`, `baseevents`, `chat` e os builders `yarn`/`webpack` usados pelo chat, mantendo o restante da base stock fora do escopo deste repositorio.
+- Hoje ele traz `mapmanager`, `spawnmanager` e `baseevents`, mantendo o restante da base stock fora do escopo deste repositorio. `chat`, `yarn` e `webpack` sao fornecidos por `citizen/system_resources` nos artifacts atuais. O perfil suportado usa OneSync; portanto, nao instala nem inicia o `sessionmanager` legado de servidores sem OneSync.
 
 ## O que o instalador faz hoje
 - baixa `oxmysql`
@@ -23,6 +23,7 @@ Camada de boot, configuracao e instalacao para subir um servidor FiveM usando `m
 - clona ou atualiza `mz_sync`
 - clona ou atualiza os resources MZ listados no boot atual
 - clona ou atualiza `screenshot-basic` em `resources/[standalone]`
+- instala/reutiliza Bob74 e provisiona `mz_cayo` no grupo `resources/[maps]`
 - instala `pma-voice` v7.0.0 no commit `3379e45dcf7aaa8b7651317190c108095a121553`
 - aplica e verifica o patch MZ que remove o ingresso em call channel solicitado pelo client, preservando o export server `setPlayerCall`
 
@@ -35,16 +36,39 @@ Camada de boot, configuracao e instalacao para subir um servidor FiveM usando `m
 1. Prepare os FXServer artifacts do ambiente.
 2. Configure o banco em `cfg/database.cfg`.
 3. Configure a license key em `cfg/base.cfg`.
-4. Rode `tools/install_deps.bat` ou `tools/install_deps.sh`.
-5. Inicie o servidor a partir da raiz deste projeto.
+4. Se a distribuicao ainda contiver resources sem repositorio publico, aponte `MZ_RESOURCE_SOURCE_ROOT` para a raiz do pacote MZ completo.
+5. Rode `tools/install_deps.bat` ou `tools/install_deps.sh`.
+6. Rode `tools/check_structure.bat` (Windows) ou `bash tools/check_structure.sh` (Linux) e somente inicie o servidor com a estrutura completa.
+
+No workspace oficial Windows, por exemplo:
+
+```bat
+set "MZ_RESOURCE_SOURCE_ROOT=D:\git-hub\repo_oficial"
+tools\install_deps.bat
+tools\check_structure.bat
+```
+
+`mz_warns` e `mz_computer` fazem parte do runtime atual. O instalador interrompe o clean install antes de alterar dependencias se eles - ou qualquer outro resource distribution-only - nao estiverem na raiz-fonte nem previamente instalados.
+
+## Catalogo de opcoes do FXServer
+
+Veja [cfg/fivem_options.example.cfg](cfg/fivem_options.example.cfg) para exemplos comentados de configuracao geral, OneSync, pure mode, rede, listagem, seguranca e integracoes opcionais.
+
+O catalogo nao e carregado pelo `server.cfg`; todas as opcoes permanecem desativadas. Copie somente as linhas que decidir usar para os arquivos existentes em `cfg/`, sem duplicar nem substituir configuracoes ja definidas. Convars especificas de resources podem nao estar no catalogo e variam conforme o artifact/resource instalado.
 
 ## Documentacao
 - [Instalacao](docs/install.md)
 - [Estrutura do ambiente](docs/structure.md)
 
+O boot declara `ensure bob74_ipl`, `ensure mz_settings` e `ensure mz_cayo`, nessa
+ordem; nao substitua por `ensure [maps]`. O instalador migra um Bob antigo
+somente quando o clone está limpo e validado, e falha sem sobrescrever cópias
+alteradas ou duplicadas. Consulte [Instalacao](docs/install.md) para o
+procedimento do layout antigo.
+
 ## screenshot-basic
 
-O `screenshot-basic` e preparado como dependencia base/opcional em `resources/[standalone]/screenshot-basic` e iniciado em `cfg/resources.cfg` antes dos resources MZ.
+O `screenshot-basic` e dependencia do `mz_feedback`, fica em `resources/[standalone]/screenshot-basic` e inicia antes dos resources MZ.
 
 Ele sera usado em uma fase futura do `mz_realestate` para fotos de imoveis. No estado atual, anuncios, placas e detalhes publicos continuam funcionando sem implementar captura de imagens.
 
