@@ -136,8 +136,12 @@ func ReadBoot(path string) ([]string, error) {
 		return nil, err
 	}
 	defer f.Close()
+	return ParseBoot(f)
+}
+
+func ParseBoot(r io.Reader) ([]string, error) {
 	var ids []string
-	scan := bufio.NewScanner(io.LimitReader(f, 1<<20))
+	scan := bufio.NewScanner(io.LimitReader(r, 1<<20))
 	for scan.Scan() {
 		line := strings.TrimSpace(scan.Text())
 		if strings.HasPrefix(line, "#") || line == "" {

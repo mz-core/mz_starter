@@ -58,3 +58,22 @@ Os testes portateis estao em `mz_testkit/tests/mz_starter/portable_smoke.py` e `
 ### Teste a partir do GitHub Releases
 
 Baixe o ZIP da sua plataforma e `SHA256SUMS.txt` em https://github.com/mz-core/mz_starter/releases. Confirme o SHA-256 antes de extrair em uma pasta nova. Os arquivos `LEIA-ME.txt` de cada ZIP descrevem a execucao e o teste com fixture descartavel sem o workspace. No Windows, use `Get-FileHash -Algorithm SHA256 <zip>`. No Linux, use `sha256sum -c SHA256SUMS.txt --ignore-missing`, depois `chmod u+x ./mz-starter-linux-amd64` e `./mz-starter-linux-amd64 serve --port 48123 --no-open`. Para acesso remoto, conecte `ssh -L 48123:127.0.0.1:48123 usuario@vps` e abra a URL completa de sessao no navegador local. Nunca use a instalacao FiveM de producao como fixture de homologacao.
+
+## Planejamento de bootstrap (Wave 2.6)
+
+No assistente, selecione explicitamente **Nova instalacao** ou **Servidor existente**. Nova instalacao aceita uma pasta vazia ou ainda inexistente e apresenta os dez arquivos de configuracao/icone planejados, configuracoes necessarias, recursos e seis fases futuras. Nenhuma pasta ou arquivo e criado. O patch oficial de pma-voice fica incorporado para revisao futura; nao e aplicado. O unico perfil suportado e o perfil observado no catalogo; nao existe selecao parcial de recursos nesta etapa.
+
+O modo existente exige `server.cfg` como arquivo regular e `cfg/resources.cfg` legivel com recursos e apenas os analisa. Uma estrutura parcial e informada como ambigua; uma pasta nao vazia nao e aceita como instalacao nova. Configuracoes existentes jamais sao sobrescritas. As fontes dos modelos sao os arquivos oficiais versionados de `mz_starter`, incorporados no build, com verificacao dos placeholders sensiveis e da ordem do boot. `cfg/fivem_options.example.cfg` e apenas referencia opcional, nao e carregado nem planejado como arquivo necessario.
+
+Na CLI, mantendo a compatibilidade dos comandos anteriores, use:
+
+```sh
+go run ./cmd/mz-starter plan --installation-mode new --server /caminho/pasta-vazia
+go run ./cmd/mz-starter plan --installation-mode existing --server /caminho/server-data
+```
+
+O plano inclui `installation_mode`, `profile`, `bootstrap_files`, `required_configuration` e `phases`. Sao contratos descritivos, nao instrucoes executaveis. Licenca, conexao de banco, endpoints, identificadores de owner e URLs/segredo de telefone exigem configuracao futura; nenhum valor real e solicitado ou gravado agora. O resultado nunca autoriza instalacao sem verificacao de releases, integridade, autorizacao e comportamento transacional.
+
+### Abertura direta
+
+No Windows, execute `mz-starter.exe` sem argumentos para iniciar a interface e abrir o navegador. O terminal apresenta tambem a URL local da sessao caso o navegador nao abra; mantenha-o aberto e encerre com Ctrl+C. A URL contem um token temporario e nao deve ser compartilhada. `mz-starter.exe serve` continua disponivel. Em Linux headless, use `./mz-starter-linux-amd64 serve --port 48123 --no-open` e um tunel SSH. Use `--help` para consultar os comandos.

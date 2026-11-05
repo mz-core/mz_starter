@@ -22,9 +22,11 @@ import (
 )
 
 type planRequest struct {
-	Server    string `json:"server"`
-	Workspace string `json:"workspace"`
-	Online    bool   `json:"online"`
+	Server           string `json:"server"`
+	Workspace        string `json:"workspace"`
+	Online           bool   `json:"online"`
+	InstallationMode string `json:"installation_mode"`
+	Profile          string `json:"profile"`
 }
 type apiError struct {
 	Code    string `json:"code"`
@@ -48,9 +50,12 @@ func serve(args []string) {
 	if e != nil {
 		fail(e.Error())
 	}
+	if e = engine.ValidateBootstrap(catalog, starter.Assets); e != nil {
+		fail(e.Error())
+	}
 	listener, e := net.Listen("tcp", fmt.Sprintf("127.0.0.1:%d", *port))
 	if e != nil {
-		fail(e.Error())
+		fail("Nao foi possivel iniciar o servidor local: " + e.Error())
 	}
 	defer listener.Close()
 	b := make([]byte, 32)
@@ -74,7 +79,7 @@ func serve(args []string) {
 			writeError(w, 405, "method", "method not allowed")
 			return
 		}
-		_ = json.NewEncoder(w).Encode(map[string]any{"catalog": catalog, "os": runtime.GOOS})
+		_ = json.NewEncoder(w).Encode(map[string]any{"catalog": catalog, "os": runtime.GOOS, "bootstrap_files": engine.BootstrapFiles, "required_configuration": engine.BootstrapConfigurations, "phases": engine.PlanningPhases})
 	})
 	mux.HandleFunc("/api/plan", func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != "POST" {
@@ -88,13 +93,20 @@ func serve(args []string) {
 			writeError(w, 400, "invalid_request", "invalid server directory")
 			return
 		}
-		boot, err := engine.ReadServerBoot(q.Server)
-		if err != nil {
-			writeError(w, 400, "boot_unavailable", "cannot read cfg/resources.cfg")
-			return
-		}
-		if len(boot) == 0 {
-			writeError(w, 400, "boot_empty", "no resources found in cfg/resources.cfg")
+		var boot []string
+		if q.InstallationMode == "" {
+			var err error
+			boot, err = engine.ReadServerBoot(q.Server)
+			if err != nil {
+				writeError(w, 400, "boot_unavailable", "cannot read cfg/resources.cfg")
+				return
+			}
+			if len(boot) == 0 {
+				writeError(w, 400, "boot_empty", "no resources found in cfg/resources.cfg")
+				return
+			}
+		} else if _, err := engine.PlanInstallation(catalog, starter.Assets, q.Server, q.Workspace, q.InstallationMode, q.Profile, nil); err != nil {
+			writeError(w, 400, err.Error(), "invalid installation target")
 			return
 		}
 		remote := map[string]engine.QueryResult{}
@@ -122,7 +134,16 @@ func serve(args []string) {
 				limited = remote[res.ID].Status == "rate_limited"
 			}
 		}
-		_ = json.NewEncoder(w).Encode(engine.BuildPlan(catalog, boot, q.Server, q.Workspace, remote))
+		if q.InstallationMode == "" {
+			_ = json.NewEncoder(w).Encode(engine.BuildPlan(catalog, boot, q.Server, q.Workspace, remote))
+			return
+		}
+		p, err := engine.PlanInstallation(catalog, starter.Assets, q.Server, q.Workspace, q.InstallationMode, q.Profile, remote)
+		if err != nil {
+			writeError(w, 400, err.Error(), "invalid installation target")
+			return
+		}
+		_ = json.NewEncoder(w).Encode(p)
 	})
 	mux.Handle("/", http.FileServer(http.FS(dist)))
 	handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -156,7 +177,17 @@ func serve(args []string) {
 			c = exec.Command("xdg-open", url)
 		}
 		if c != nil {
-			_ = c.Start()
+			if err := c.Start(); err != nil {
+				fmt.Fprintln(os.Stderr, "Nao foi possivel abrir o navegador. Abra o endereco exibido acima manualmente.")
+			} else {
+				go func() {
+					if c.Wait() != nil {
+						fmt.Fprintln(os.Stderr, "Nao foi possivel abrir o navegador. Abra o endereco exibido acima manualmente.")
+					}
+				}()
+			}
+		} else {
+			fmt.Fprintln(os.Stderr, "Abra o endereco exibido acima manualmente.")
 		}
 	}
 	srv := &http.Server{Handler: handler, ReadHeaderTimeout: 5 * time.Second, IdleTimeout: 60 * time.Second}

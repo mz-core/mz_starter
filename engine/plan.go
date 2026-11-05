@@ -27,12 +27,17 @@ type Step struct {
 	Blockers         []string `json:"blockers"`
 }
 type Plan struct {
-	SchemaVersion int     `json:"schema_version"`
-	Mode          string  `json:"mode"`
-	Server        string  `json:"server"`
-	Steps         []Step  `json:"steps"`
-	Issues        []Issue `json:"issues"`
-	Ready         bool    `json:"ready"`
+	SchemaVersion         int      `json:"schema_version"`
+	Mode                  string   `json:"mode"`
+	Server                string   `json:"server"`
+	Steps                 []Step   `json:"steps"`
+	Issues                []Issue  `json:"issues"`
+	Ready                 bool     `json:"ready"`
+	InstallationMode      string   `json:"installation_mode,omitempty"`
+	Profile               string   `json:"profile,omitempty"`
+	BootstrapFiles        []string `json:"bootstrap_files,omitempty"`
+	RequiredConfiguration []string `json:"required_configuration,omitempty"`
+	Phases                []string `json:"phases,omitempty"`
 }
 
 type managedRecord struct {

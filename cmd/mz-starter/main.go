@@ -8,14 +8,20 @@ import (
 	"os"
 	"time"
 
+	starter "github.com/mz-core/mz_starter"
 	"github.com/mz-core/mz_starter/engine"
 )
 
 func main() {
 	if len(os.Args) < 2 {
-		fail("uso: mz-starter catalog|diagnose|plan|releases [opcoes]")
+		serve(nil)
+		return
 	}
 	command := os.Args[1]
+	if command == "--help" || command == "-h" || command == "help" {
+		fmt.Println("MZ Starter: execute sem argumentos para abrir a interface.\nComandos: serve [--port PORTA] [--no-open], catalog, diagnose, plan, releases.\nUse <comando> --help para as opcoes.")
+		return
+	}
 	if command == "serve" {
 		serve(os.Args[2:])
 		return
@@ -26,6 +32,8 @@ func main() {
 	workspace := flags.String("workspace", "", "raiz opcional de manifestos fonte")
 	resource := flags.String("resource", "", "ID para consulta de releases")
 	online := flags.Bool("online", false, "consultar metadados GitHub")
+	installationMode := flags.String("installation-mode", "", "new ou existing")
+	profile := flags.String("profile", "", "perfil do catalogo")
 	if err := flags.Parse(os.Args[2:]); err != nil {
 		fail(err.Error())
 	}
@@ -65,9 +73,15 @@ func main() {
 		g := engine.GitHub{Token: os.Getenv("GITHUB_TOKEN")}
 		err = out.Encode(g.Releases(ctx, found.ID, repository))
 	case "diagnose", "plan":
-		boot, e := engine.ReadServerBoot(*server)
-		if e != nil {
-			fail("nao foi possivel ler cfg/resources.cfg: " + e.Error())
+		var boot []string
+		if *installationMode == "" {
+			var e error
+			boot, e = engine.ReadServerBoot(*server)
+			if e != nil {
+				fail("nao foi possivel ler cfg/resources.cfg: " + e.Error())
+			}
+		} else if _, e := engine.PlanInstallation(c, starter.Assets, *server, *workspace, *installationMode, *profile, nil); e != nil {
+			fail(e.Error())
 		}
 		remote := map[string]engine.QueryResult{}
 		if *online {
@@ -91,7 +105,15 @@ func main() {
 				cancel()
 			}
 		}
-		err = out.Encode(engine.BuildPlan(c, boot, *server, *workspace, remote))
+		if *installationMode == "" {
+			err = out.Encode(engine.BuildPlan(c, boot, *server, *workspace, remote))
+		} else {
+			var p engine.Plan
+			p, err = engine.PlanInstallation(c, starter.Assets, *server, *workspace, *installationMode, *profile, remote)
+			if err == nil {
+				err = out.Encode(p)
+			}
+		}
 	default:
 		fail("comando desconhecido")
 	}
