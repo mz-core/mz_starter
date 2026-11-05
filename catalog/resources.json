@@ -1,0 +1,1229 @@
+{
+  "schema_version": 1,
+  "profile": "current_boot",
+  "generated_from": "cfg/resources.cfg",
+  "resources": [
+    {
+      "id": "mapmanager",
+      "name": "mapmanager",
+      "type": "cfx",
+      "group": "[managers]",
+      "repository": "https://github.com/citizenfx/cfx-server-data",
+      "visibility": "public",
+      "source": "external",
+      "version": "",
+      "tag": "",
+      "asset": "",
+      "sha256": "",
+      "dependencies": [],
+      "required_files": [],
+      "mutable_policy": "unknown_preserve",
+      "channel": "stable",
+      "availability": "external_unverified"
+    },
+    {
+      "id": "spawnmanager",
+      "name": "spawnmanager",
+      "type": "cfx",
+      "group": "[managers]",
+      "repository": "https://github.com/citizenfx/cfx-server-data",
+      "visibility": "public",
+      "source": "external",
+      "version": "",
+      "tag": "",
+      "asset": "",
+      "sha256": "",
+      "dependencies": [],
+      "required_files": [],
+      "mutable_policy": "unknown_preserve",
+      "channel": "stable",
+      "availability": "external_unverified"
+    },
+    {
+      "id": "yarn",
+      "name": "yarn",
+      "type": "artifact",
+      "group": "[system]",
+      "repository": "",
+      "visibility": "artifact",
+      "source": "system_artifact",
+      "version": "",
+      "tag": "",
+      "asset": "",
+      "sha256": "",
+      "dependencies": [],
+      "required_files": [],
+      "mutable_policy": "unknown_preserve",
+      "channel": "stable",
+      "availability": "external_unverified"
+    },
+    {
+      "id": "webpack",
+      "name": "webpack",
+      "type": "artifact",
+      "group": "[system]",
+      "repository": "",
+      "visibility": "artifact",
+      "source": "system_artifact",
+      "version": "",
+      "tag": "",
+      "asset": "",
+      "sha256": "",
+      "dependencies": [],
+      "required_files": [],
+      "mutable_policy": "unknown_preserve",
+      "channel": "stable",
+      "availability": "external_unverified"
+    },
+    {
+      "id": "oxmysql",
+      "name": "oxmysql",
+      "type": "external",
+      "group": "[ox]",
+      "repository": "https://github.com/overextended/oxmysql",
+      "visibility": "public",
+      "source": "external",
+      "version": "",
+      "tag": "",
+      "asset": "",
+      "sha256": "",
+      "dependencies": [],
+      "required_files": [
+        "fxmanifest.lua",
+        "dist/build.js"
+      ],
+      "mutable_policy": "unknown_preserve",
+      "channel": "stable",
+      "availability": "external_unverified"
+    },
+    {
+      "id": "ox_lib",
+      "name": "ox_lib",
+      "type": "external",
+      "group": "[ox]",
+      "repository": "https://github.com/overextended/ox_lib",
+      "visibility": "public",
+      "source": "external",
+      "version": "",
+      "tag": "",
+      "asset": "",
+      "sha256": "",
+      "dependencies": [],
+      "required_files": [
+        "fxmanifest.lua",
+        "web/build/index.html"
+      ],
+      "mutable_policy": "unknown_preserve",
+      "channel": "stable",
+      "availability": "external_unverified"
+    },
+    {
+      "id": "screenshot-basic",
+      "name": "screenshot-basic",
+      "type": "external",
+      "group": "[standalone]",
+      "repository": "https://github.com/citizenfx/screenshot-basic",
+      "visibility": "public",
+      "source": "external",
+      "version": "",
+      "tag": "",
+      "asset": "",
+      "sha256": "",
+      "dependencies": [],
+      "required_files": [],
+      "mutable_policy": "unknown_preserve",
+      "channel": "stable",
+      "availability": "external_unverified"
+    },
+    {
+      "id": "pma-voice",
+      "name": "pma-voice",
+      "type": "external",
+      "group": "[som]",
+      "repository": "https://github.com/AvarianKnight/pma-voice",
+      "visibility": "public",
+      "source": "external",
+      "version": "7.0.0",
+      "tag": "v7.0.0",
+      "asset": "",
+      "sha256": "",
+      "dependencies": [],
+      "required_files": [
+        "fxmanifest.lua",
+        "server/module/phone.lua"
+      ],
+      "mutable_policy": "unknown_preserve",
+      "channel": "stable",
+      "availability": "external_unverified"
+    },
+    {
+      "id": "mz_lib",
+      "name": "mz_lib",
+      "type": "fivem_resource",
+      "group": "[mz]",
+      "repository": "https://github.com/mz-core/mz_lib",
+      "visibility": "public",
+      "source": "github_release",
+      "version": "1.0.0",
+      "tag": "mz_lib-v1.0.0",
+      "asset": "mz_lib-v1.0.0.zip",
+      "sha256": "sha256:cf187249131e4869339da657548b010902312e01d5aeee65721d8c8c33c7ad5a",
+      "dependencies": [],
+      "required_files": [
+        "fxmanifest.lua",
+        "web/dist/index.html"
+      ],
+      "mutable_policy": "unknown_preserve",
+      "channel": "stable",
+      "availability": "metadata_only_unverified"
+    },
+    {
+      "id": "mz_notify",
+      "name": "mz_notify",
+      "type": "fivem_resource",
+      "group": "[mz]",
+      "repository": "https://github.com/mz-core/mz_notify",
+      "visibility": "public",
+      "source": "github_release",
+      "version": "1.0.0",
+      "tag": "mz_notify-v1.0.0",
+      "asset": "mz_notify-v1.0.0.zip",
+      "sha256": "sha256:b179115b6fe527bdc545b8b21a79958ac74fc35b55af54992eed3549a58b55f7",
+      "dependencies": [],
+      "required_files": [
+        "fxmanifest.lua",
+        "web/index.html"
+      ],
+      "mutable_policy": "unknown_preserve",
+      "channel": "stable",
+      "availability": "metadata_only_unverified"
+    },
+    {
+      "id": "mz_sync",
+      "name": "mz_sync",
+      "type": "fivem_resource",
+      "group": "[mz]",
+      "repository": "https://github.com/mz-core/mz_sync",
+      "visibility": "public",
+      "source": "github_release",
+      "version": "1.0.0",
+      "tag": "v1.0.0",
+      "asset": "mz_sync-v1.0.0.zip",
+      "sha256": "sha256:472494ff5478ccb42f3ec78cdeda4b8c7c137e574331e19ed7623d118c5772f9",
+      "dependencies": [],
+      "required_files": [
+        "fxmanifest.lua"
+      ],
+      "mutable_policy": "unknown_preserve",
+      "channel": "stable",
+      "availability": "metadata_only_unverified"
+    },
+    {
+      "id": "mz_core",
+      "name": "mz_core",
+      "type": "fivem_resource",
+      "group": "[mz]",
+      "repository": "https://github.com/mz-core/mz_core",
+      "visibility": "public",
+      "source": "github_release",
+      "version": "1.0.0",
+      "tag": "v1.0.0",
+      "asset": "mz_core-v1.0.0.zip",
+      "sha256": "sha256:6fa5c9771bfdc66a46ed9ad848b33ff87bdfcf9e42b87c2ff566b1934cb245b5",
+      "dependencies": [
+        "oxmysql",
+        "ox_lib",
+        "spawnmanager"
+      ],
+      "required_files": [
+        "fxmanifest.lua"
+      ],
+      "mutable_policy": "unknown_preserve",
+      "channel": "stable",
+      "availability": "provenance_conflict"
+    },
+    {
+      "id": "mz_assets",
+      "name": "mz_assets",
+      "type": "fivem_resource",
+      "group": "[mz]",
+      "repository": "https://github.com/mz-core/mz_assets",
+      "visibility": "private",
+      "source": "private_release_requires_authorization",
+      "version": "1.0.0",
+      "tag": "",
+      "asset": "",
+      "sha256": "",
+      "dependencies": [],
+      "required_files": [
+        "fxmanifest.lua"
+      ],
+      "mutable_policy": "unknown_preserve",
+      "channel": "stable",
+      "availability": "release_missing"
+    },
+    {
+      "id": "mz_inventory",
+      "name": "mz_inventory",
+      "type": "fivem_resource",
+      "group": "[mz]",
+      "repository": "https://github.com/mz-core/mz_inventory",
+      "visibility": "public",
+      "source": "github_release",
+      "version": "1.0.0",
+      "tag": "v1.0.0",
+      "asset": "mz_inventory-v1.0.0.zip",
+      "sha256": "sha256:1422064ab7daf038b68a30dabe3f786506c05b512d1124a744b0061d1f5ef7cc",
+      "dependencies": [
+        "oxmysql",
+        "ox_lib",
+        "mz_core",
+        "mz_assets"
+      ],
+      "required_files": [
+        "fxmanifest.lua",
+        "web/index.html"
+      ],
+      "mutable_policy": "unknown_preserve",
+      "channel": "stable",
+      "availability": "provenance_conflict"
+    },
+    {
+      "id": "mz_economy",
+      "name": "mz_economy",
+      "type": "fivem_resource",
+      "group": "[mz]",
+      "repository": "https://github.com/mz-core/mz_economy",
+      "visibility": "public",
+      "source": "github_release",
+      "version": "1.0.0",
+      "tag": "mz_economy-v1.0.0",
+      "asset": "mz_economy-v1.0.0.zip",
+      "sha256": "sha256:7cc2b355a8aebf9a71b38d8b51d3abd5a61a92b0ca20f3eed2b738da77693236",
+      "dependencies": [
+        "oxmysql",
+        "mz_core",
+        "mz_inventory"
+      ],
+      "required_files": [
+        "fxmanifest.lua"
+      ],
+      "mutable_policy": "unknown_preserve",
+      "channel": "stable",
+      "availability": "metadata_only_unverified"
+    },
+    {
+      "id": "mz_status",
+      "name": "mz_status",
+      "type": "fivem_resource",
+      "group": "[mz]",
+      "repository": "",
+      "visibility": "unknown",
+      "source": "unavailable",
+      "version": "1.0.0",
+      "tag": "",
+      "asset": "",
+      "sha256": "",
+      "dependencies": [
+        "ox_lib",
+        "mz_core",
+        "mz_inventory"
+      ],
+      "required_files": [
+        "fxmanifest.lua"
+      ],
+      "mutable_policy": "unknown_preserve",
+      "channel": "stable",
+      "availability": "repository_missing_or_unknown"
+    },
+    {
+      "id": "mz_progress",
+      "name": "mz_progress",
+      "type": "fivem_resource",
+      "group": "[mz]",
+      "repository": "https://github.com/mz-core/mz_progress",
+      "visibility": "public",
+      "source": "github_release",
+      "version": "1.0.0",
+      "tag": "mz_progress-v1.0.0",
+      "asset": "mz_progress-v1.0.0.zip",
+      "sha256": "sha256:0476e8c3dea72a82d265d945746d372c56d70b131e594b4b87ed04f971c28d1d",
+      "dependencies": [],
+      "required_files": [
+        "fxmanifest.lua",
+        "web/index.html"
+      ],
+      "mutable_policy": "unknown_preserve",
+      "channel": "stable",
+      "availability": "metadata_only_unverified"
+    },
+    {
+      "id": "bob74_ipl",
+      "name": "bob74_ipl",
+      "type": "external",
+      "group": "[maps]",
+      "repository": "https://github.com/Bob74/bob74_ipl",
+      "visibility": "public",
+      "source": "external",
+      "version": "2.7.1",
+      "tag": "2.7.1",
+      "asset": "",
+      "sha256": "",
+      "dependencies": [],
+      "required_files": [
+        "fxmanifest.lua",
+        "LICENSE",
+        "client.lua",
+        "gtav/base.lua",
+        "dlc_cayoperico/base.lua"
+      ],
+      "mutable_policy": "unknown_preserve",
+      "channel": "stable",
+      "availability": "external_unverified"
+    },
+    {
+      "id": "mz_settings",
+      "name": "mz_settings",
+      "type": "fivem_resource",
+      "group": "[mz]",
+      "repository": "https://github.com/mz-core/mz_settings",
+      "visibility": "public",
+      "source": "github_release",
+      "version": "2.2.0",
+      "tag": "mz_settings-v2.2.0",
+      "asset": "mz_settings-v2.2.0.zip",
+      "sha256": "sha256:907f18b4768ffa790e6b1e5713a2f72f3d2cd61d443a25c5e9d97200c0986e90",
+      "dependencies": [],
+      "required_files": [
+        "fxmanifest.lua"
+      ],
+      "mutable_policy": "unknown_preserve",
+      "channel": "stable",
+      "availability": "metadata_only_unverified"
+    },
+    {
+      "id": "mz_cayo",
+      "name": "mz_cayo",
+      "type": "fivem_resource",
+      "group": "[maps]",
+      "repository": "https://github.com/mz-core/mz_cayo",
+      "visibility": "public",
+      "source": "github_release",
+      "version": "1.0.0",
+      "tag": "mz_cayo-v1.0.0",
+      "asset": "mz_cayo-v1.0.0.zip",
+      "sha256": "sha256:03f70c3645c04b236c5c33cb97379c2d3d17934001daab1b54d6394d9a3fe910",
+      "dependencies": [
+        "mz_settings"
+      ],
+      "required_files": [
+        "fxmanifest.lua",
+        "config.lua",
+        "client/ipl_data.lua",
+        "client/main.lua"
+      ],
+      "mutable_policy": "unknown_preserve",
+      "channel": "stable",
+      "availability": "metadata_only_unverified"
+    },
+    {
+      "id": "mz_menu",
+      "name": "mz_menu",
+      "type": "fivem_resource",
+      "group": "[mz]",
+      "repository": "https://github.com/mz-core/mz_menu",
+      "visibility": "private",
+      "source": "private_release_requires_authorization",
+      "version": "0.4.0-test",
+      "tag": "",
+      "asset": "",
+      "sha256": "",
+      "dependencies": [],
+      "required_files": [
+        "fxmanifest.lua",
+        "web/index.html"
+      ],
+      "mutable_policy": "unknown_preserve",
+      "channel": "prerelease",
+      "availability": "release_missing"
+    },
+    {
+      "id": "mz_interact",
+      "name": "mz_interact",
+      "type": "fivem_resource",
+      "group": "[mz]",
+      "repository": "https://github.com/mz-core/mz_interact",
+      "visibility": "public",
+      "source": "github_release",
+      "version": "0.2.0",
+      "tag": "mz_interact-v0.2.0",
+      "asset": "mz_interact-v0.2.0.zip",
+      "sha256": "sha256:0abf24e2d3ea90277aec45266157331ecdb217060a2d2df2ca1331c303bfe420",
+      "dependencies": [],
+      "required_files": [
+        "fxmanifest.lua"
+      ],
+      "mutable_policy": "unknown_preserve",
+      "channel": "stable",
+      "availability": "metadata_only_unverified"
+    },
+    {
+      "id": "mz_world_editor",
+      "name": "mz_world_editor",
+      "type": "fivem_resource",
+      "group": "[mz]",
+      "repository": "https://github.com/mz-core/mz_world_editor",
+      "visibility": "public",
+      "source": "github_release",
+      "version": "0.3.0",
+      "tag": "mz_world_editor-v0.3.0",
+      "asset": "mz_world_editor-v0.3.0.zip",
+      "sha256": "sha256:eec8a6a2420fdf10ac55af626df242bb189eeb36a738e106e04c70448d889bc3",
+      "dependencies": [],
+      "required_files": [
+        "fxmanifest.lua"
+      ],
+      "mutable_policy": "unknown_preserve",
+      "channel": "stable",
+      "availability": "metadata_only_unverified"
+    },
+    {
+      "id": "mz_vehicles",
+      "name": "mz_vehicles",
+      "type": "fivem_resource",
+      "group": "[mz]",
+      "repository": "https://github.com/mz-core/mz_vehicles",
+      "visibility": "public",
+      "source": "github_release",
+      "version": "0.1.0",
+      "tag": "",
+      "asset": "",
+      "sha256": "",
+      "dependencies": [
+        "ox_lib",
+        "oxmysql",
+        "mz_core"
+      ],
+      "required_files": [
+        "fxmanifest.lua",
+        "web/index.html"
+      ],
+      "mutable_policy": "unknown_preserve",
+      "channel": "stable",
+      "availability": "version_conflict"
+    },
+    {
+      "id": "mz_org",
+      "name": "mz_org",
+      "type": "fivem_resource",
+      "group": "[mz]",
+      "repository": "https://github.com/mz-core/mz_org",
+      "visibility": "private",
+      "source": "private_release_requires_authorization",
+      "version": "0.1.0",
+      "tag": "",
+      "asset": "",
+      "sha256": "",
+      "dependencies": [
+        "ox_lib",
+        "mz_core",
+        "mz_economy",
+        "mz_vehicles",
+        "mz_menu",
+        "mz_interact",
+        "oxmysql"
+      ],
+      "required_files": [
+        "fxmanifest.lua",
+        "web/dist/index.html"
+      ],
+      "mutable_policy": "unknown_preserve",
+      "channel": "stable",
+      "availability": "release_missing"
+    },
+    {
+      "id": "mz_target",
+      "name": "mz_target",
+      "type": "fivem_resource",
+      "group": "[mz]",
+      "repository": "https://github.com/mz-core/mz_target",
+      "visibility": "private",
+      "source": "private_release_requires_authorization",
+      "version": "1.0.0",
+      "tag": "",
+      "asset": "",
+      "sha256": "",
+      "dependencies": [
+        "ox_lib"
+      ],
+      "required_files": [
+        "fxmanifest.lua",
+        "web/index.html"
+      ],
+      "mutable_policy": "unknown_preserve",
+      "channel": "stable",
+      "availability": "release_missing"
+    },
+    {
+      "id": "mz_fuel",
+      "name": "mz_fuel",
+      "type": "fivem_resource",
+      "group": "[mz]",
+      "repository": "https://github.com/mz-core/mz_fuel",
+      "visibility": "private",
+      "source": "private_release_requires_authorization",
+      "version": "1.0.0",
+      "tag": "",
+      "asset": "",
+      "sha256": "",
+      "dependencies": [
+        "mz_core",
+        "mz_economy",
+        "mz_vehicles",
+        "mz_inventory"
+      ],
+      "required_files": [
+        "fxmanifest.lua",
+        "web/index.html"
+      ],
+      "mutable_policy": "unknown_preserve",
+      "channel": "stable",
+      "availability": "release_missing"
+    },
+    {
+      "id": "mz_garagem",
+      "name": "mz_garagem",
+      "type": "fivem_resource",
+      "group": "[mz]",
+      "repository": "https://github.com/mz-core/mz_garagem",
+      "visibility": "public",
+      "source": "github_release",
+      "version": "0.1.0",
+      "tag": "mz_garagem-v0.1.0",
+      "asset": "mz_garagem-v0.1.0.zip",
+      "sha256": "sha256:f7050deafdd810b5791a2650af2d2b175d11d3da11060ac2f5977ebdf5b5ccfb",
+      "dependencies": [
+        "ox_lib",
+        "oxmysql",
+        "mz_core",
+        "mz_org",
+        "mz_vehicles",
+        "mz_fuel"
+      ],
+      "required_files": [
+        "fxmanifest.lua",
+        "web/index.html"
+      ],
+      "mutable_policy": "unknown_preserve",
+      "channel": "stable",
+      "availability": "metadata_only_unverified"
+    },
+    {
+      "id": "mz_prison",
+      "name": "mz_prison",
+      "type": "fivem_resource",
+      "group": "[mz]",
+      "repository": "https://github.com/mz-core/mz_prison",
+      "visibility": "private",
+      "source": "private_release_requires_authorization",
+      "version": "0.3.0",
+      "tag": "mz_prison-v0.3.0",
+      "asset": "mz_prison-v0.3.0.zip",
+      "sha256": "sha256:81443031141323b46391304df4782fc970890b467cabf13c98bffc42d12a5ae0",
+      "dependencies": [
+        "oxmysql",
+        "mz_core",
+        "mz_inventory",
+        "mz_interact",
+        "mz_menu"
+      ],
+      "required_files": [
+        "fxmanifest.lua"
+      ],
+      "mutable_policy": "unknown_preserve",
+      "channel": "stable",
+      "availability": "metadata_only_unverified"
+    },
+    {
+      "id": "mz_dispatch",
+      "name": "mz_dispatch",
+      "type": "fivem_resource",
+      "group": "[mz]",
+      "repository": "https://github.com/mz-core/mz_dispatch",
+      "visibility": "public",
+      "source": "github_release",
+      "version": "1.0.0",
+      "tag": "mz_dispatch-v1.0.0",
+      "asset": "mz_dispatch-v1.0.0.zip",
+      "sha256": "sha256:3749cb7ccd21e8ea61fa8c6a3a1c2785b72191ea4709e27b63f3b35839c51263",
+      "dependencies": [
+        "oxmysql",
+        "mz_core",
+        "mz_org",
+        "mz_menu"
+      ],
+      "required_files": [
+        "fxmanifest.lua",
+        "web/index.html"
+      ],
+      "mutable_policy": "unknown_preserve",
+      "channel": "stable",
+      "availability": "metadata_only_unverified"
+    },
+    {
+      "id": "mz_police",
+      "name": "mz_police",
+      "type": "fivem_resource",
+      "group": "[mz]",
+      "repository": "https://github.com/mz-core/mz_police",
+      "visibility": "private",
+      "source": "private_release_requires_authorization",
+      "version": "0.11.0",
+      "tag": "mz_police-v0.11.0",
+      "asset": "mz_police-v0.11.0.zip",
+      "sha256": "sha256:d07ed4db41abb622cf85d3c1fff40c82902a9f130bf8327d37bc586da910379b",
+      "dependencies": [
+        "ox_lib",
+        "oxmysql",
+        "mz_core",
+        "mz_org",
+        "mz_economy",
+        "mz_inventory",
+        "mz_vehicles",
+        "mz_navigation",
+        "mz_interact",
+        "mz_garagem"
+      ],
+      "required_files": [
+        "fxmanifest.lua",
+        "web/index.html"
+      ],
+      "mutable_policy": "unknown_preserve",
+      "channel": "stable",
+      "availability": "metadata_only_unverified"
+    },
+    {
+      "id": "mz_medical",
+      "name": "mz_medical",
+      "type": "fivem_resource",
+      "group": "[mz]",
+      "repository": "https://github.com/mz-core/mz_medical",
+      "visibility": "public",
+      "source": "github_release",
+      "version": "1.0.0",
+      "tag": "mz_medical-v1.0.0",
+      "asset": "mz_medical-v1.0.0.zip",
+      "sha256": "sha256:639541a20685456ae4f79561a575bceb99b8c8544db6e8de07525f61eda8cb51",
+      "dependencies": [
+        "ox_lib",
+        "mz_core",
+        "mz_org",
+        "mz_inventory",
+        "mz_progress",
+        "spawnmanager"
+      ],
+      "required_files": [
+        "fxmanifest.lua"
+      ],
+      "mutable_policy": "unknown_preserve",
+      "channel": "stable",
+      "availability": "metadata_only_unverified"
+    },
+    {
+      "id": "mz_bank",
+      "name": "mz_bank",
+      "type": "fivem_resource",
+      "group": "[mz]",
+      "repository": "https://github.com/mz-core/mz_bank",
+      "visibility": "public",
+      "source": "github_release",
+      "version": "2.0.0",
+      "tag": "mz_bank-v2.0.0",
+      "asset": "mz_bank-v2.0.0.zip",
+      "sha256": "sha256:b4250644f77c96ddf53bd6bdda8c9b92e1b7bd8f839571294156e12bc8dad1b4",
+      "dependencies": [
+        "oxmysql",
+        "ox_lib",
+        "mz_core",
+        "mz_economy",
+        "mz_inventory"
+      ],
+      "required_files": [
+        "fxmanifest.lua",
+        "html/index.html"
+      ],
+      "mutable_policy": "unknown_preserve",
+      "channel": "stable",
+      "availability": "metadata_only_unverified"
+    },
+    {
+      "id": "mz_navigation",
+      "name": "mz_navigation",
+      "type": "fivem_resource",
+      "group": "[mz]",
+      "repository": "https://github.com/mz-core/mz_navigation",
+      "visibility": "public",
+      "source": "github_release",
+      "version": "1.1.0",
+      "tag": "mz_navigation-v1.1.0",
+      "asset": "mz_navigation-v1.1.0.zip",
+      "sha256": "sha256:227dc45c724b0a48929553dc0b892cec225c6a22211dc03296271c2e10912080",
+      "dependencies": [
+        "oxmysql",
+        "mz_core"
+      ],
+      "required_files": [
+        "fxmanifest.lua",
+        "web/index.html"
+      ],
+      "mutable_policy": "unknown_preserve",
+      "channel": "stable",
+      "availability": "metadata_only_unverified"
+    },
+    {
+      "id": "mz_phone",
+      "name": "mz_phone",
+      "type": "fivem_resource",
+      "group": "[mz]",
+      "repository": "https://github.com/mz-core/mz_phone",
+      "visibility": "public",
+      "source": "github_release",
+      "version": "1.0.0",
+      "tag": "",
+      "asset": "",
+      "sha256": "",
+      "dependencies": [
+        "oxmysql",
+        "mz_core",
+        "mz_org",
+        "mz_inventory",
+        "mz_dispatch",
+        "mz_interact",
+        "mz_world_editor"
+      ],
+      "required_files": [
+        "fxmanifest.lua",
+        "web/index.html"
+      ],
+      "mutable_policy": "unknown_preserve",
+      "channel": "stable",
+      "availability": "release_missing"
+    },
+    {
+      "id": "mz_transport",
+      "name": "mz_transport",
+      "type": "fivem_resource",
+      "group": "[mz]",
+      "repository": "",
+      "visibility": "unknown",
+      "source": "unavailable",
+      "version": "1.0.0",
+      "tag": "",
+      "asset": "",
+      "sha256": "",
+      "dependencies": [
+        "oxmysql",
+        "mz_core",
+        "mz_economy",
+        "mz_phone"
+      ],
+      "required_files": [
+        "fxmanifest.lua"
+      ],
+      "mutable_policy": "unknown_preserve",
+      "channel": "stable",
+      "availability": "repository_missing_or_unknown"
+    },
+    {
+      "id": "mz_interiors",
+      "name": "mz_interiors",
+      "type": "fivem_resource",
+      "group": "[mz]",
+      "repository": "https://github.com/mz-core/mz_interiors",
+      "visibility": "private",
+      "source": "private_release_requires_authorization",
+      "version": "0.2.0",
+      "tag": "",
+      "asset": "",
+      "sha256": "",
+      "dependencies": [
+        "mz_core"
+      ],
+      "required_files": [
+        "fxmanifest.lua"
+      ],
+      "mutable_policy": "unknown_preserve",
+      "channel": "stable",
+      "availability": "release_missing"
+    },
+    {
+      "id": "mz_houses",
+      "name": "mz_houses",
+      "type": "fivem_resource",
+      "group": "[mz]",
+      "repository": "https://github.com/mz-core/mz_houses",
+      "visibility": "public",
+      "source": "github_release",
+      "version": "0.2.0",
+      "tag": "mz_houses-v0.2.0",
+      "asset": "mz_houses-v0.2.0.zip",
+      "sha256": "sha256:e395bb2bdca362e7c364d92006e5fe233dcaceec9ebd909fd88bbfedde4a3fb3",
+      "dependencies": [
+        "ox_lib",
+        "oxmysql",
+        "mz_core",
+        "mz_economy",
+        "mz_org",
+        "mz_inventory",
+        "mz_interiors",
+        "mz_menu"
+      ],
+      "required_files": [
+        "fxmanifest.lua"
+      ],
+      "mutable_policy": "unknown_preserve",
+      "channel": "stable",
+      "availability": "metadata_only_unverified"
+    },
+    {
+      "id": "mz_furniture",
+      "name": "mz_furniture",
+      "type": "fivem_resource",
+      "group": "[mz]",
+      "repository": "https://github.com/mz-core/mz_furniture",
+      "visibility": "private",
+      "source": "private_release_requires_authorization",
+      "version": "0.10.0",
+      "tag": "mz_furniture-v0.10.0",
+      "asset": "mz_furniture-v0.10.0.zip",
+      "sha256": "sha256:c7082adbdf5620f929f78fefc93a4309955dc86ad4afdc2d5214bdf2af690229",
+      "dependencies": [
+        "oxmysql",
+        "ox_lib",
+        "mz_core",
+        "mz_economy",
+        "mz_org",
+        "mz_interiors",
+        "mz_houses",
+        "mz_menu",
+        "mz_world_editor"
+      ],
+      "required_files": [
+        "fxmanifest.lua"
+      ],
+      "mutable_policy": "unknown_preserve",
+      "channel": "stable",
+      "availability": "metadata_only_unverified"
+    },
+    {
+      "id": "mz_org_activities",
+      "name": "mz_org_activities",
+      "type": "fivem_resource",
+      "group": "[mz]",
+      "repository": "https://github.com/mz-core/mz_org_activities",
+      "visibility": "public",
+      "source": "github_release",
+      "version": "0.2.0",
+      "tag": "mz_org_activities-v0.2.0",
+      "asset": "mz_org_activities-v0.2.0.zip",
+      "sha256": "sha256:cf74606d93d58a2738ab93ed0d25610a4705b0b08efc6f576ba7509381430408",
+      "dependencies": [
+        "ox_lib",
+        "oxmysql",
+        "mz_core",
+        "mz_org",
+        "mz_interact",
+        "mz_interiors",
+        "mz_houses",
+        "mz_furniture"
+      ],
+      "required_files": [
+        "fxmanifest.lua"
+      ],
+      "mutable_policy": "unknown_preserve",
+      "channel": "stable",
+      "availability": "metadata_only_unverified"
+    },
+    {
+      "id": "mz_computer",
+      "name": "mz_computer",
+      "type": "fivem_resource",
+      "group": "[mz]",
+      "repository": "https://github.com/mz-core/mz_computer",
+      "visibility": "private",
+      "source": "private_release_requires_authorization",
+      "version": "1.3.3",
+      "tag": "",
+      "asset": "",
+      "sha256": "",
+      "dependencies": [
+        "oxmysql",
+        "ox_lib",
+        "mz_core",
+        "mz_org",
+        "mz_inventory"
+      ],
+      "required_files": [
+        "fxmanifest.lua",
+        "ui/dist/index.html"
+      ],
+      "mutable_policy": "unknown_preserve",
+      "channel": "stable",
+      "availability": "release_missing"
+    },
+    {
+      "id": "mz_radio",
+      "name": "mz_radio",
+      "type": "fivem_resource",
+      "group": "[mz]",
+      "repository": "https://github.com/mz-core/mz_radio",
+      "visibility": "public",
+      "source": "github_release",
+      "version": "0.1.0",
+      "tag": "mz_radio-v0.1.0",
+      "asset": "mz_radio-v0.1.0.zip",
+      "sha256": "sha256:4171d6e3f077db8e1e62488849dd50d64d310c2ba4682522911b8f133865fab8",
+      "dependencies": [
+        "ox_lib",
+        "oxmysql",
+        "mz_core",
+        "pma-voice"
+      ],
+      "required_files": [
+        "fxmanifest.lua",
+        "web/index.html"
+      ],
+      "mutable_policy": "unknown_preserve",
+      "channel": "stable",
+      "availability": "metadata_only_unverified"
+    },
+    {
+      "id": "mz_creator",
+      "name": "mz_creator",
+      "type": "fivem_resource",
+      "group": "[mz]",
+      "repository": "https://github.com/mz-core/mz_creator",
+      "visibility": "public",
+      "source": "github_release",
+      "version": "0.1.0",
+      "tag": "mz_creator-v0.1.0",
+      "asset": "mz_creator-v0.1.0.zip",
+      "sha256": "sha256:b26d1c94df518e2393477f9c03c0007bee67e6f9380cdcb4d4ef63ae58274d1f",
+      "dependencies": [
+        "oxmysql",
+        "ox_lib",
+        "mz_core"
+      ],
+      "required_files": [
+        "fxmanifest.lua",
+        "web/index.html"
+      ],
+      "mutable_policy": "unknown_preserve",
+      "channel": "stable",
+      "availability": "metadata_only_unverified"
+    },
+    {
+      "id": "mz_multichar",
+      "name": "mz_multichar",
+      "type": "fivem_resource",
+      "group": "[mz]",
+      "repository": "https://github.com/mz-core/mz_multichar",
+      "visibility": "public",
+      "source": "github_release",
+      "version": "0.1.0",
+      "tag": "mz_multichar-v0.1.0",
+      "asset": "mz_multichar-v0.1.0.zip",
+      "sha256": "sha256:a7776afcfbc0c900c26041f94aedab102189b8bf42ac0ebd61ee75868238985f",
+      "dependencies": [
+        "ox_lib",
+        "mz_core",
+        "mz_creator"
+      ],
+      "required_files": [
+        "fxmanifest.lua",
+        "web/index.html"
+      ],
+      "mutable_policy": "unknown_preserve",
+      "channel": "stable",
+      "availability": "metadata_only_unverified"
+    },
+    {
+      "id": "mz_clothing",
+      "name": "mz_clothing",
+      "type": "fivem_resource",
+      "group": "[mz]",
+      "repository": "https://github.com/mz-core/mz_clothing",
+      "visibility": "public",
+      "source": "github_release",
+      "version": "0.1.0",
+      "tag": "mz_clothing-v0.1.0",
+      "asset": "mz_clothing-v0.1.0.zip",
+      "sha256": "sha256:e1e60d4ec394cbd0fb32ab80ebb9c2ee872913822c95be1e221a9d2cc6c18601",
+      "dependencies": [
+        "oxmysql",
+        "ox_lib",
+        "mz_core",
+        "mz_economy",
+        "mz_inventory"
+      ],
+      "required_files": [
+        "fxmanifest.lua",
+        "web/index.html"
+      ],
+      "mutable_policy": "unknown_preserve",
+      "channel": "stable",
+      "availability": "metadata_only_unverified"
+    },
+    {
+      "id": "mz_tatto",
+      "name": "mz_tatto",
+      "type": "fivem_resource",
+      "group": "[mz]",
+      "repository": "https://github.com/mz-core/mz_tatto",
+      "visibility": "public",
+      "source": "github_release",
+      "version": "1.0.0",
+      "tag": "mz_tatto-v1.0.0",
+      "asset": "mz_tatto-v1.0.0.zip",
+      "sha256": "sha256:feba92afeb1d6468f74d2664448c79e675e7757750b21d32dd6ddbfc8caa406f",
+      "dependencies": [
+        "oxmysql",
+        "ox_lib",
+        "mz_core",
+        "mz_economy"
+      ],
+      "required_files": [
+        "fxmanifest.lua",
+        "web/index.html"
+      ],
+      "mutable_policy": "unknown_preserve",
+      "channel": "stable",
+      "availability": "metadata_only_unverified"
+    },
+    {
+      "id": "mz_hud",
+      "name": "mz_hud",
+      "type": "fivem_resource",
+      "group": "[mz]",
+      "repository": "https://github.com/mz-core/mz_hud",
+      "visibility": "public",
+      "source": "github_release",
+      "version": "1.0.0",
+      "tag": "",
+      "asset": "",
+      "sha256": "",
+      "dependencies": [
+        "ox_lib",
+        "mz_core"
+      ],
+      "required_files": [
+        "fxmanifest.lua",
+        "web/index.html"
+      ],
+      "mutable_policy": "unknown_preserve",
+      "channel": "stable",
+      "availability": "release_missing"
+    },
+    {
+      "id": "mz_banguard",
+      "name": "mz_banguard",
+      "type": "fivem_resource",
+      "group": "[mz]",
+      "repository": "https://github.com/mz-core/mz_banguard",
+      "visibility": "private",
+      "source": "protected",
+      "version": "1.6.0",
+      "tag": "",
+      "asset": "",
+      "sha256": "",
+      "dependencies": [
+        "oxmysql",
+        "mz_core",
+        "mz_inventory"
+      ],
+      "required_files": [
+        "fxmanifest.lua"
+      ],
+      "mutable_policy": "unknown_preserve",
+      "channel": "stable",
+      "availability": "protected_distribution_required"
+    },
+    {
+      "id": "mz_warns",
+      "name": "mz_warns",
+      "type": "fivem_resource",
+      "group": "[mz]",
+      "repository": "https://github.com/mz-core/mz_warns",
+      "visibility": "public",
+      "source": "github_release",
+      "version": "1.0.0",
+      "tag": "mz_warns-v1.0.0",
+      "asset": "mz_warns-v1.0.0.zip",
+      "sha256": "sha256:190d95ea3508eca49c9d776d7c4e4c1940960affd5a541b18e9e928cb93dd967",
+      "dependencies": [
+        "oxmysql",
+        "mz_core"
+      ],
+      "required_files": [
+        "fxmanifest.lua"
+      ],
+      "mutable_policy": "unknown_preserve",
+      "channel": "stable",
+      "availability": "metadata_only_unverified"
+    },
+    {
+      "id": "mz_admin",
+      "name": "mz_admin",
+      "type": "fivem_resource",
+      "group": "[mz]",
+      "repository": "https://github.com/mz-core/mz_admin",
+      "visibility": "private",
+      "source": "private_release_requires_authorization",
+      "version": "0.3.1",
+      "tag": "v0.3.1",
+      "asset": "mz_admin-v0.3.1.zip",
+      "sha256": "sha256:d223a22c929b87e9643bc15e202dad8a814f7455f73ee9f5722645a558b9b00b",
+      "dependencies": [
+        "ox_lib",
+        "mz_core",
+        "mz_status",
+        "mz_org",
+        "mz_garagem"
+      ],
+      "required_files": [
+        "fxmanifest.lua",
+        "web/index.html"
+      ],
+      "mutable_policy": "unknown_preserve",
+      "channel": "stable",
+      "availability": "provenance_conflict"
+    },
+    {
+      "id": "mz_feedback",
+      "name": "mz_feedback",
+      "type": "fivem_resource",
+      "group": "[mz]",
+      "repository": "https://github.com/mz-core/mz_feedback",
+      "visibility": "public",
+      "source": "github_release",
+      "version": "1.0.0",
+      "tag": "mz_feedback-v1.0.0",
+      "asset": "mz_feedback-v1.0.0.zip",
+      "sha256": "sha256:0fcf28023dd21cf30b1582e078b370d6f1b58c851cd044197933f4679f44a112",
+      "dependencies": [
+        "oxmysql",
+        "mz_core",
+        "mz_notify",
+        "screenshot-basic"
+      ],
+      "required_files": [
+        "fxmanifest.lua",
+        "web/index.html"
+      ],
+      "mutable_policy": "unknown_preserve",
+      "channel": "stable",
+      "availability": "metadata_only_unverified"
+    }
+  ],
+  "observed_at_utc": "2026-11-05T16:43:01+00:00"
+}

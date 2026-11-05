@@ -1,5 +1,7 @@
 # mz_starter
 
+O prototipo somente leitura do Starter 2.0 esta documentado em [planejamento e catalogo](docs/planning.md). Ele nao substitui os instaladores atuais nem instala resources.
+
 Camada de boot, configuracao e instalacao para subir um servidor FiveM usando `mz_core`.
 
 ## O que este repositorio e

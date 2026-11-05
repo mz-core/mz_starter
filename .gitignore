@@ -8,3 +8,5 @@ logs/
 .env.*
 artifacts/
 txData/
+node_modules/
+build/
