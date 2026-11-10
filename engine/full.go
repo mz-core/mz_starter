@@ -28,8 +28,10 @@ type FullOptions struct {
 	Target          string
 	LocalRoot       string
 	LocalAuthorized bool
+	AllowIncomplete bool
 	ArtifactsMode   string
 	ArtifactsPath   string
+	ArtifactOS      string
 	MaxDownload     int64
 	Progress        func(FullProgress)
 	Sources         *Sources
@@ -68,6 +70,7 @@ type ArtifactPlan struct {
 	Path    string `json:"path,omitempty"`
 	Status  string `json:"status"`
 	Version string `json:"version,omitempty"`
+	Archive string `json:"archive,omitempty"`
 	Digest  string `json:"digest,omitempty"`
 	URL     string `json:"url,omitempty"`
 	Reason  string `json:"reason,omitempty"`
@@ -129,6 +132,9 @@ func (o FullOptions) defaults() FullOptions {
 	}
 	if o.Sources.RuntimeBase != "" {
 		merged.RuntimeBase = o.Sources.RuntimeBase
+	}
+	if o.Sources.ReleaseBase != "" {
+		merged.ReleaseBase = o.Sources.ReleaseBase
 	}
 	for id, contract := range o.Sources.External {
 		merged.External[id] = contract
@@ -305,13 +311,6 @@ func resolveMZ(ctx context.Context, r Resource, opts FullOptions, comp Component
 		comp.Protected = true
 		return comp
 	}
-	if r.Visibility == "public" && r.Source == "github_release" && r.Tag != "" && r.Asset != "" {
-		if expected, ok := catalogDigest(r.SHA256); ok {
-			if direct, err := directReleaseComponent(r, expected); err == nil {
-				return direct
-			}
-		}
-	}
 	localFirst := r.Source == "protected" || r.Visibility != "public" || r.Source != "github_release" || r.Tag == "" || r.Asset == "" || r.SHA256 == ""
 	if localFirst {
 		if local, err := resolveLocalPackage(opts.LocalRoot, r, opts.LocalAuthorized); err == nil {
@@ -333,10 +332,18 @@ func resolveMZ(ctx context.Context, r Resource, opts FullOptions, comp Component
 	}
 	if r.Source == "github_release" || r.Source == "private_release_requires_authorization" {
 		if r.Visibility == "public" || opts.GitHub.Token != "" {
-			if remote, err := resolveGitHubRelease(ctx, r, opts); err == nil {
+			remote, err := resolveGitHubRelease(ctx, r, opts)
+			if err == nil {
 				return remote
-			} else if comp.Reason == "" {
+			}
+			if comp.Reason == "" {
 				comp.Reason = "github:" + err.Error()
+			}
+			if expected, ok := catalogDigest(r.SHA256); ok && r.Visibility == "public" && r.Source == "github_release" && r.Tag != "" && r.Asset != "" && transientGitHubError(err) {
+				if direct, derr := directReleaseComponent(r, expected, opts.Sources.ReleaseBase); derr == nil {
+					direct.SourceDetail = "pinned catalog fallback (" + err.Error() + ")"
+					return direct
+				}
 			}
 		}
 	}
@@ -354,14 +361,30 @@ func resolveMZ(ctx context.Context, r Resource, opts FullOptions, comp Component
 	return comp
 }
 
-func directReleaseComponent(r Resource, digest string) (Component, error) {
-	u, err := url.Parse(r.Repository)
+func transientGitHubError(err error) bool {
+	switch err.Error() {
+	case "rate_limited", "timeout", "network_error", "http_error":
+		return true
+	}
+	return false
+}
+
+func releaseDownloadURL(repository, id, tag, asset, base string) (string, error) {
+	u, err := url.Parse(repository)
 	if err != nil || u.Scheme != "https" || u.Host != "github.com" || u.User != nil {
-		return Component{}, fmt.Errorf("invalid_repository")
+		return "", fmt.Errorf("invalid_repository")
 	}
 	parts := strings.Split(strings.Trim(u.Path, "/"), "/")
-	if len(parts) != 2 || parts[1] != r.ID || !idPattern.MatchString(parts[0]) {
-		return Component{}, fmt.Errorf("invalid_repository")
+	if len(parts) != 2 || parts[1] != id || !idPattern.MatchString(parts[0]) || tag == "" || asset == "" {
+		return "", fmt.Errorf("invalid_repository")
+	}
+	return strings.TrimRight(base, "/") + "/" + parts[0] + "/" + parts[1] + "/releases/download/" + tag + "/" + asset, nil
+}
+
+func directReleaseComponent(r Resource, digest, base string) (Component, error) {
+	downloadURL, err := releaseDownloadURL(r.Repository, r.ID, r.Tag, r.Asset, base)
+	if err != nil {
+		return Component{}, err
 	}
 	comp := Component{
 		ID: r.ID, Type: r.Type, Version: r.Version, Tag: r.Tag, Repository: r.Repository,
@@ -369,7 +392,7 @@ func directReleaseComponent(r Resource, digest string) (Component, error) {
 		Status: "ready", resource: r, kind: "direct_release", Digest: digest, Asset: r.Asset,
 		SourceKind: "github_release", SourceDetail: "pinned GitHub release " + r.Tag,
 	}
-	comp.archiveURL = "https://github.com/" + parts[0] + "/" + parts[1] + "/releases/download/" + r.Tag + "/" + r.Asset
+	comp.archiveURL = downloadURL
 	return comp, nil
 }
 
@@ -440,6 +463,14 @@ func resolveGitHubRelease(ctx context.Context, r Resource, opts FullOptions) (Co
 	comp.Digest = digest
 	comp.Size = asset.Size
 	comp.assetID = asset.ID
+	if r.Visibility == "public" {
+		downloadURL, err := releaseDownloadURL(r.Repository, r.ID, rel.Tag, asset.Name, opts.Sources.ReleaseBase)
+		if err != nil {
+			return comp, err
+		}
+		comp.kind = "direct_release"
+		comp.archiveURL = downloadURL
+	}
 	return comp, nil
 }
 
@@ -630,8 +661,10 @@ func InstallFull(ctx context.Context, c Catalog, templates fs.FS, target string,
 	}
 	if !plan.FilesReady {
 		result.Missing = blockedIDs(plan)
-		emit()
-		return result, fmt.Errorf("full_installation_blocked")
+		if !opts.AllowIncomplete || result.Total == 0 {
+			emit()
+			return result, fmt.Errorf("full_installation_blocked")
+		}
 	}
 	stage, err := makePrivateTemp(parent)
 	if err != nil {
@@ -732,9 +765,19 @@ func InstallFull(ctx context.Context, c Catalog, templates fs.FS, target string,
 		}
 	}
 	result.Plan = &plan
-	result.FilesReady = true
+	result.FilesReady = plan.FilesReady
 	artifactResult, artifactErr := installArtifacts(ctx, opts, absolute, &result, emit)
 	result.Artifacts = artifactResult
+	if !plan.FilesReady {
+		result.State = "incomplete"
+		result.Detail = "missing_required_components"
+		if artifactErr != nil {
+			result.Detail += "; artifacts_failed:" + artifactErr.Error()
+		}
+		result.ServerReady = false
+		emit()
+		return result, nil
+	}
 	if artifactErr != nil {
 		result.State = "completed_files_only"
 		result.Detail = "artifacts_failed:" + artifactErr.Error()

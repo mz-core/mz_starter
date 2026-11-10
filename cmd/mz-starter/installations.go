@@ -35,6 +35,7 @@ type installRequest struct {
 	Resources        []string `json:"resources"`
 	PartialConfirmed bool     `json:"partial_confirmed"`
 	FullConfirmed    bool     `json:"full_confirmed"`
+	AllowIncomplete  bool     `json:"allow_incomplete"`
 	LocalRoot        string   `json:"local_root"`
 	LocalAuthorized  bool     `json:"local_authorized"`
 	ArtifactsMode    string   `json:"artifacts_mode"`
@@ -119,7 +120,7 @@ func (m *installationJobs) handler(w http.ResponseWriter, r *http.Request) {
 				respond(400, apiError{"invalid_request", "full installation confirmation required"})
 				return
 			}
-			if q.ArtifactsMode != "" && q.ArtifactsMode != "none" && q.ArtifactsMode != "existing" && q.ArtifactsMode != "download" {
+			if q.ArtifactsMode != "" && q.ArtifactsMode != "none" && q.ArtifactsMode != "existing" && q.ArtifactsMode != "download" && q.ArtifactsMode != "auto" {
 				respond(400, apiError{"invalid_request", "invalid artifacts mode"})
 				return
 			}
@@ -181,7 +182,8 @@ func (m *installationJobs) handler(w http.ResponseWriter, r *http.Request) {
 			result, _ := engine.InstallFull(ctx, m.catalog, starter.Assets, q.Server, engine.FullOptions{
 				GitHub: engine.GitHub{Token: os.Getenv("GITHUB_TOKEN")}, Target: q.Server,
 				LocalRoot: q.LocalRoot, LocalAuthorized: q.LocalAuthorized,
-				ArtifactsMode: q.ArtifactsMode, ArtifactsPath: q.ArtifactsPath,
+				AllowIncomplete: q.AllowIncomplete,
+				ArtifactsMode:   q.ArtifactsMode, ArtifactsPath: q.ArtifactsPath,
 				MaxDownload: m.maxDownload,
 				Progress: func(p engine.FullProgress) {
 					p.InstalledResources = append([]string{}, p.InstalledResources...)

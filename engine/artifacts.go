@@ -39,6 +39,13 @@ func artifactOverlap(target, path string) bool {
 	return check(a, b) || check(b, a)
 }
 
+func artifactOS(opts FullOptions) string {
+	if opts.ArtifactOS != "" {
+		return opts.ArtifactOS
+	}
+	return runtime.GOOS
+}
+
 func resolveArtifacts(ctx context.Context, opts FullOptions) (ArtifactPlan, error) {
 	plan := ArtifactPlan{Mode: opts.ArtifactsMode, Path: opts.ArtifactsPath}
 	switch opts.ArtifactsMode {
@@ -46,7 +53,7 @@ func resolveArtifacts(ctx context.Context, opts FullOptions) (ArtifactPlan, erro
 		plan.Status = "not_provided"
 		return plan, nil
 	case "existing":
-		abs, err := validateExistingArtifacts(opts.ArtifactsPath)
+		abs, err := validateExistingArtifacts(opts.ArtifactsPath, artifactOS(opts))
 		if err != nil {
 			plan.Status, plan.Reason = "blocked", err.Error()
 			return plan, nil
@@ -58,10 +65,6 @@ func resolveArtifacts(ctx context.Context, opts FullOptions) (ArtifactPlan, erro
 		plan.Path, plan.Status = abs, "existing"
 		return plan, nil
 	case "download":
-		if runtime.GOOS != "windows" {
-			plan.Status, plan.Reason = "blocked", "artifact_download_unsupported_on_this_host"
-			return plan, nil
-		}
 		abs, err := validateArtifactDestination(opts.ArtifactsPath)
 		if err != nil {
 			plan.Status, plan.Reason = "blocked", err.Error()
@@ -76,7 +79,33 @@ func resolveArtifacts(ctx context.Context, opts FullOptions) (ArtifactPlan, erro
 			plan.Status, plan.Reason = "blocked", err.Error()
 			return plan, nil
 		}
-		plan.Path, plan.Status, plan.Version, plan.URL = abs, "ready", info.Build, info.URL
+		plan.Path, plan.Status, plan.Version, plan.URL, plan.Archive = abs, "ready", info.Build, info.URL, info.Archive
+		return plan, nil
+	case "auto":
+		path := opts.ArtifactsPath
+		if strings.TrimSpace(path) == "" {
+			absTarget, err := filepath.Abs(opts.Target)
+			if err != nil || absTarget == "" {
+				plan.Status, plan.Reason = "blocked", "artifacts_path_invalid"
+				return plan, nil
+			}
+			path = filepath.Join(filepath.Dir(absTarget), "mz-artifacts")
+		}
+		abs, err := validateArtifactDestination(path)
+		if err != nil {
+			plan.Status, plan.Reason = "blocked", err.Error()
+			return plan, nil
+		}
+		if opts.Target != "" && artifactOverlap(opts.Target, abs) {
+			plan.Status, plan.Reason = "blocked", "artifacts_overlap_server_data"
+			return plan, nil
+		}
+		info, err := fetchRecommendedArtifact(ctx, opts)
+		if err != nil {
+			plan.Status, plan.Reason = "blocked", err.Error()
+			return plan, nil
+		}
+		plan.Path, plan.Status, plan.Version, plan.URL, plan.Archive = abs, "ready", info.Build, info.URL, info.Archive
 		return plan, nil
 	default:
 		plan.Status, plan.Reason = "blocked", "invalid_artifacts_mode"
@@ -85,13 +114,22 @@ func resolveArtifacts(ctx context.Context, opts FullOptions) (ArtifactPlan, erro
 }
 
 type recommendedArtifact struct {
-	Build string
-	URL   string
+	Build   string
+	URL     string
+	Archive string
 }
 
 func fetchRecommendedArtifact(ctx context.Context, opts FullOptions) (recommendedArtifact, error) {
+	goos := artifactOS(opts)
+	if goos != "windows" && goos != "linux" {
+		return recommendedArtifact{}, fmt.Errorf("artifact_unsupported_host")
+	}
+	platform := "win32"
+	if goos == "linux" {
+		platform = "linux"
+	}
 	base := strings.TrimRight(opts.Sources.ChangelogBase, "/")
-	req, err := http.NewRequestWithContext(ctx, http.MethodGet, base+"/api/changelog/versions/win32/server", nil)
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, base+"/api/changelog/versions/"+platform+"/server", nil)
 	if err != nil {
 		return recommendedArtifact{}, fmt.Errorf("artifact_changelog_invalid")
 	}
@@ -112,21 +150,33 @@ func fetchRecommendedArtifact(ctx context.Context, opts FullOptions) (recommende
 	if err = json.NewDecoder(io.LimitReader(resp.Body, 1<<20)).Decode(&v); err != nil || v.Recommended == "" || v.RecommendedDownload == "" {
 		return recommendedArtifact{}, fmt.Errorf("artifact_changelog_invalid")
 	}
-	if err = validateArtifactURL(v.RecommendedDownload, v.Recommended, opts.Sources.RuntimeBase); err != nil {
+	if err = validateArtifactURL(v.RecommendedDownload, v.Recommended, opts.Sources.RuntimeBase, goos); err != nil {
 		return recommendedArtifact{}, err
 	}
-	return recommendedArtifact{Build: v.Recommended, URL: v.RecommendedDownload}, nil
+	archive := "zip"
+	if goos == "linux" {
+		archive = "tar.xz"
+	}
+	return recommendedArtifact{Build: v.Recommended, URL: v.RecommendedDownload, Archive: archive}, nil
 }
 
-func validateArtifactURL(raw, build, runtimeBase string) error {
+func validateArtifactURL(raw, build, runtimeBase, goos string) error {
 	u, err := url.Parse(raw)
 	if err != nil || u.User != nil {
 		return fmt.Errorf("artifact_url_invalid")
 	}
+	suffix := "/server.zip"
+	prefix := "/artifacts/fivem/build_server_windows/master/"
+	if goos == "linux" {
+		suffix = "/fx.tar.xz"
+		prefix = "/artifacts/fivem/build_proot_linux/master/"
+	} else if goos != "windows" {
+		return fmt.Errorf("artifact_unsupported_host")
+	}
 	defaultBase := "https://runtime.fivem.net"
 	base := strings.TrimRight(runtimeBase, "/")
 	if base != defaultBase {
-		if !strings.HasPrefix(raw, base+"/") || !strings.HasSuffix(u.Path, "/server.zip") {
+		if !strings.HasPrefix(raw, base+"/") || !strings.HasSuffix(u.Path, suffix) {
 			return fmt.Errorf("artifact_url_invalid")
 		}
 		return nil
@@ -134,19 +184,18 @@ func validateArtifactURL(raw, build, runtimeBase string) error {
 	if u.Scheme != "https" || u.Host != "runtime.fivem.net" || u.Port() != "" {
 		return fmt.Errorf("artifact_url_invalid")
 	}
-	prefix := "/artifacts/fivem/build_server_windows/master/"
 	if !strings.HasPrefix(u.Path, prefix) {
 		return fmt.Errorf("artifact_url_invalid")
 	}
 	rest := strings.TrimPrefix(u.Path, prefix)
 	parts := strings.Split(rest, "/")
-	if len(parts) != 2 || parts[1] != "server.zip" || !strings.HasPrefix(parts[0], build+"-") {
+	if len(parts) != 2 || "/"+parts[1] != suffix || !strings.HasPrefix(parts[0], build+"-") {
 		return fmt.Errorf("artifact_url_invalid")
 	}
 	return nil
 }
 
-func validateExistingArtifacts(path string) (string, error) {
+func validateExistingArtifacts(path, goos string) (string, error) {
 	if strings.TrimSpace(path) == "" {
 		return "", fmt.Errorf("artifacts_path_required")
 	}
@@ -159,7 +208,7 @@ func validateExistingArtifacts(path string) (string, error) {
 		return "", fmt.Errorf("artifacts_path_invalid")
 	}
 	exe := "run.sh"
-	if runtime.GOOS == "windows" {
+	if goos == "windows" {
 		exe = "FXServer.exe"
 	}
 	if info, err := os.Stat(filepath.Join(abs, exe)); err != nil || !info.Mode().IsRegular() {
@@ -214,7 +263,11 @@ func installArtifacts(ctx context.Context, opts FullOptions, target string, resu
 		return resolved, fmt.Errorf("staging_unavailable")
 	}
 	defer os.RemoveAll(work)
-	archive := filepath.Join(work, "server.zip")
+	archiveName := "server.zip"
+	if resolved.Archive == "tar.xz" {
+		archiveName = "fx.tar.xz"
+	}
+	archive := filepath.Join(work, archiveName)
 	result.State = "artifacts"
 	emit()
 	_, err = downloadVerified(ctx, downloadSpec{URL: resolved.URL, MaxSize: 2 << 30, Client: opts.ArtifactClient, Progress: func(received, size int64) {
@@ -229,7 +282,12 @@ func installArtifacts(ctx context.Context, opts FullOptions, target string, resu
 		return resolved, err
 	}
 	extract := filepath.Join(work, "artifact")
-	if err = extractArtifactArchive(ctx, archive, extract); err != nil {
+	if resolved.Archive == "tar.xz" {
+		err = extractArtifactTarXZ(ctx, archive, extract)
+	} else {
+		err = extractArtifactArchive(ctx, archive, extract)
+	}
+	if err != nil {
 		return resolved, err
 	}
 	if err = publishInstallStage(extract, resolved.Path); err != nil {

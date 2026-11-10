@@ -98,7 +98,8 @@ const sourceLabel: Record<string, [string, string]> = {
 export function FullInstallPanel({ t, label, server, planReady }: Props) {
   const [localRoot, setLocalRoot] = useState('');
   const [authorized, setAuthorized] = useState(false);
-  const [artifactsMode, setArtifactsMode] = useState('none');
+  const [artifactsMode, setArtifactsMode] = useState('auto');
+  const [allowIncomplete, setAllowIncomplete] = useState(false);
   const [artifactsPath, setArtifactsPath] = useState('');
   const [plan, setPlan] = useState<FullPlan | null>(null);
   const [resolvedKey, setResolvedKey] = useState('');
@@ -146,6 +147,7 @@ export function FullInstallPanel({ t, label, server, planReady }: Props) {
       setPlan(value);
       setResolvedKey(currentKey);
       setConfirmed(false);
+      setAllowIncomplete(false);
     } catch (error) {
       setResolveError(error instanceof Error ? error.message : 'network_error');
     } finally {
@@ -160,6 +162,7 @@ export function FullInstallPanel({ t, label, server, planReady }: Props) {
         kind: 'full',
         server,
         full_confirmed: true,
+        allow_incomplete: allowIncomplete,
         local_root: localRoot,
         local_authorized: authorized,
         artifacts_mode: artifactsMode,
@@ -187,8 +190,8 @@ export function FullInstallPanel({ t, label, server, planReady }: Props) {
   };
 
   const report = job?.report;
-  const stateText = report?.state === 'completed' ? t.fullCompleted : report?.state === 'completed_files_only' ? t.fullCompletedFilesOnly : label(report?.state || '');
-  const detailText = report?.detail === 'configuration_required' ? t.configurationRequired : report?.detail === 'server_artifacts_not_provided' ? t.artifactsNotProvided : report?.detail === 'full_installation_blocked' ? t.blockedInstall : report?.detail?.startsWith('artifacts_failed:') ? `${t.artifactsNotProvided}: ${report.detail.slice('artifacts_failed:'.length)}` : label(report?.detail || '');
+  const stateText = report?.state === 'completed' ? t.fullCompleted : report?.state === 'completed_files_only' ? t.fullCompletedFilesOnly : report?.state === 'incomplete' ? t.fullIncomplete : label(report?.state || '');
+  const detailText = report?.detail === 'configuration_required' ? t.configurationRequired : report?.detail === 'server_artifacts_not_provided' ? t.artifactsNotProvided : report?.detail === 'full_installation_blocked' ? t.blockedInstall : report?.detail === 'missing_required_components' ? t.missingRequired : report?.detail?.startsWith('artifacts_failed:') ? `${t.artifactsNotProvided}: ${report.detail.slice('artifacts_failed:'.length)}` : label(report?.detail || '');
   const installed = new Set(report?.installed_resources || []);
   const components = report?.plan?.components || plan?.components || [];
   const blockers = report?.plan?.blockers || plan?.blockers || [];
@@ -197,7 +200,7 @@ export function FullInstallPanel({ t, label, server, planReady }: Props) {
   const total = report?.total || (plan ? plan.required : 0);
   const installedCount = report?.installed || 0;
   const percent = total > 0 ? Math.min(100, Math.round((installedCount / total) * 100)) : 0;
-  const canInstall = planMatches && !!plan?.files_ready && confirmed && !jobID;
+  const canInstall = planMatches && !!plan && (plan.files_ready || allowIncomplete) && confirmed && !jobID;
   const done = !!job?.done;
 
   return (
@@ -220,12 +223,13 @@ export function FullInstallPanel({ t, label, server, planReady }: Props) {
         <label>
           {t.artifactsMode}
           <select value={artifactsMode} onChange={(e) => setArtifactsMode(e.target.value)}>
+            <option value="auto">{t.artifactsAuto}</option>
             <option value="none">{t.artifactsNone}</option>
             <option value="existing">{t.artifactsExisting}</option>
             <option value="download">{t.artifactsDownload}</option>
           </select>
         </label>
-        {artifactsMode !== 'none' && (
+        {(artifactsMode === 'existing' || artifactsMode === 'download') && (
           <label>
             {t.artifactsPath}
             <input value={artifactsPath} onChange={(e) => setArtifactsPath(e.target.value)} placeholder={t.artifactsHint} />
@@ -285,6 +289,12 @@ export function FullInstallPanel({ t, label, server, planReady }: Props) {
             <input type="checkbox" checked={confirmed} onChange={(e) => setConfirmed(e.target.checked)} />
             {t.fullConfirm}
           </label>
+          {!plan.files_ready && (
+            <label className="check">
+              <input type="checkbox" checked={allowIncomplete} onChange={(e) => setAllowIncomplete(e.target.checked)} />
+              {t.allowIncomplete}
+            </label>
+          )}
           <button className="primary" disabled={!canInstall} onClick={start}>
             <Download size={16} /> {t.installButton}
           </button>
@@ -303,7 +313,7 @@ export function FullInstallPanel({ t, label, server, planReady }: Props) {
           {done && (
             <p className={report.files_ready ? 'notice' : 'error'}>
               {report.files_ready ? <CheckCircle2 size={16} /> : <XCircle size={16} />}
-              {report.files_ready ? t.fullFilesReady : t.fullFilesNotReady}
+              {report.files_ready ? t.fullFilesReady : report.state === 'incomplete' ? t.fullIncomplete : t.fullFilesNotReady}
               {report.server_ready ? ` Â· ${t.serverReady}` : ` Â· ${t.notReady}`}
             </p>
           )}

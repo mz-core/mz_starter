@@ -59,6 +59,7 @@ type Sources struct {
 	CodeloadBase  string
 	ChangelogBase string
 	RuntimeBase   string
+	ReleaseBase   string
 	External      map[string]ExternalContract
 }
 
@@ -76,7 +77,7 @@ func defaultSources() Sources {
 	add(cfx("mapmanager", "[managers]", "resources/[managers]/mapmanager"))
 	add(cfx("spawnmanager", "[managers]", "resources/[managers]/spawnmanager"))
 	add(cfx("baseevents", "[system]", "resources/[system]/baseevents"))
-	return Sources{CodeloadBase: "https://codeload.github.com", ChangelogBase: "https://changelogs-live.fivem.net", RuntimeBase: "https://runtime.fivem.net", External: contracts}
+	return Sources{CodeloadBase: "https://codeload.github.com", ChangelogBase: "https://changelogs-live.fivem.net", RuntimeBase: "https://runtime.fivem.net", ReleaseBase: "https://github.com", External: contracts}
 }
 
 func externalContract(s Sources, id string) (ExternalContract, bool) {
