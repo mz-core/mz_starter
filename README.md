@@ -1,12 +1,20 @@
 # mz_starter
 
-O Starter 2.0 planeja o ambiente e, nesta versao experimental, executa uma instalacao parcial de resources publicos apos confirmacao explicita. O planejamento e a instalacao estao documentados em [planejamento e catalogo](docs/planning.md). O Starter nao substitui os instaladores atuais e nao realiza uma instalacao completa do MZ Core.
+O Starter 2.0 planeja o ambiente e executa duas modalidades de instalacao apos confirmacao explicita: instalacao completa do MZ Core e instalacao parcial experimental. O planejamento e a instalacao estao documentados em [planejamento e catalogo](docs/planning.md). O Starter nao substitui os instaladores atuais e nao inicia o FXServer.
+
+## Instalacao completa do MZ Core
+
+Na interface, escolha Instalacao completa do MZ Core, informe um destino novo ou vazio e clique em Verificar componentes. O Starter resolve os 51 componentes do perfil a partir do catalogo auditado, de GitHub Releases publicos, de snapshots oficiais fixados e de pacotes locais autorizados. O botao INSTALAR SERVIDOR baixa todos os componentes, verifica SHA-256, inspeciona cada ZIP, extrai em staging privado e publica a arvore completa com rename sem sobrescrita.
+
+As dependencias externas usam contratos fixados: `oxmysql` 2.14.3, `ox_lib` 3.42.2, `pma-voice` 7.0.0 com o patch server-authoritative, `bob74_ipl` 2.7.1, `screenshot-basic` e o snapshot oficial do `cfx-server-data` para `mapmanager`, `spawnmanager` e `baseevents`. Resources sem release publica valida sao atendidos por uma pasta de distribuicao local explicitamente autorizada. `mz_banguard` permanece protegido e so pode vir dessa fonte local autorizada.
+
+Os artifacts do FXServer sao opcionais e separados do server-data. O assistente permite usar artifacts existentes ou baixar o build oficial recomendado no Windows. O servidor gerado diferencia arquivos instalados de servidor configurado: licenca, banco, endpoints e permissoes continuam sendo responsabilidade do operador.
 
 ## Instalacao parcial experimental
 
-Na interface, escolha Nova instalacao, informe um destino novo ou vazio, gere o plano, selecione um resource publico e confirme a instalacao parcial. O botao INSTALAR SERVIDOR baixa o release, compara o SHA-256 publicado com o catalogo e com o arquivo executado, inspeciona o ZIP e extrai para uma area temporaria privada antes de publicar no destino sem sobrescrever nada.
+Na interface, escolha Instalacao parcial experimental, informe um destino novo ou vazio, gere o plano, selecione um resource publico e confirme a instalacao parcial. O botao INSTALAR SERVIDOR baixa o release, compara o SHA-256 publicado com o catalogo e com o arquivo executado, inspeciona o ZIP e extrai para uma area temporaria privada antes de publicar no destino sem sobrescrever nada.
 
-O diretorio gerado NAO e um servidor pronto para iniciar: FXServer, dependencias externas e os demais resources nao sao instalados automaticamente. O `server.cfg` e os modelos de `cfg/` permanecem os oficiais; em `cfg/resources.cfg`, linhas de boot de resources ausentes ou com dependencia nao instalada ficam comentadas. Use apenas pastas descartaveis e nunca um servidor de producao. A correspondencia de hash nao comprova procedencia criptografica.
+O diretorio gerado pela instalacao parcial NAO e um servidor pronto para iniciar: FXServer, dependencias externas e os demais resources nao sao instalados automaticamente. O `server.cfg` e os modelos de `cfg/` permanecem os oficiais; em `cfg/resources.cfg`, linhas de boot de resources ausentes ou com dependencia nao instalada ficam comentadas. Use apenas pastas descartaveis e nunca um servidor de producao. A correspondencia de hash nao comprova procedencia criptografica.
 
 Camada de boot, configuracao e instalacao para subir um servidor FiveM usando `mz_core`.
 

@@ -129,7 +129,10 @@
       "tag": "",
       "asset": "",
       "sha256": "",
-      "dependencies": [],
+      "dependencies": [
+        "yarn",
+        "webpack"
+      ],
       "required_files": [],
       "mutable_policy": "unknown_preserve",
       "channel": "stable",
@@ -240,7 +243,7 @@
       ],
       "mutable_policy": "unknown_preserve",
       "channel": "stable",
-      "availability": "provenance_conflict"
+      "availability": "metadata_only_unverified"
     },
     {
       "id": "mz_assets",
@@ -286,7 +289,7 @@
       ],
       "mutable_policy": "unknown_preserve",
       "channel": "stable",
-      "availability": "provenance_conflict"
+      "availability": "metadata_only_unverified"
     },
     {
       "id": "mz_economy",
@@ -1241,7 +1244,7 @@
       ],
       "mutable_policy": "unknown_preserve",
       "channel": "stable",
-      "availability": "provenance_conflict"
+      "availability": "metadata_only_unverified"
     },
     {
       "id": "mz_feedback",

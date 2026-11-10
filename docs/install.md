@@ -8,6 +8,16 @@ O foco aqui e deixar claro:
 - o que o instalador realmente faz
 - o que continua fora do escopo deste repositorio
 
+## Starter 2.0: instalacao completa pela interface
+
+O executavel `mz-starter` abre a interface local. Em Instalacao completa do MZ Core, informe um destino novo ou vazio, uma pasta de distribuicao local autorizada para os resources sem release publica e, opcionalmente, artifacts existentes. Clique em Verificar componentes para ver os 51 componentes, releases, dependencias, bloqueios e avisos antes de instalar. O botao INSTALAR SERVIDOR so e habilitado sem bloqueios e com a confirmacao marcada.
+
+A instalacao completa escreve `server.cfg`, `logo.png`, `cfg/`, `resources/` e os resources resolvidos em um staging privado. Nada e publicado se qualquer componente obrigatorio falhar; o destino precisa continuar vazio e nao pode estar dentro de um servidor existente. Resources publicos com SHA fixado usam a URL direta do GitHub Release; os demais usam pacotes locais autorizados, releases privados com token ou os snapshots oficiais fixados das dependencias externas.
+
+Os artifacts sao separados do server-data. O modo existente valida o executavel; o modo de download oficial so esta disponivel no Windows e registra o SHA-256 obtido. Sem artifacts, o resultado e `completed_files_only`: os arquivos estao completos, mas o servidor nao esta pronto para iniciar. Licenca, banco, endpoints e permissoes nunca sao preenchidos automaticamente.
+
+O modo Instalacao parcial experimental continua disponivel e instala apenas um resource publico com confirmacao explicita. Os scripts `tools/install_deps.*` permanecem como contrato legado para atualizacao de uma arvore ja existente.
+
 ## Papel de cada parte no setup
 
 ### `mz_starter`

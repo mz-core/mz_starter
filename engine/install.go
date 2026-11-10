@@ -54,12 +54,12 @@ func catalogDigest(value string) (string, bool) {
 
 // commentUnreadyBoot keeps the canonical order but never leaves a boot line active
 // for a resource whose direct or transitive dependencies were not installed.
-func commentUnreadyBoot(content string, bootReady map[string]bool) string {
+func commentUnreadyBoot(content string, bootReady map[string]bool, reason string) string {
 	lines := strings.Split(content, "\n")
 	for i, line := range lines {
 		fields := strings.Fields(line)
 		if len(fields) >= 2 && (strings.EqualFold(fields[0], "ensure") || strings.EqualFold(fields[0], "start")) && !bootReady[fields[1]] {
-			lines[i] = "# " + line + " # recurso ou dependencia ausente nesta instalacao parcial"
+			lines[i] = "# " + line + " # " + reason
 		}
 	}
 	return strings.Join(lines, "\n")
@@ -91,29 +91,11 @@ func InstallPartial(ctx context.Context, c Catalog, templates fs.FS, target stri
 	if _, err = PlanInstallation(c, templates, target, "", "new", "", nil); err != nil {
 		return result, err
 	}
-	absolute, err := filepath.Abs(target)
+	absolute, err := validateInstallDestination(target)
 	if err != nil {
 		return result, err
 	}
 	parent := filepath.Dir(absolute)
-	if parent == absolute {
-		return result, fmt.Errorf("invalid_directory")
-	}
-	for p := parent; ; p = filepath.Dir(p) {
-		if strings.EqualFold(filepath.Base(p), "resources") {
-			return result, fmt.Errorf("target_inside_existing_server")
-		}
-		for _, marker := range []string{"server.cfg", "fxmanifest.lua"} {
-			if _, e := os.Lstat(filepath.Join(p, marker)); e == nil {
-				return result, fmt.Errorf("target_inside_existing_server")
-			} else if !os.IsNotExist(e) {
-				return result, fmt.Errorf("destination_unavailable")
-			}
-		}
-		if filepath.Dir(p) == p {
-			break
-		}
-	}
 	selected := map[string]bool{}
 	var resources []Resource
 	var prepared, files []string
@@ -221,42 +203,12 @@ func InstallPartial(ctx context.Context, c Catalog, templates fs.FS, target stri
 	for _, resource := range c.Resources {
 		byID[resource.ID] = resource
 	}
-	bootReady := map[string]bool{}
-	var canBoot func(string, map[string]bool) bool
-	canBoot = func(id string, visiting map[string]bool) bool {
-		resource, exists := byID[id]
-		if !exists || !selected[id] || visiting[id] {
-			return false
-		}
-		visiting[id] = true
-		defer delete(visiting, id)
-		for _, dependency := range resource.Dependencies {
-			if !canBoot(dependency, visiting) {
-				return false
-			}
-		}
-		return true
+	bootReady := bootReadyFor(byID, selected, nil)
+	bootstrapFiles, e := writeBootstrap(stage, templates, bootReady, partialBootstrapNotice, "recurso ou dependencia ausente nesta instalacao parcial")
+	if e != nil {
+		return result, e
 	}
-	for id := range selected {
-		bootReady[id] = canBoot(id, map[string]bool{})
-	}
-	for _, name := range BootstrapFiles {
-		b, e := fs.ReadFile(templates, name)
-		if e != nil {
-			return result, e
-		}
-		if name == "cfg/resources.cfg" {
-			b = []byte(partialBootstrapNotice + commentUnreadyBoot(string(b), bootReady))
-		}
-		p := filepath.Join(stage, filepath.FromSlash(name))
-		if e = os.MkdirAll(filepath.Dir(p), 0700); e != nil {
-			return result, e
-		}
-		if e = os.WriteFile(p, b, 0600); e != nil {
-			return result, e
-		}
-		files = append(files, name)
-	}
+	files = append(files, bootstrapFiles...)
 	if ctx.Err() != nil {
 		return result, ctx.Err()
 	}
@@ -265,25 +217,8 @@ func InstallPartial(ctx context.Context, c Catalog, templates fs.FS, target stri
 	if ctx.Err() != nil {
 		return result, ctx.Err()
 	}
-	// Only empty destinations may be removed. A no-replace rename prevents a race from overwriting another directory.
-	if st, e := os.Lstat(absolute); e == nil && (!st.IsDir() || st.Mode()&os.ModeSymlink != 0) {
-		return result, fmt.Errorf("destination_not_empty")
-	} else if e != nil && !os.IsNotExist(e) {
-		return result, fmt.Errorf("destination_unavailable")
-	}
-	removed := false
-	if e := removeEmptyDirectory(absolute); e == nil {
-		removed = true
-	} else if !os.IsNotExist(e) {
-		return result, fmt.Errorf("destination_not_empty")
-	}
-	if e := publishNoReplace(stage, absolute); e != nil {
-		if removed {
-			if restore := os.Mkdir(absolute, 0700); restore != nil && !os.IsExist(restore) {
-				return result, fmt.Errorf("publication_failed_empty_destination_not_restored")
-			}
-		}
-		return result, fmt.Errorf("publication_failed: %w", e)
+	if e := publishInstallStage(stage, absolute); e != nil {
+		return result, e
 	}
 	stage = ""
 	result.Installed = prepared

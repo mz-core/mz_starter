@@ -119,8 +119,9 @@ server-data/
 `-- tmp/
 ```
 
-## Fronteira pratica entre os repositorios
-Use esta regra simples:
+O instalador completo do Starter 2.0 cria essa arvore em um destino novo e vazio. Os artifacts do FXServer ficam em um diretorio separado do server-data; `yarn`, `webpack` e `chat` continuam vindo dos `system_resources` dos artifacts. Sem artifacts fornecidos, o resultado e `completed_files_only` e essas linhas de boot ficam comentadas.
+
+## Fronteira pratica entre os repositoriosUse esta regra simples:
 - se a mudanca e de boot, install, configuracao ou documentacao operacional, ela tende a pertencer ao `mz_starter`
 - se a mudanca e de logica do framework, ela tende a pertencer ao `mz_core`
 - se a mudanca exige mais recursos stock alem dos que ja sao sincronizados aqui, trate isso como uma decisao de infraestrutura, nao de framework
