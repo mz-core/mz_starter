@@ -16,6 +16,28 @@ A instalacao completa escreve `server.cfg`, `logo.png`, `cfg/`, `resources/` e o
 
 Os artifacts sao separados do server-data. O modo automatico baixa o build oficial recomendado no Windows e no Linux para `mz-artifacts`; o modo existente valida o executavel; o modo de download permite escolher o destino. Sem artifacts, o resultado e `completed_files_only`; com instalacao incompleta, o resultado e `incomplete`. Licenca, banco, endpoints e permissoes nunca sao preenchidos automaticamente.
 
+### Abrir o txAdmin da instalacao nova
+
+Depois da instalacao, execute no diretorio do server-data:
+
+```bat
+start-txadmin.cmd
+```
+
+```sh
+./start-txadmin.sh
+```
+
+O script localiza os artifacts em `../mz-artifacts` (ou no caminho escolhido), inicia o FXServer sem `+exec server.cfg` e cria o `txData` no proprio server-data. Abra a URL impressa no console; o padrao e `http://127.0.0.1:40120`.
+
+Na primeira configuracao, escolha a opcao de servidor existente e selecione o diretorio do server-data criado pelo Starter. Nao use a opcao de criar outro servidor. Em uma VPS remota, use um tunel SSH:
+
+```sh
+ssh -L 40120:127.0.0.1:40120 usuario@vps
+```
+
+O script nao inicia o servidor durante a instalacao, nao contem licenca, senha ou token e nao sobrescreve arquivos existentes.
+
 O modo Instalacao parcial experimental continua disponivel e instala apenas um resource publico com confirmacao explicita. Os scripts `tools/install_deps.*` permanecem como contrato legado para atualizacao de uma arvore ja existente.
 
 ## Papel de cada parte no setup

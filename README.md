@@ -10,6 +10,8 @@ O perfil publico atual resolve 26 GitHub Releases de resources MZ, 7 snapshots o
 
 Os artifacts do FXServer sao separados do server-data. Na instalacao nova no Windows e no Linux, a opcao automatica baixa o build oficial recomendado e habilita `yarn`, `webpack`, `screenshot-basic` e `mz_feedback`. Se houver componentes obrigatorios sem distribuicao, o operador pode autorizar uma instalacao incompleta dos componentes disponiveis; o resultado e explicitamente marcado como incompleto e o servidor nao e declarado pronto. Licenca, banco, endpoints e permissoes continuam sendo responsabilidade do operador.
 
+Ao final, o Starter cria `start-txadmin.cmd` e `start-txadmin.sh` dentro do server-data. Execute o script da sua plataforma para abrir o txAdmin; ele roda o FXServer sem `+exec server.cfg`, cria o `txData` nesse diretorio e imprime a URL do painel (padrao `http://127.0.0.1:40120`). No primeiro acesso, escolha a opcao de servidor existente e selecione o server-data recem-criado. Nao use o deploy de um novo servidor. Em VPS, use um tunel SSH para a porta 40120.
+
 ## Instalacao parcial experimental
 
 Na interface, escolha Instalacao parcial experimental, informe um destino novo ou vazio, gere o plano, selecione um resource publico e confirme a instalacao parcial. O botao INSTALAR SERVIDOR baixa o release, compara o SHA-256 publicado com o catalogo e com o arquivo executado, inspeciona o ZIP e extrai para uma area temporaria privada antes de publicar no destino sem sobrescrever nada.

@@ -63,6 +63,8 @@ type Progress = {
   artifacts: ArtifactPlan;
   plan?: FullPlan;
   destination?: string;
+  launch_script?: string;
+  txadmin_url?: string;
   detail?: string;
   files?: number;
   files_ready: boolean;
@@ -307,8 +309,23 @@ export function FullInstallPanel({ t, label, server, planReady }: Props) {
           <p><strong>{stateText}</strong> {report.resource && `Â· ${report.resource}`} {report.index && report.total ? `Â· ${report.index}/${report.total}` : ''} {report.installed ? `Â· ${report.installed}/${report.total}` : ''}</p>
           <p>{t.installDone}: {installedCount} Â· {t.filesCreated}: {report.files || 0}{report.received ? ` Â· ${report.received}/${report.size || 0} ${t.installBytes}` : ''}</p>
           {report.detail && <p>{detailText}</p>}
-          {report.destination && <p className="hash">{report.destination}</p>}
+          {report.destination && <p><strong>{t.serverDataDirectory}:</strong> <span className="hash">{report.destination}</span></p>}
           {report.artifacts && <p>{t.artifactsStatus}: {label(report.artifacts.status)}{report.artifacts.version ? ` Â· ${report.artifacts.version}` : ''}{report.artifacts.path ? ` Â· ${report.artifacts.path}` : ''}</p>}
+          {report.artifacts?.path && <p><strong>{t.fxserverDirectory}:</strong> <span className="hash">{report.artifacts.path}</span></p>}
+          {report.launch_script && (
+            <div className="notice">
+              <Info size={16} />
+              <div>
+                <strong>{t.txAdminTitle}</strong>
+                <p>{t.txAdminRun} <code className="hash">{report.launch_script}</code></p>
+                <p>{t.txAdminURL} <code>{report.txadmin_url || 'http://127.0.0.1:40120'}</code></p>
+                <p>{t.txAdminExisting}</p>
+                <p>{t.txAdminTunnel}</p>
+                {report.state === 'incomplete' && <p className="error">{t.txAdminIncomplete}</p>}
+              </div>
+            </div>
+          )}
+          {done && !report.launch_script && <p className="muted">{t.txAdminUnavailable}</p>}
           {report.missing && report.missing.length > 0 && <p className="error">{t.blockersTitle}: {report.missing.join(', ')}</p>}
           {done && (
             <p className={report.files_ready ? 'notice' : 'error'}>

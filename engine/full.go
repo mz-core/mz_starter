@@ -105,6 +105,8 @@ type FullProgress struct {
 	Artifacts          ArtifactPlan `json:"artifacts"`
 	Plan               *FullPlan    `json:"plan,omitempty"`
 	Destination        string       `json:"destination,omitempty"`
+	LaunchScript       string       `json:"launch_script,omitempty"`
+	TxAdminURL         string       `json:"txadmin_url,omitempty"`
 	Detail             string       `json:"detail,omitempty"`
 	Files              int          `json:"files,omitempty"`
 	FilesReady         bool         `json:"files_ready"`
@@ -768,11 +770,25 @@ func InstallFull(ctx context.Context, c Catalog, templates fs.FS, target string,
 	result.FilesReady = plan.FilesReady
 	artifactResult, artifactErr := installArtifacts(ctx, opts, absolute, &result, emit)
 	result.Artifacts = artifactResult
+	launchWarning := ""
+	if artifactErr == nil && (artifactResult.Status == "installed" || artifactResult.Status == "existing") {
+		launch, launchErr := writeLaunchScripts(absolute, artifactResult.Path)
+		if launchErr != nil {
+			launchWarning = "launch_script_failed:" + launchErr.Error()
+		} else {
+			result.LaunchScript = launch
+			result.TxAdminURL = "http://127.0.0.1:40120"
+			result.Files += 2
+		}
+	}
 	if !plan.FilesReady {
 		result.State = "incomplete"
 		result.Detail = "missing_required_components"
 		if artifactErr != nil {
 			result.Detail += "; artifacts_failed:" + artifactErr.Error()
+		}
+		if launchWarning != "" {
+			result.Detail += "; " + launchWarning
 		}
 		result.ServerReady = false
 		emit()
@@ -798,6 +814,9 @@ func InstallFull(ctx context.Context, c Catalog, templates fs.FS, target string,
 	} else {
 		result.State = "completed_files_only"
 		result.Detail = "server_artifacts_not_provided"
+	}
+	if launchWarning != "" {
+		result.Detail += "; " + launchWarning
 	}
 	emit()
 	return result, nil
