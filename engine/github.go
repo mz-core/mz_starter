@@ -3,8 +3,10 @@ package engine
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
+	"net"
 	"net/http"
 	"net/url"
 	"regexp"
@@ -14,6 +16,8 @@ import (
 )
 
 type Asset struct {
+	ID     int64  `json:"id"`
+	Size   int64  `json:"size"`
 	Name   string `json:"name"`
 	Digest string `json:"digest"`
 	State  string `json:"state"`
@@ -111,6 +115,10 @@ func (g GitHub) Releases(ctx context.Context, id, repository string) QueryResult
 		}
 		resp, e := client.Do(req)
 		if e != nil {
+			var n net.Error
+			if errors.As(e, &n) && n.Timeout() {
+				result.Status = "timeout"
+			}
 			return result
 		}
 		if resp.StatusCode != http.StatusOK {

@@ -776,6 +776,51 @@
         "fxmanifest.lua",
         "web/index.html"
       ],
+      "file_rules": [
+        {
+          "version": "1.1.0",
+          "sha256": "sha256:227dc45c724b0a48929553dc0b892cec225c6a22211dc03296271c2e10912080",
+          "path": "web/assets/los-santos-atlas.webp",
+          "classification": "required",
+          "evidence": "Default atlas referenced by web/js/map.js",
+          "origin": "https://github.com/mz-core/mz_navigation/tree/mz_navigation-v1.1.0"
+        },
+        {
+          "version": "1.1.0",
+          "sha256": "sha256:227dc45c724b0a48929553dc0b892cec225c6a22211dc03296271c2e10912080",
+          "path": "web/assets/atlas.json",
+          "classification": "required",
+          "evidence": "Static atlas metadata shipped with default atlas",
+          "origin": "https://github.com/mz-core/mz_navigation/tree/mz_navigation-v1.1.0"
+        },
+        {
+          "version": "1.1.0",
+          "sha256": "sha256:227dc45c724b0a48929553dc0b892cec225c6a22211dc03296271c2e10912080",
+          "path": "web/tiles/atlas.json",
+          "classification": "conditional",
+          "condition": "tiles enabled; packaged default false",
+          "evidence": "server/service.lua guards the read and falls back when unavailable",
+          "origin": "https://github.com/mz-core/mz_navigation/tree/mz_navigation-v1.1.0"
+        },
+        {
+          "version": "1.1.0",
+          "sha256": "sha256:227dc45c724b0a48929553dc0b892cec225c6a22211dc03296271c2e10912080",
+          "path": "web/tiles/*/*/*.jpg",
+          "classification": "conditional",
+          "condition": "tiles enabled; packaged default false",
+          "evidence": "config.lua defaults false and web/js/map.js renders only when enabled",
+          "origin": "https://github.com/mz-core/mz_navigation/tree/mz_navigation-v1.1.0"
+        },
+        {
+          "version": "1.1.0",
+          "sha256": "sha256:227dc45c724b0a48929553dc0b892cec225c6a22211dc03296271c2e10912080",
+          "path": "web/tiles/*/*/*.png",
+          "classification": "conditional",
+          "condition": "tiles enabled; packaged default false",
+          "evidence": "manifest declares optional tile format; runtime coverage not established",
+          "origin": "https://github.com/mz-core/mz_navigation/tree/mz_navigation-v1.1.0"
+        }
+      ],
       "mutable_policy": "unknown_preserve",
       "channel": "stable",
       "availability": "metadata_only_unverified"

@@ -37,8 +37,9 @@ func serve(args []string) {
 	flags := flag.NewFlagSet("serve", flag.ExitOnError)
 	port := flags.Int("port", 0, "porta loopback (0 automatica)")
 	noOpen := flags.Bool("no-open", false, "nao abrir navegador")
+	maxDownload := flags.Int("max-download-mib", 512, "limite de download em MiB (1-2048)")
 	flags.Parse(args)
-	if flags.NArg() != 0 || *port < 0 || *port > 65535 {
+	if flags.NArg() != 0 || *port < 0 || *port > 65535 || *maxDownload < 1 || *maxDownload > 2048 {
 		fail("argumentos invalidos")
 	}
 	f, e := starter.Assets.Open("catalog/resources.json")
@@ -70,6 +71,9 @@ func serve(args []string) {
 		fail(e.Error())
 	}
 	mux := http.NewServeMux()
+	jobs := &verificationJobs{jobs: map[string]*job{}, catalog: catalog, maxDownload: int64(*maxDownload) << 20}
+	mux.HandleFunc("/api/verifications", jobs.handler)
+	mux.HandleFunc("/api/verifications/", jobs.handler)
 	writeError := func(w http.ResponseWriter, status int, code, message string) {
 		w.WriteHeader(status)
 		_ = json.NewEncoder(w).Encode(apiError{code, message})
@@ -91,6 +95,10 @@ func serve(args []string) {
 		dec.DisallowUnknownFields()
 		if dec.Decode(&q) != nil || strings.TrimSpace(q.Server) == "" {
 			writeError(w, 400, "invalid_request", "invalid server directory")
+			return
+		}
+		if !jobs.addServer(q.Server) {
+			writeError(w, 409, "verification_in_progress", "wait for active verification")
 			return
 		}
 		var boot []string

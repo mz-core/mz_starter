@@ -13,22 +13,34 @@ import (
 )
 
 type Resource struct {
-	ID            string   `json:"id"`
-	Name          string   `json:"name"`
-	Type          string   `json:"type"`
-	Group         string   `json:"group"`
-	Repository    string   `json:"repository"`
-	Visibility    string   `json:"visibility"`
-	Source        string   `json:"source"`
-	Version       string   `json:"version"`
-	Tag           string   `json:"tag"`
-	Asset         string   `json:"asset"`
-	SHA256        string   `json:"sha256"`
-	Dependencies  []string `json:"dependencies"`
-	RequiredFiles []string `json:"required_files"`
-	MutablePolicy string   `json:"mutable_policy"`
-	Channel       string   `json:"channel"`
-	Availability  string   `json:"availability"`
+	ID            string     `json:"id"`
+	Name          string     `json:"name"`
+	Type          string     `json:"type"`
+	Group         string     `json:"group"`
+	Repository    string     `json:"repository"`
+	Visibility    string     `json:"visibility"`
+	Source        string     `json:"source"`
+	Version       string     `json:"version"`
+	Tag           string     `json:"tag"`
+	Asset         string     `json:"asset"`
+	SHA256        string     `json:"sha256"`
+	Dependencies  []string   `json:"dependencies"`
+	RequiredFiles []string   `json:"required_files"`
+	FileRules     []FileRule `json:"file_rules,omitempty"`
+	MutablePolicy string     `json:"mutable_policy"`
+	Channel       string     `json:"channel"`
+	Availability  string     `json:"availability"`
+}
+
+// FileRule is maintained by the Starter, never by the inspected archive.
+type FileRule struct {
+	Version        string `json:"version"`
+	SHA256         string `json:"sha256"`
+	Path           string `json:"path"`
+	Classification string `json:"classification"`
+	Condition      string `json:"condition,omitempty"`
+	Evidence       string `json:"evidence"`
+	Origin         string `json:"origin"`
 }
 
 type Catalog struct {
@@ -124,6 +136,13 @@ func ValidateCatalog(c Catalog) error {
 		for _, file := range r.RequiredFiles {
 			if file == "" || filepath.IsAbs(file) || strings.ContainsAny(file, `\\:`) || strings.Contains("/"+file+"/", "/../") {
 				return fmt.Errorf("arquivo obrigatorio invalido: %s", file)
+			}
+		}
+		for _, rule := range r.FileRules {
+			_, validPath := compileResourcePattern(rule.Path)
+			u, err := url.Parse(rule.Origin)
+			if rule.Version == "" || !hashPattern.MatchString(rule.SHA256) || !validPath || rule.Evidence == "" || err != nil || u.Scheme != "https" || u.Host != "github.com" || u.User != nil || !strings.HasPrefix(rule.Origin, r.Repository+"/") || !map[string]bool{"required": true, "optional": true, "conditional": true, "external": true, "inconclusive": true}[rule.Classification] || (rule.Classification == "conditional" && rule.Condition == "") {
+				return fmt.Errorf("regra de arquivo invalida: %s", r.ID)
 			}
 		}
 	}
