@@ -2,7 +2,7 @@
 
 O planejamento nao instala, atualiza, extrai ZIPs para o servidor, altera configuracoes ou executa scripts. A verificacao opcional de pacotes baixa assets para uma area temporaria privada e os remove apos inspecao. O catalogo `catalog/resources.json` e um retrato inicial; seus hashes e disponibilidades nao constituem autorizacao nem comprovam procedencia. Verifique metadados novamente antes de qualquer futura operacao de instalacao.
 
-Execute os comandos a partir da raiz deste repositorio, com Go 1.22 ou posterior:
+Os executaveis portateis usam por padrao o catalogo incorporado, inclusive fora do repositorio. Para desenvolvimento com Go 1.22 ou posterior, na raiz deste repositorio:
 
 ```sh
 go run ./cmd/mz-starter catalog
@@ -11,7 +11,7 @@ go run ./cmd/mz-starter plan --server /caminho/do/server-data --workspace /camin
 go run ./cmd/mz-starter releases --resource mz_navigation --online
 ```
 
-No Windows, substitua os caminhos pelos caminhos nativos, por exemplo `--server "D:\\FXServer\\server-data"`. `diagnose` e `plan` produzem o mesmo plano JSON nesta etapa. `--catalog` permite apontar outro catalogo validado. `--workspace` e opcional e compara os manifestos locais sem executa-los. Sem `--online`, nenhuma consulta de rede e feita. `plan --online` consulta metadados de releases dos resources; `releases --online` consulta um resource especifico. Um token opcional `GITHUB_TOKEN` e usado apenas na API oficial e nunca e incluido na saida.
+No Windows, substitua os caminhos pelos caminhos nativos, por exemplo `--server "D:\\FXServer\\server-data"`. `diagnose` e `plan` produzem o mesmo plano JSON nesta etapa. `--catalog` permite apontar outro catalogo, que e lido e validado; caminho vazio, arquivo inexistente ou catalogo invalido causam erro. `--workspace` e opcional e compara os manifestos locais sem executa-los. Sem `--online`, nenhuma consulta de rede e feita. `plan --online` consulta metadados de releases dos resources; `releases --online` consulta um resource especifico. Um token opcional `GITHUB_TOKEN` e usado apenas na API oficial e nunca e incluido na saida.
 
 O JSON de plano tem `schema_version`, `mode`, `server`, `steps`, `issues` e `ready`. Cada passo fornece ID, acao simulada, estado, versoes observadas, procedencia e bloqueios. `ready` permanece `false` enquanto nao existir verificacao de procedencia e compatibilidade confiavel. `integrity_unverified` significa que a API informou um digest bem formado, nao que o ZIP tenha sido baixado ou verificado. Uma marca `.mz-starter.json` coerente e relatada como `managed_record_unverified`: ela nao comprova integridade nem autoriza sobrescrita.
 
@@ -118,3 +118,7 @@ O catalogo incorpora `file_rules` por resource, com versao, SHA-256 exato do ZIP
 No `mz_navigation` 1.1.0, a revisao registra os dois arquivos de atlas estatico como requeridos e os caminhos de tiles como condicionais. O digest fixado corresponde ao pacote cuja configuracao distribuida desabilita tiles. Esta evidencia descreve apenas aquele pacote: nao analisa mudancas posteriores, nao comprova configuracao em runtime e nao calcula automaticamente se uma condicao foi satisfeita. Com tiles habilitados e ausentes, a funcionalidade nao deve ser aprovada; o codigo do resource informa fallback quando o atlas de tiles esta ausente. Uma configuracao dinamica ou alterada e inconclusiva. A cobertura de referencias continua inconclusiva onde ha runtime dinamico.
 
 O contrato atual registra classificacoes mas ainda nao calcula a compatibilidade automatica de perfis habilitados ou alterados. Nao usar esse resultado para instalar; concluir esses cenarios e sua homologacao antes de considerar esta etapa fechada.
+
+### Preparacao de um build rastreavel
+
+Para um candidato de publicacao futuro, use uma revisao ja aprovada, com `git status --porcelain` vazio, registre `git rev-parse HEAD` e `git rev-parse HEAD^{tree}`, instale as dependencias fixadas em `web/package-lock.json` com `npm ci`, execute `npm run build` e confira novamente `git status --porcelain`. Se o frontend gerado diferir da arvore aprovada, nao associe o executavel ao commit limpo: revise e versione a alteracao antes de reconstruir. Registre versoes de Go, Node e npm, sistema, variaveis `GOOS`, `GOARCH`, `CGO_ENABLED`, arquivos e SHA-256 finais. So associe o build ao commit quando todas as entradas utilizadas estiverem comprovadamente nessa arvore. Os pacotes locais produzidos com alteracoes nao commitadas servem somente para homologacao e nao comprovam reproducibilidade a partir do HEAD.

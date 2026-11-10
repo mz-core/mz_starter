@@ -27,7 +27,7 @@ func main() {
 		return
 	}
 	flags := flag.NewFlagSet(command, flag.ContinueOnError)
-	catalogPath := flags.String("catalog", "catalog/resources.json", "caminho do catalogo")
+	catalogPath := flags.String("catalog", "", "caminho opcional de um catalogo externo")
 	server := flags.String("server", ".", "raiz do server-data")
 	workspace := flags.String("workspace", "", "raiz opcional de manifestos fonte")
 	resource := flags.String("resource", "", "ID para consulta de releases")
@@ -40,7 +40,25 @@ func main() {
 	if flags.NArg() != 0 {
 		fail("argumentos adicionais nao suportados")
 	}
-	c, err := engine.LoadCatalog(*catalogPath)
+	externalCatalog := false
+	flags.Visit(func(f *flag.Flag) {
+		if f.Name == "catalog" {
+			externalCatalog = true
+		}
+	})
+	var c engine.Catalog
+	var err error
+	if externalCatalog {
+		c, err = engine.LoadCatalog(*catalogPath)
+	} else {
+		f, openErr := starter.Assets.Open("catalog/resources.json")
+		if openErr != nil {
+			err = openErr
+		} else {
+			c, err = engine.ReadCatalog(f)
+			_ = f.Close()
+		}
+	}
 	if err != nil {
 		fail(err.Error())
 	}
