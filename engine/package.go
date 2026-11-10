@@ -49,6 +49,11 @@ type VerifyOptions struct {
 	Client         *http.Client
 	APIBase        string
 	Progress       func(PackageReport)
+	// OnVerified receives the private temporary archive only after all checks pass.
+	// It must finish using the archive before it returns.
+	OnVerified func(context.Context, string) error
+	// PermitIncomplete is for an explicitly confirmed partial installation; it cannot override invalid ZIPs.
+	PermitIncomplete func(PackageReport) bool
 }
 
 func (o VerifyOptions) defaults() VerifyOptions {
@@ -377,6 +382,17 @@ func VerifyPackage(ctx context.Context, r Resource, tag string, g GitHub, opts V
 	} else {
 		out.Structure = "structure_valid"
 		out.State = "completed"
+	}
+	if opts.OnVerified != nil && (out.Structure == "structure_valid" || (out.Structure == "structure_incomplete" && opts.PermitIncomplete != nil && opts.PermitIncomplete(out))) {
+		if err := opts.OnVerified(ctx, filepath.Join(dir, "asset.zip")); err != nil {
+			if ctx.Err() != nil {
+				return fail("cancelled")
+			}
+			return fail("verified_archive_processing_failed")
+		}
+		if ctx.Err() != nil {
+			return fail("cancelled")
+		}
 	}
 	emit()
 	return out

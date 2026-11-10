@@ -74,6 +74,9 @@ func serve(args []string) {
 	jobs := &verificationJobs{jobs: map[string]*job{}, catalog: catalog, maxDownload: int64(*maxDownload) << 20}
 	mux.HandleFunc("/api/verifications", jobs.handler)
 	mux.HandleFunc("/api/verifications/", jobs.handler)
+	installJobs := &installationJobs{jobs: map[string]*installationJob{}, catalog: catalog, maxDownload: int64(*maxDownload) << 20}
+	mux.HandleFunc("/api/installations", installJobs.handler)
+	mux.HandleFunc("/api/installations/", installJobs.handler)
 	writeError := func(w http.ResponseWriter, status int, code, message string) {
 		w.WriteHeader(status)
 		_ = json.NewEncoder(w).Encode(apiError{code, message})

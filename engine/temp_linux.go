@@ -5,6 +5,7 @@ package engine
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 	"syscall"
 )
 
@@ -12,6 +13,23 @@ func defaultTempRoot() (string, error) { return os.TempDir(), nil }
 
 // makePrivateTemp only trusts a root-owned sticky shared directory or a private user-owned directory.
 func makePrivateTemp(root string) (string, error) {
+	root, err := filepath.Abs(root)
+	if err != nil {
+		return "", err
+	}
+	for parent := filepath.Dir(root); ; parent = filepath.Dir(parent) {
+		st, e := os.Lstat(parent)
+		if e != nil || !st.IsDir() || st.Mode()&os.ModeSymlink != 0 {
+			return "", fmt.Errorf("untrusted temporary ancestor")
+		}
+		info, ok := st.Sys().(*syscall.Stat_t)
+		if !ok || (info.Uid != 0 && info.Uid != uint32(os.Geteuid())) || (st.Mode().Perm()&0022 != 0 && st.Mode()&os.ModeSticky == 0) {
+			return "", fmt.Errorf("untrusted temporary ancestor")
+		}
+		if filepath.Dir(parent) == parent {
+			break
+		}
+	}
 	st, err := os.Lstat(root)
 	if err != nil || !st.IsDir() || st.Mode()&os.ModeSymlink != 0 {
 		return "", fmt.Errorf("untrusted temporary root")

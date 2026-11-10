@@ -1,6 +1,12 @@
 # mz_starter
 
-O prototipo somente leitura do Starter 2.0 esta documentado em [planejamento e catalogo](docs/planning.md). Ele nao substitui os instaladores atuais nem instala resources.
+O Starter 2.0 planeja o ambiente e, nesta versao experimental, executa uma instalacao parcial de resources publicos apos confirmacao explicita. O planejamento e a instalacao estao documentados em [planejamento e catalogo](docs/planning.md). O Starter nao substitui os instaladores atuais e nao realiza uma instalacao completa do MZ Core.
+
+## Instalacao parcial experimental
+
+Na interface, escolha Nova instalacao, informe um destino novo ou vazio, gere o plano, selecione um resource publico e confirme a instalacao parcial. O botao INSTALAR SERVIDOR baixa o release, compara o SHA-256 publicado com o catalogo e com o arquivo executado, inspeciona o ZIP e extrai para uma area temporaria privada antes de publicar no destino sem sobrescrever nada.
+
+O diretorio gerado NAO e um servidor pronto para iniciar: FXServer, dependencias externas e os demais resources nao sao instalados automaticamente. O `server.cfg` e os modelos de `cfg/` permanecem os oficiais; em `cfg/resources.cfg`, linhas de boot de resources ausentes ou com dependencia nao instalada ficam comentadas. Use apenas pastas descartaveis e nunca um servidor de producao. A correspondencia de hash nao comprova procedencia criptografica.
 
 Camada de boot, configuracao e instalacao para subir um servidor FiveM usando `mz_core`.
 
