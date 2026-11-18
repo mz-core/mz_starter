@@ -230,13 +230,33 @@ func installResume(ctx context.Context, c Catalog, templates fs.FS, target strin
 	}
 	result.Plan = &plan
 	result.Artifacts = plan.Artifacts
-	result.Missing = blockedIDs(plan)
 	selected := map[string]bool{}
 	for _, id := range opts.UpdateIDs {
 		selected[id] = true
 	}
+	for id := range selected {
+		found := false
+		for _, comp := range plan.Components {
+			if comp.ID == id && comp.Type == "fivem_resource" {
+				found = true
+				if comp.Status != "ready" && comp.Installed {
+					result.Missing = append(result.Missing, id)
+					result.Failures = append(result.Failures, InstallFailure{ID: id, Reason: comp.Reason})
+				}
+				break
+			}
+		}
+		if !found {
+			return result, fmt.Errorf("unknown_component:%s", id)
+		}
+	}
+	for _, id := range blockedIDs(plan) {
+		if len(selected) == 0 || selected[id] {
+			result.Missing = append(result.Missing, id)
+		}
+	}
 	for _, comp := range plan.Components {
-		if comp.Status == "ready" && (!comp.Installed || (opts.UpdateExisting && comp.Type == "fivem_resource" && (len(selected) == 0 || selected[comp.ID]))) {
+		if comp.Status == "ready" && (len(selected) == 0 || selected[comp.ID]) && (!comp.Installed || (opts.UpdateExisting && comp.Type == "fivem_resource")) {
 			result.Total++
 		}
 	}
@@ -256,7 +276,7 @@ func installResume(ctx context.Context, c Catalog, templates fs.FS, target strin
 		if comp.Status != "ready" || (comp.Installed && (!opts.UpdateExisting || comp.Type != "fivem_resource")) {
 			continue
 		}
-		if comp.Installed && len(selected) > 0 && !selected[comp.ID] {
+		if len(selected) > 0 && !selected[comp.ID] {
 			continue
 		}
 		if comp.Installed {

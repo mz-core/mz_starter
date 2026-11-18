@@ -490,3 +490,64 @@ export function SimpleInstallPanel({ t, label, server, resources, suggested, onS
     </dialog>
   </section>;
 }
+
+export function ResourceManagerPanel({t, label, server, onServer, resources, os}: {t:T; label:(v:string)=>string; server:string; onServer:(v:string)=>void; resources:{id:string;type:string}[]; os:string}) {
+  const [plan, setPlan] = useState<FullPlan | null>(null);
+  const [checking, setChecking] = useState(false);
+  const [stopped, setStopped] = useState(false);
+  const [jobID, setJobID] = useState('');
+  const [job, setJob] = useState<Job | null>(null);
+  const [selected, setSelected] = useState('');
+  const [error, setError] = useState('');
+  const ids = resources.map(r => r.id);
+  const mz = resources.filter(r => r.type === 'fivem_resource');
+  const inspect = async () => {
+    setChecking(true); setError(''); setPlan(null);
+    try { setPlan(await api<FullPlan>('/api/installations/resolve', {server, existing:true, artifacts_mode:'none', excluded_ids:[...ids, 'baseevents']})); }
+    catch (e) { setError(e instanceof Error ? e.message : t.failed); }
+    finally { setChecking(false); }
+  };
+  useEffect(() => {
+    if (!jobID || job?.done) return;
+    let active = true;
+    const poll = async () => { try { const next = await api<Job>('/api/installations/' + jobID); if (active) setJob(next); } catch { if (active) setError(t.failed); } };
+    poll(); const timer = window.setInterval(poll, 700); return () => { active = false; window.clearInterval(timer); };
+  }, [jobID, job?.done]);
+  const start = async (resource: string) => {
+    setError('');
+    try {
+      const next = await api<{id:string}>('/api/installations', {kind:'full', server, full_confirmed:true, resume_existing:true, update_existing:true, update_ids:[resource], excluded_ids:[...ids.filter(id => id !== resource), 'baseevents'], artifacts_mode:'none'});
+      setSelected(resource); setJob(null); setJobID(next.id);
+    } catch (e) { setError(e instanceof Error ? e.message : t.failed); }
+  };
+  const clear = async () => {
+    const response = await fetch('/api/installations/' + jobID, {method:'DELETE', headers:{'X-MZ-Session':token}});
+    if (!response.ok) { setError(t.failed); return; }
+    if (job?.done) { setJobID(''); setJob(null); await inspect(); }
+  };
+  const components = new Map((plan?.target === server ? plan.components : []).map(c => [c.id, c]));
+  const reason = job?.report.failures?.find(x => x.id === selected)?.reason || job?.report.plan?.components.find(c => c.id === selected)?.reason || job?.report.detail || '';
+  const humanReason = reason.includes('rate_limited') ? t.resourceRateLimited : reason.includes('update_baseline_missing') ? t.resourceNeedsReview : reason.includes('core_migration_review_required') ? t.resourceCoreReview : label(reason);
+  return <section className="full-install">
+    <h3>{t.resourceManageTitle}</h3><p>{t.resourceManageHint}</p>
+    <label className="fields">{t.server}<input value={server} onChange={e => {onServer(e.target.value); setPlan(null);}} placeholder={os === 'windows' ? 'C:\\FXServer\\server-data' : '/srv/fxserver/server-data'} /></label>
+    <button disabled={!server.trim() || checking || !!jobID} onClick={inspect}>{checking ? t.resolving : t.resourceScan}</button>
+    {error && <p className="error" role="alert">{label(error)}</p>}
+    {plan && plan.target === server && <>
+      <p>{t.resourceListHint}</p>
+      <label className="check"><input type="checkbox" checked={stopped} onChange={e => setStopped(e.target.checked)}/>{t.resourceStopped}</label>
+      <div className="table-wrap"><table><thead><tr><th>{t.component}</th><th>{t.installed}</th><th>{t.status}</th><th>{t.resourceAction}</th></tr></thead><tbody>
+        {mz.map(r => {const c=components.get(r.id); return <tr key={r.id}><td>{r.id}</td><td>{c?.installed ? (c.installed_version || t.unknown) : '—'}</td><td>{c?.installed ? t.resourcePresent : t.resourceAbsent}</td><td><button disabled={!!jobID || (c?.installed && !stopped)} onClick={() => start(r.id)}>{c?.installed ? t.resourceUpdate : t.resourceDownload}</button></td></tr>})}
+      </tbody></table></div>
+    </>}
+    {job && <div role="status"><p>{selected}: {label(job.report.state)} {job.report.resource || ''}</p>
+      {job.done && job.report.failures && job.report.failures.length > 0 && <p className="error">{humanReason}</p>}
+      {job.done && !job.report.failures?.length && job.report.missing?.includes(selected) && <p className="error">{humanReason || t.resourceUnavailable}</p>}
+      {job.done && job.report.state === 'failed' && <p className="error">{humanReason}</p>}
+      {job.done && job.report.installed_resources?.includes(selected) && <p>{t.resourceDone}</p>}
+      {job.done && !job.report.installed_resources?.includes(selected) && !job.report.missing?.includes(selected) && job.report.state !== 'failed' && <p>{t.resourceNoChange}</p>}
+      {job.report.backups && job.report.backups.length > 0 && <p>{t.updateBackups}: {job.report.backups.join(', ')}</p>}
+      <button onClick={clear}>{job.done ? t.installClear : t.installCancel}</button>
+    </div>}
+  </section>;
+}

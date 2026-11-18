@@ -4,6 +4,8 @@ O Starter 2.0 planeja o ambiente e executa duas modalidades de instalacao apos c
 
 Para um servidor existente, escolha **Servidor ja instalado** e informe a pasta que contem `resources`. **Verificar scripts instalados** mostra as versoes encontradas e as releases consultadas, sem alterar scripts. **Baixar artifacts recomendados** baixa o artifact para o sistema em que o Starter esta rodando, em uma pasta separada ao lado do servidor; nao altera os arquivos do servidor nem troca o caminho dos scripts de inicializacao existentes.
 
+Na aba **Recursos**, informe a pasta do servidor criado pelo Starter e clique em **Verificar resources**. Use **Baixar** para um resource ausente ou **Atualizar** para um instalado, com o servidor parado. O Starter consulta a release do resource escolhido; atualizacoes preservam personalizacoes e fazem backup, mas versoes antigas sem registro de arquivos e atualizacoes do Core exigem revisao manual.
+
 ## Abrir no Linux
 
 Baixe o pacote Linux amd64 da [pagina de releases](https://github.com/mz-core/mz_starter/releases), extraia o ZIP e, no terminal da pasta extraida, execute:
