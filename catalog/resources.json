@@ -97,6 +97,24 @@
       "availability": "external_unverified"
     },
     {
+      "id": "require",
+      "name": "require",
+      "type": "external",
+      "group": "[ox]",
+      "repository": "https://github.com/overextended/cfxlua-require",
+      "visibility": "public",
+      "source": "external",
+      "version": "",
+      "tag": "",
+      "asset": "",
+      "sha256": "",
+      "dependencies": [],
+      "required_files": ["fxmanifest.lua", "init.lua"],
+      "mutable_policy": "unknown_preserve",
+      "channel": "stable",
+      "availability": "external_unverified"
+    },
+    {
       "id": "ox_lib",
       "name": "ox_lib",
       "type": "external",
@@ -108,7 +126,7 @@
       "tag": "",
       "asset": "",
       "sha256": "",
-      "dependencies": [],
+      "dependencies": ["require"],
       "required_files": [
         "fxmanifest.lua",
         "web/build/index.html"

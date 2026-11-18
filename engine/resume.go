@@ -237,7 +237,7 @@ func installResume(ctx context.Context, c Catalog, templates fs.FS, target strin
 	for id := range selected {
 		found := false
 		for _, comp := range plan.Components {
-			if comp.ID == id && comp.Type == "fivem_resource" {
+			if comp.ID == id && (comp.Type == "fivem_resource" || comp.ID == "require") {
 				found = true
 				if comp.Status != "ready" && comp.Installed {
 					result.Missing = append(result.Missing, id)

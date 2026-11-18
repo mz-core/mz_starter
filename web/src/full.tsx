@@ -502,10 +502,10 @@ export function ResourceManagerPanel({t, label, server, onServer, resources, os}
   const [selected, setSelected] = useState('');
   const [error, setError] = useState('');
   const ids = resources.map(r => r.id);
-  const mz = resources.filter(r => r.type === 'fivem_resource');
+  const mz = resources.filter(r => r.type === 'fivem_resource' || r.id === 'require');
   const inspect = async () => {
     setChecking(true); setError(''); setPlan(null);
-    try { setPlan(await api<FullPlan>('/api/installations/resolve', {server, existing:true, artifacts_mode:'none', excluded_ids:[...resources.filter(r => r.type !== 'fivem_resource' || r.id === 'mz_banguard').map(r => r.id), 'baseevents']})); }
+    try { setPlan(await api<FullPlan>('/api/installations/resolve', {server, existing:true, artifacts_mode:'none', excluded_ids:[...resources.filter(r => (r.type !== 'fivem_resource' && r.id !== 'require') || r.id === 'mz_banguard').map(r => r.id), 'baseevents']})); }
     catch (e) { setError(e instanceof Error ? e.message : t.failed); }
     finally { setChecking(false); }
   };
@@ -549,6 +549,7 @@ export function ResourceManagerPanel({t, label, server, onServer, resources, os}
       {job.done && !job.report.failures?.length && job.report.missing?.includes(selected) && <p className="error">{humanReason || t.resourceUnavailable}</p>}
       {job.done && job.report.state === 'failed' && <p className="error">{humanReason}</p>}
       {job.done && job.report.installed_resources?.includes(selected) && <p>{t.resourceDone}</p>}
+      {job.done && selected === 'require' && job.report.installed_resources?.includes('require') && <p>Confira se o seu cfg/resources.cfg contém <code>ensure require</code> antes de <code>ensure ox_lib</code>.</p>}
       {job.done && !job.report.installed_resources?.includes(selected) && !job.report.missing?.includes(selected) && job.report.state !== 'failed' && <p>{t.resourceNoChange}</p>}
       {job.report.backups && job.report.backups.length > 0 && <p>{t.updateBackups}: {job.report.backups.join(', ')}</p>}
       <button onClick={clear}>{job.done ? t.installClear : t.installCancel}</button>
