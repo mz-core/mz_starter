@@ -229,10 +229,10 @@
       "repository": "https://github.com/mz-core/mz_core",
       "visibility": "public",
       "source": "github_release",
-      "version": "1.0.0",
-      "tag": "v1.0.0",
-      "asset": "mz_core-v1.0.0.zip",
-      "sha256": "sha256:6fa5c9771bfdc66a46ed9ad848b33ff87bdfcf9e42b87c2ff566b1934cb245b5",
+      "version": "1.0.1",
+      "tag": "v1.0.1",
+      "asset": "mz_core-v1.0.1.zip",
+      "sha256": "sha256:b63e997cdd6ac16e5515a7e0837ef1329070fd1e041c7de75134b504b4e8049f",
       "dependencies": [
         "oxmysql",
         "ox_lib",
@@ -1053,10 +1053,10 @@
       "repository": "https://github.com/mz-core/mz_creator",
       "visibility": "public",
       "source": "github_release",
-      "version": "0.1.0",
-      "tag": "mz_creator-v0.1.0",
-      "asset": "mz_creator-v0.1.0.zip",
-      "sha256": "sha256:b26d1c94df518e2393477f9c03c0007bee67e6f9380cdcb4d4ef63ae58274d1f",
+      "version": "0.1.1",
+      "tag": "mz_creator-v0.1.1",
+      "asset": "mz_creator-v0.1.1.zip",
+      "sha256": "sha256:2bd263b6b6ab31e80352fe7c42c4f6c0ef3e2f707e2c4e8ff6034a41db781a02",
       "dependencies": [
         "oxmysql",
         "ox_lib",
@@ -1078,10 +1078,10 @@
       "repository": "https://github.com/mz-core/mz_multichar",
       "visibility": "public",
       "source": "github_release",
-      "version": "0.1.0",
-      "tag": "mz_multichar-v0.1.0",
-      "asset": "mz_multichar-v0.1.0.zip",
-      "sha256": "sha256:a7776afcfbc0c900c26041f94aedab102189b8bf42ac0ebd61ee75868238985f",
+      "version": "0.1.1",
+      "tag": "mz_multichar-v0.1.1",
+      "asset": "mz_multichar-v0.1.1.zip",
+      "sha256": "sha256:99d40fa032678c4a703999776d2df87a60775ecf7efe2a0fbb3ae9cd0767d501",
       "dependencies": [
         "ox_lib",
         "mz_core",
@@ -1156,10 +1156,10 @@
       "repository": "https://github.com/mz-core/mz_hud",
       "visibility": "public",
       "source": "github_release",
-      "version": "1.0.0",
-      "tag": "",
-      "asset": "",
-      "sha256": "",
+      "version": "1.0.1",
+      "tag": "mz_hud-v1.0.1",
+      "asset": "mz_hud-v1.0.1.zip",
+      "sha256": "sha256:d569588e34e7d750ff4f309df9f3b2f6d03054fdc723f27729462e81296b7124",
       "dependencies": [
         "ox_lib",
         "mz_core"
@@ -1170,7 +1170,7 @@
       ],
       "mutable_policy": "unknown_preserve",
       "channel": "stable",
-      "availability": "release_missing"
+      "availability": "metadata_only_unverified"
     },
     {
       "id": "mz_banguard",

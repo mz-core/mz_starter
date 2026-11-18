@@ -96,7 +96,7 @@ type downloadSpec struct {
 
 func downloadVerified(ctx context.Context, spec downloadSpec, dest string) (int64, error) {
 	if spec.MaxSize <= 0 {
-		spec.MaxSize = 512 << 20
+		spec.MaxSize = 1024 << 20
 	}
 	u, err := url.Parse(spec.URL)
 	if err != nil || u.User != nil {
@@ -180,7 +180,10 @@ func downloadVerified(ctx context.Context, spec downloadSpec, dest string) (int6
 
 // downloadGitHubAsset resolves an asset by ID through the GitHub API. Redirects are
 // limited to GitHub release asset hosts and the token is dropped on redirect.
-func downloadGitHubAsset(ctx context.Context, g GitHub, apiBase, repository string, asset Asset, dest string, progress func(received, size int64)) (int64, error) {
+func downloadGitHubAsset(ctx context.Context, g GitHub, apiBase, repository string, asset Asset, dest string, maxSize int64, progress func(received, size int64)) (int64, error) {
+	if maxSize <= 0 {
+		maxSize = 1024 << 20
+	}
 	u, err := url.Parse(repository)
 	if err != nil || u.Scheme != "https" || u.Host != "github.com" || u.User != nil {
 		return 0, fmt.Errorf("invalid_repository")
@@ -227,6 +230,9 @@ func downloadGitHubAsset(ctx context.Context, g GitHub, apiBase, repository stri
 	if resp.StatusCode != http.StatusOK {
 		return 0, fmt.Errorf("download_http_error")
 	}
+	if resp.ContentLength > maxSize {
+		return 0, fmt.Errorf("download_too_large")
+	}
 	f, err := os.OpenFile(dest, os.O_CREATE|os.O_EXCL|os.O_WRONLY, 0600)
 	if err != nil {
 		return 0, err
@@ -238,6 +244,10 @@ func downloadGitHubAsset(ctx context.Context, g GitHub, apiBase, repository stri
 		n, readErr := resp.Body.Read(buf)
 		if n > 0 {
 			total += int64(n)
+			if total > maxSize {
+				_ = f.Close()
+				return 0, fmt.Errorf("download_too_large")
+			}
 			if asset.Size > 0 && total > asset.Size {
 				_ = f.Close()
 				return 0, fmt.Errorf("download_size_mismatch")

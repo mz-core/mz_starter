@@ -8,21 +8,37 @@ import (
 )
 
 // writeLaunchScripts creates minimal manual launchers inside the new server-data.
-// The scripts never contain credentials and never start FXServer during installation.
-func writeLaunchScripts(serverData, artifactsPath string) (string, error) {
+// With allowExisting it reuses both scripts when already present and never rewrites them.
+func writeLaunchScripts(serverData, artifactsPath string, allowExisting bool) (string, bool, error) {
 	absData, err := filepath.Abs(serverData)
 	if err != nil {
-		return "", fmt.Errorf("launch_path_invalid")
+		return "", false, fmt.Errorf("launch_path_invalid")
 	}
 	absArtifacts, err := filepath.Abs(artifactsPath)
 	if err != nil {
-		return "", fmt.Errorf("launch_path_invalid")
+		return "", false, fmt.Errorf("launch_path_invalid")
 	}
 	if info, err := os.Stat(absData); err != nil || !info.IsDir() {
-		return "", fmt.Errorf("launch_server_data_missing")
+		return "", false, fmt.Errorf("launch_server_data_missing")
 	}
 	if info, err := os.Stat(absArtifacts); err != nil || !info.IsDir() {
-		return "", fmt.Errorf("launch_artifacts_missing")
+		return "", false, fmt.Errorf("launch_artifacts_missing")
+	}
+	cmdPath := filepath.Join(absData, "start-txadmin.cmd")
+	shPath := filepath.Join(absData, "start-txadmin.sh")
+	hostLaunch := func() string {
+		if runtime.GOOS == "windows" {
+			return cmdPath
+		}
+		return shPath
+	}
+	cmdExists := fileExists(cmdPath)
+	shExists := fileExists(shPath)
+	if cmdExists || shExists {
+		if allowExisting && cmdExists && shExists {
+			return hostLaunch(), false, nil
+		}
+		return "", false, fmt.Errorf("launch_script_conflict")
 	}
 	rel, err := filepath.Rel(absData, absArtifacts)
 	relative := err == nil && rel != "" && rel != "." && !filepath.IsAbs(rel)
@@ -106,20 +122,21 @@ cd "${SERVER_DATA}"
 exec "${ARTIFACTS}/run.sh"
 `, shRef)
 
-	cmdPath := filepath.Join(absData, "start-txadmin.cmd")
-	shPath := filepath.Join(absData, "start-txadmin.sh")
+	cmdPath = filepath.Join(absData, "start-txadmin.cmd")
+	shPath = filepath.Join(absData, "start-txadmin.sh")
 	if err = writeExclusive(cmdPath, cmd, 0700); err != nil {
-		return "", fmt.Errorf("launch_script_conflict:start-txadmin.cmd")
+		return "", false, fmt.Errorf("launch_script_conflict:start-txadmin.cmd")
 	}
 	if err = writeExclusive(shPath, sh, 0700); err != nil {
 		_ = os.Remove(cmdPath)
-		return "", fmt.Errorf("launch_script_conflict:start-txadmin.sh")
+		return "", false, fmt.Errorf("launch_script_conflict:start-txadmin.sh")
 	}
-	launch := shPath
-	if runtime.GOOS == "windows" {
-		launch = cmdPath
-	}
-	return launch, nil
+	return hostLaunch(), true, nil
+}
+
+func fileExists(name string) bool {
+	info, err := os.Stat(name)
+	return err == nil && info.Mode().IsRegular()
 }
 
 func writeExclusive(name, content string, mode os.FileMode) error {

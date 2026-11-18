@@ -3,6 +3,22 @@
 ## Objetivo
 Este documento resume como atualizar um ambiente ja instalado com o `mz_starter`.
 
+## Instalacoes feitas com ZIPs do Starter
+
+A opcao de completar uma instalacao adiciona apenas recursos ausentes: ela nao
+atualiza pastas ja existentes. Os instaladores legados tambem preservam pastas
+sem `.git`. Para atualizar esses recursos, pare o servidor, faca backup
+restauravel dos arquivos e do banco e compare cada pacote da release com os
+arquivos e configuracoes locais antes de substitui-los manualmente. Preserve as
+personalizacoes e valide as dependencias antes de reiniciar.
+
+O `mz_core` 1.0.1 exige a coluna `metadata_version` em `mz_players`. Em bancos
+anteriores, siga o procedimento e aplique manualmente `sql/metadata_version.sql`
+do pacote do Core apos verificar o backup e parar todos os processos escritores.
+O Starter nao executa migracoes no banco. Nao inicie o Core atualizado antes de
+confirmar a migracao; em caso de falha, siga o plano de recuperacao documentado
+em `mz_docs/core/METADATA_PERSISTENCE_DEPLOYMENT.md`.
+
 ## Atualizar dependencias
 Rode novamente o instalador da plataforma:
 

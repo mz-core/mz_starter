@@ -29,6 +29,7 @@ type FullOptions struct {
 	LocalRoot       string
 	LocalAuthorized bool
 	AllowIncomplete bool
+	ResumeExisting  bool
 	ArtifactsMode   string
 	ArtifactsPath   string
 	ArtifactOS      string
@@ -56,6 +57,8 @@ type Component struct {
 	Reason       string   `json:"reason,omitempty"`
 	Protected    bool     `json:"protected,omitempty"`
 	Optional     bool     `json:"optional,omitempty"`
+	Installed    bool     `json:"installed,omitempty"`
+	Fallback     bool     `json:"fallback,omitempty"`
 
 	kind       string
 	assetID    int64
@@ -85,6 +88,7 @@ type FullPlan struct {
 	Components            []Component  `json:"components"`
 	Required              int          `json:"required"`
 	Resolved              int          `json:"resolved"`
+	Installed             int          `json:"installed"`
 	Blockers              []string     `json:"blockers"`
 	Warnings              []string     `json:"warnings"`
 	ConfigurationRequired []string     `json:"configuration_required"`
@@ -92,30 +96,36 @@ type FullPlan struct {
 	ServerReady           bool         `json:"server_ready"`
 }
 
+type InstallFailure struct {
+	ID     string `json:"id"`
+	Reason string `json:"reason"`
+}
+
 type FullProgress struct {
-	State              string       `json:"state"`
-	Resource           string       `json:"resource,omitempty"`
-	Index              int          `json:"index,omitempty"`
-	Total              int          `json:"total,omitempty"`
-	Received           int64        `json:"received,omitempty"`
-	Size               int64        `json:"size,omitempty"`
-	Installed          int          `json:"installed,omitempty"`
-	InstalledResources []string     `json:"installed_resources,omitempty"`
-	Missing            []string     `json:"missing,omitempty"`
-	Artifacts          ArtifactPlan `json:"artifacts"`
-	Plan               *FullPlan    `json:"plan,omitempty"`
-	Destination        string       `json:"destination,omitempty"`
-	LaunchScript       string       `json:"launch_script,omitempty"`
-	TxAdminURL         string       `json:"txadmin_url,omitempty"`
-	Detail             string       `json:"detail,omitempty"`
-	Files              int          `json:"files,omitempty"`
-	FilesReady         bool         `json:"files_ready"`
-	ServerReady        bool         `json:"server_ready"`
+	State              string           `json:"state"`
+	Resource           string           `json:"resource,omitempty"`
+	Index              int              `json:"index,omitempty"`
+	Total              int              `json:"total,omitempty"`
+	Received           int64            `json:"received,omitempty"`
+	Size               int64            `json:"size,omitempty"`
+	Installed          int              `json:"installed,omitempty"`
+	InstalledResources []string         `json:"installed_resources,omitempty"`
+	Missing            []string         `json:"missing,omitempty"`
+	Failures           []InstallFailure `json:"failures,omitempty"`
+	Artifacts          ArtifactPlan     `json:"artifacts"`
+	Plan               *FullPlan        `json:"plan,omitempty"`
+	Destination        string           `json:"destination,omitempty"`
+	LaunchScript       string           `json:"launch_script,omitempty"`
+	TxAdminURL         string           `json:"txadmin_url,omitempty"`
+	Detail             string           `json:"detail,omitempty"`
+	Files              int              `json:"files,omitempty"`
+	FilesReady         bool             `json:"files_ready"`
+	ServerReady        bool             `json:"server_ready"`
 }
 
 func (o FullOptions) defaults() FullOptions {
 	if o.MaxDownload <= 0 {
-		o.MaxDownload = 512 << 20
+		o.MaxDownload = 1024 << 20
 	}
 	if o.ArtifactsMode == "" {
 		o.ArtifactsMode = "none"
@@ -215,6 +225,17 @@ func ResolveFull(ctx context.Context, c Catalog, opts FullOptions) (FullPlan, er
 		}
 	}
 	plan.Required = len(c.Resources)
+	if opts.Target != "" {
+		if info, err := os.Lstat(opts.Target); err == nil && info.IsDir() && info.Mode()&os.ModeSymlink == 0 {
+			for i := range plan.Components {
+				dest := filepath.Join(opts.Target, filepath.FromSlash(plan.Components[i].Destination))
+				if st, err := os.Stat(filepath.Join(dest, "fxmanifest.lua")); err == nil && st.Mode().IsRegular() {
+					plan.Components[i].Installed = true
+					plan.Installed++
+				}
+			}
+		}
+	}
 	components := map[string]*Component{}
 	for i := range plan.Components {
 		components[plan.Components[i].ID] = &plan.Components[i]
@@ -229,7 +250,7 @@ func ResolveFull(ctx context.Context, c Catalog, opts FullOptions) (FullPlan, er
 				plan.Blockers = append(plan.Blockers, comp.ID+":unknown_dependency:"+dep)
 				continue
 			}
-			if d := components[dep]; d == nil || d.Status == "blocked" {
+			if d := components[dep]; d == nil || (d.Status == "blocked" && !d.Installed) {
 				plan.Warnings = append(plan.Warnings, comp.ID+":dependency_blocked:"+dep)
 			}
 		}
@@ -239,7 +260,7 @@ func ResolveFull(ctx context.Context, c Catalog, opts FullOptions) (FullPlan, er
 		case "ready", "system":
 			plan.Resolved++
 		case "blocked":
-			if !comp.Optional {
+			if !comp.Optional && !comp.Installed {
 				plan.Blockers = append(plan.Blockers, comp.ID+":"+comp.Reason)
 			}
 		}
@@ -307,60 +328,107 @@ func resolveComponent(ctx context.Context, r Resource, opts FullOptions) Compone
 }
 
 func resolveMZ(ctx context.Context, r Resource, opts FullOptions, comp Component) Component {
-	if r.Source == "protected" && !opts.LocalAuthorized {
-		comp.Status = "blocked"
-		comp.Reason = "protected_local_authorization_required"
-		comp.Protected = true
-		return comp
+	repository := repositoryForMZ(r)
+	if repository != "" {
+		comp.Repository = repository
 	}
-	localFirst := r.Source == "protected" || r.Visibility != "public" || r.Source != "github_release" || r.Tag == "" || r.Asset == "" || r.SHA256 == ""
-	if localFirst {
+	if r.Source == "protected" {
+		comp.Protected = true
+		if !opts.LocalAuthorized {
+			comp.Status = "blocked"
+			comp.Reason = "protected_local_authorization_required"
+			return comp
+		}
 		if local, err := resolveLocalPackage(opts.LocalRoot, r, opts.LocalAuthorized); err == nil {
 			return applyLocal(comp, local, r)
-		} else {
-			comp.Reason = err.Error()
 		}
-		if r.Source == "protected" {
-			comp.Status = "blocked"
-			comp.Reason = "protected_local_package_required"
-			comp.Protected = true
-			return comp
+		comp.Status = "blocked"
+		comp.Reason = "protected_local_package_required"
+		return comp
+	}
+	if repository == "" {
+		if local, err := resolveLocalPackage(opts.LocalRoot, r, opts.LocalAuthorized); err == nil {
+			return applyLocal(comp, local, r)
 		}
-		if r.Visibility != "public" && opts.GitHub.Token == "" {
-			comp.Status = "blocked"
-			comp.Reason = "private_release_or_local_package_required"
-			return comp
+		comp.Status = "blocked"
+		comp.Reason = "repository_missing_or_unknown"
+		return comp
+	}
+
+	// The GitHub latest stable release is authoritative: the catalog only
+	// supplies identity, destination, dependencies and distribution policy.
+	remote, err := resolveLatestRelease(ctx, r, opts)
+	if err == nil {
+		return remote
+	}
+	reason := err.Error()
+
+	// A latest release that exists but is unusable must never be replaced
+	// silently by an older pinned or local package.
+	if hardLatestError(reason) {
+		comp.Status = "blocked"
+		comp.Reason = "github:" + reason
+		return comp
+	}
+
+	// A transient GitHub failure keeps the verified pinned catalog release as
+	// an explicit fallback. It is only used when integrity data is complete.
+	if transientGitHubError(err) {
+		if expected, ok := catalogDigest(r.SHA256); ok && r.Tag != "" && r.Asset != "" {
+			if direct, derr := directReleaseComponent(r, expected, opts.Sources.ReleaseBase); derr == nil {
+				direct.Fallback = true
+				direct.SourceKind = "github_release"
+				direct.SourceDetail = "pinned catalog fallback after GitHub " + reason + " (" + r.Tag + ")"
+				return direct
+			}
 		}
 	}
-	if r.Source == "github_release" || r.Source == "private_release_requires_authorization" {
-		if r.Visibility == "public" || opts.GitHub.Token != "" {
-			remote, err := resolveGitHubRelease(ctx, r, opts)
-			if err == nil {
-				return remote
-			}
-			if comp.Reason == "" {
-				comp.Reason = "github:" + err.Error()
-			}
-			if expected, ok := catalogDigest(r.SHA256); ok && r.Visibility == "public" && r.Source == "github_release" && r.Tag != "" && r.Asset != "" && transientGitHubError(err) {
-				if direct, derr := directReleaseComponent(r, expected, opts.Sources.ReleaseBase); derr == nil {
-					direct.SourceDetail = "pinned catalog fallback (" + err.Error() + ")"
-					return direct
-				}
-			}
-		}
-	}
-	if local, err := resolveLocalPackage(opts.LocalRoot, r, opts.LocalAuthorized); err == nil {
+
+	// No usable latest release (absent or not accessible): an explicitly
+	// authorized local package remains an accepted distribution source.
+	if local, lerr := resolveLocalPackage(opts.LocalRoot, r, opts.LocalAuthorized); lerr == nil {
 		return applyLocal(comp, local, r)
 	}
+
 	comp.Status = "blocked"
-	if comp.Reason == "" {
-		if r.Source == "unavailable" || r.Repository == "" {
+	switch {
+	case reason == "access_denied" || reason == "not_found_or_no_access" || reason == "release_missing":
+		if r.Visibility == "private" && opts.GitHub.Token == "" {
+			comp.Reason = "private_release_or_local_package_required"
+		} else if r.Source == "unavailable" {
 			comp.Reason = "repository_missing_or_unknown"
 		} else {
-			comp.Reason = "release_or_local_package_missing"
+			comp.Reason = "github:" + reason
 		}
+	default:
+		comp.Reason = "github:" + reason
 	}
 	return comp
+}
+
+func repositoryForMZ(r Resource) string {
+	if repository := strings.TrimSpace(r.Repository); repository != "" {
+		return repository
+	}
+	if idPattern.MatchString(r.ID) {
+		return "https://github.com/mz-core/" + r.ID
+	}
+	return ""
+}
+
+// hardLatestError reports failures where a latest release exists but cannot be
+// installed safely. These are terminal: falling back to an older package would
+// hide a broken or incomplete distribution.
+func hardLatestError(reason string) bool {
+	switch reason {
+	case "asset_missing", "asset_ambiguous", "asset_unavailable",
+		"integrity_missing", "integrity_invalid", "invalid_asset_metadata",
+		"invalid_repository", "invalid_api_origin", "invalid_response",
+		"invalid_request", "unrecognized_release", "prerelease_rejected",
+		"draft_rejected":
+		return true
+	}
+	return false
 }
 
 func transientGitHubError(err error) bool {
@@ -398,75 +466,35 @@ func directReleaseComponent(r Resource, digest, base string) (Component, error) 
 	return comp, nil
 }
 
-func resolveGitHubRelease(ctx context.Context, r Resource, opts FullOptions) (Component, error) {
+func resolveLatestRelease(ctx context.Context, r Resource, opts FullOptions) (Component, error) {
+	repository := repositoryForMZ(r)
 	comp := Component{
-		ID: r.ID, Type: r.Type, Version: r.Version, Tag: r.Tag, Repository: r.Repository,
+		ID: r.ID, Type: r.Type, Version: r.Version, Tag: r.Tag, Repository: repository,
 		Destination: componentDestination(r), Dependencies: append([]string{}, r.Dependencies...),
 		Status: "blocked", resource: r, kind: "github",
 	}
-	if r.Repository == "" {
+	if repository == "" {
 		return comp, fmt.Errorf("repository_missing")
 	}
-	q := opts.GitHub.Releases(ctx, r.ID, r.Repository)
-	if q.Status != "ok" {
-		return comp, fmt.Errorf("%s", q.Status)
+	latest := opts.GitHub.Latest(ctx, r.ID, repository)
+	if latest.Status != "ok" {
+		return comp, fmt.Errorf("%s", latest.Status)
 	}
-	var matched []Release
-	for _, rel := range q.Releases {
-		if rel.Version != r.Version {
-			continue
-		}
-		if r.Tag != "" && rel.Tag != r.Tag {
-			continue
-		}
-		matched = append(matched, rel)
-	}
-	if len(matched) == 0 {
-		return comp, fmt.Errorf("release_missing")
-	}
-	if len(matched) > 1 {
-		return comp, fmt.Errorf("release_ambiguous")
-	}
-	rel := matched[0]
-	if rel.Status != "integrity_unverified" {
-		return comp, fmt.Errorf("%s", rel.Status)
-	}
-	var asset *Asset
-	for i := range rel.Assets {
-		a := &rel.Assets[i]
-		if a.Name == r.ID+"-v"+rel.Version+".zip" {
-			if asset != nil {
-				return comp, fmt.Errorf("asset_ambiguous")
-			}
-			asset = a
-		}
-	}
-	if asset == nil {
-		return comp, fmt.Errorf("asset_missing")
-	}
-	if asset.State != "" && asset.State != "uploaded" {
-		return comp, fmt.Errorf("asset_unavailable")
-	}
-	digest := strings.ToLower(strings.TrimPrefix(asset.Digest, "sha256:"))
-	if len(digest) != 64 || !hashPattern.MatchString(digest) {
-		return comp, fmt.Errorf("integrity_missing")
-	}
-	if expected, ok := catalogDigest(r.SHA256); ok && !strings.EqualFold(digest, expected) {
-		return comp, fmt.Errorf("catalog_digest_changed")
-	}
-	if asset.ID <= 0 || asset.Size <= 0 {
-		return comp, fmt.Errorf("invalid_asset_metadata")
+	digest, ok := releaseDigest(latest.Asset.Digest)
+	if !ok {
+		return comp, fmt.Errorf("integrity_invalid")
 	}
 	comp.Status = "ready"
 	comp.SourceKind = "github_release"
-	comp.SourceDetail = "GitHub release " + rel.Tag
-	comp.Tag = rel.Tag
-	comp.Asset = asset.Name
+	comp.SourceDetail = "GitHub latest release " + latest.Tag
+	comp.Version = latest.Version
+	comp.Tag = latest.Tag
+	comp.Asset = latest.Asset.Name
 	comp.Digest = digest
-	comp.Size = asset.Size
-	comp.assetID = asset.ID
-	if r.Visibility == "public" {
-		downloadURL, err := releaseDownloadURL(r.Repository, r.ID, rel.Tag, asset.Name, opts.Sources.ReleaseBase)
+	comp.Size = latest.Asset.Size
+	comp.assetID = latest.Asset.ID
+	if r.Visibility == "public" || opts.GitHub.Token == "" {
+		downloadURL, err := releaseDownloadURL(repository, r.ID, latest.Tag, latest.Asset.Name, opts.Sources.ReleaseBase)
 		if err != nil {
 			return comp, err
 		}
@@ -618,6 +646,9 @@ func allowedInconclusiveProblems(problems []string) bool {
 }
 
 func InstallFull(ctx context.Context, c Catalog, templates fs.FS, target string, opts FullOptions) (result FullProgress, err error) {
+	if opts.ResumeExisting {
+		return installResume(ctx, c, templates, target, opts)
+	}
 	opts = opts.defaults()
 	opts.Target = target
 	result.State = "preflight"
@@ -772,13 +803,15 @@ func InstallFull(ctx context.Context, c Catalog, templates fs.FS, target string,
 	result.Artifacts = artifactResult
 	launchWarning := ""
 	if artifactErr == nil && (artifactResult.Status == "installed" || artifactResult.Status == "existing") {
-		launch, launchErr := writeLaunchScripts(absolute, artifactResult.Path)
+		launch, created, launchErr := writeLaunchScripts(absolute, artifactResult.Path, false)
 		if launchErr != nil {
 			launchWarning = "launch_script_failed:" + launchErr.Error()
 		} else {
 			result.LaunchScript = launch
 			result.TxAdminURL = "http://127.0.0.1:40120"
-			result.Files += 2
+			if created {
+				result.Files += 2
+			}
 		}
 	}
 	if !plan.FilesReady {
@@ -825,7 +858,7 @@ func InstallFull(ctx context.Context, c Catalog, templates fs.FS, target string,
 func blockedIDs(plan FullPlan) []string {
 	var ids []string
 	for _, comp := range plan.Components {
-		if comp.Status == "blocked" && !comp.Optional {
+		if comp.Status == "blocked" && !comp.Optional && !comp.Installed {
 			ids = append(ids, comp.ID)
 		}
 	}
@@ -846,7 +879,7 @@ func installReleaseComponent(ctx context.Context, comp *Component, stage, downlo
 		if opts.GitHub.BaseURL != "" {
 			apiBase = opts.GitHub.BaseURL
 		}
-		_, err = downloadGitHubAsset(ctx, opts.GitHub, apiBase, comp.resource.Repository, Asset{ID: comp.assetID, Size: comp.Size, Digest: "sha256:" + comp.Digest}, archive, progress)
+		_, err = downloadGitHubAsset(ctx, opts.GitHub, apiBase, comp.Repository, Asset{ID: comp.assetID, Size: comp.Size, Digest: "sha256:" + comp.Digest}, archive, opts.MaxDownload, progress)
 	}
 	if err != nil {
 		return 0, err
@@ -881,7 +914,7 @@ func installExternalRelease(ctx context.Context, comp *Component, stage, downloa
 	if opts.GitHub.BaseURL != "" {
 		apiBase = opts.GitHub.BaseURL
 	}
-	_, err := downloadGitHubAsset(ctx, opts.GitHub, apiBase, comp.contract.Repository, Asset{ID: comp.assetID, Size: comp.Size, Digest: "sha256:" + comp.Digest}, archive, func(received, size int64) {
+	_, err := downloadGitHubAsset(ctx, opts.GitHub, apiBase, comp.contract.Repository, Asset{ID: comp.assetID, Size: comp.Size, Digest: "sha256:" + comp.Digest}, archive, opts.MaxDownload, func(received, size int64) {
 		result.Received, result.Size = received, size
 		emit()
 	})

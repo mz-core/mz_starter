@@ -22,6 +22,8 @@ type Component = {
   reason?: string;
   protected?: boolean;
   optional?: boolean;
+  installed?: boolean;
+  fallback?: boolean;
 };
 
 type ArtifactPlan = {
@@ -43,6 +45,7 @@ type FullPlan = {
   components: Component[];
   required: number;
   resolved: number;
+  installed?: number;
   blockers: string[];
   warnings: string[];
   configuration_required: string[];
@@ -60,6 +63,7 @@ type Progress = {
   installed?: number;
   installed_resources?: string[];
   missing?: string[];
+  failures?: { id: string; reason: string }[];
   artifacts: ArtifactPlan;
   plan?: FullPlan;
   destination?: string;
@@ -102,6 +106,7 @@ export function FullInstallPanel({ t, label, server, planReady }: Props) {
   const [authorized, setAuthorized] = useState(false);
   const [artifactsMode, setArtifactsMode] = useState('auto');
   const [allowIncomplete, setAllowIncomplete] = useState(false);
+  const [resumeExisting, setResumeExisting] = useState(false);
   const [artifactsPath, setArtifactsPath] = useState('');
   const [plan, setPlan] = useState<FullPlan | null>(null);
   const [resolvedKey, setResolvedKey] = useState('');
@@ -164,7 +169,8 @@ export function FullInstallPanel({ t, label, server, planReady }: Props) {
         kind: 'full',
         server,
         full_confirmed: true,
-        allow_incomplete: allowIncomplete,
+        allow_incomplete: allowIncomplete || resumeExisting,
+        resume_existing: resumeExisting,
         local_root: localRoot,
         local_authorized: authorized,
         artifacts_mode: artifactsMode,
@@ -202,7 +208,7 @@ export function FullInstallPanel({ t, label, server, planReady }: Props) {
   const total = report?.total || (plan ? plan.required : 0);
   const installedCount = report?.installed || 0;
   const percent = total > 0 ? Math.min(100, Math.round((installedCount / total) * 100)) : 0;
-  const canInstall = planMatches && !!plan && (plan.files_ready || allowIncomplete) && confirmed && !jobID;
+  const canInstall = planMatches && !!plan && (plan.files_ready || allowIncomplete || resumeExisting) && confirmed && !jobID;
   const done = !!job?.done;
 
   return (
@@ -273,13 +279,17 @@ export function FullInstallPanel({ t, label, server, planReady }: Props) {
               <thead><tr><th>{t.component}</th><th>{t.status}</th><th>{t.sourceLabel}</th><th>{t.available}</th></tr></thead>
               <tbody>
                 {components.map((component) => {
-                  const state = installed.has(component.id) ? 'installed' : component.status;
+                  const state = installed.has(component.id) ? 'installed' : component.installed ? 'installed' : component.status;
                   return (
                     <tr key={component.id}>
                       <td><strong>{component.id}</strong>{component.optional && <small>{t.optionalComponent}</small>}</td>
                       <td><span className="tag">{label(state)}</span>{component.reason && <small>{label(component.reason)}</small>}</td>
                       <td>{label(component.source_kind)}{component.source_detail && <small>{component.source_detail}</small>}</td>
-                      <td>{component.version || 'â€”'}</td>
+                      <td>
+                        {component.version || '—'}
+                        {component.tag && <small>{component.tag}</small>}
+                        {component.fallback && <small className="error">{t.fallbackVersion}</small>}
+                      </td>
                     </tr>
                   );
                 })}
@@ -287,6 +297,11 @@ export function FullInstallPanel({ t, label, server, planReady }: Props) {
             </table>
           </div>
           <p className="muted">{t.artifactsStatus}: {label(plan.artifacts.status)}{plan.artifacts.version ? ` Â· ${plan.artifacts.version}` : ''}{plan.artifacts.path ? ` Â· ${plan.artifacts.path}` : ''}</p>
+          <label className="check">
+            <input type="checkbox" checked={resumeExisting} onChange={(e) => setResumeExisting(e.target.checked)} />
+            {t.resumeExisting}
+          </label>
+          <p className="muted">{t.resumeHint}</p>
           <label className="check">
             <input type="checkbox" checked={confirmed} onChange={(e) => setConfirmed(e.target.checked)} />
             {t.fullConfirm}
@@ -298,7 +313,7 @@ export function FullInstallPanel({ t, label, server, planReady }: Props) {
             </label>
           )}
           <button className="primary" disabled={!canInstall} onClick={start}>
-            <Download size={16} /> {t.installButton}
+            <Download size={16} /> {resumeExisting ? t.completeInstallButton : t.installButton}
           </button>
         </>
       )}
@@ -327,6 +342,18 @@ export function FullInstallPanel({ t, label, server, planReady }: Props) {
           )}
           {done && !report.launch_script && <p className="muted">{t.txAdminUnavailable}</p>}
           {report.missing && report.missing.length > 0 && <p className="error">{t.blockersTitle}: {report.missing.join(', ')}</p>}
+          {report.missing && report.missing.length > 0 && (
+            <details>
+              <summary>{t.missingReasons}</summary>
+              <ul>
+                {report.missing.map((id) => {
+                  const failed = report.failures?.find((failure) => failure.id === id);
+                  const component = components.find((item) => item.id === id);
+                  return <li key={id}>{id}: {label(failed?.reason || component?.reason || 'missing')}</li>;
+                })}
+              </ul>
+            </details>
+          )}
           {done && (
             <p className={report.files_ready ? 'notice' : 'error'}>
               {report.files_ready ? <CheckCircle2 size={16} /> : <XCircle size={16} />}

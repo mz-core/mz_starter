@@ -58,7 +58,7 @@ type VerifyOptions struct {
 
 func (o VerifyOptions) defaults() VerifyOptions {
 	if o.MaxDownload <= 0 {
-		o.MaxDownload = 512 << 20
+		o.MaxDownload = 1024 << 20
 	}
 	if o.MaxExpanded == 0 {
 		o.MaxExpanded = 1 << 30

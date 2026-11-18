@@ -91,6 +91,34 @@ func resolveArtifacts(ctx context.Context, opts FullOptions) (ArtifactPlan, erro
 			}
 			path = filepath.Join(filepath.Dir(absTarget), "mz-artifacts")
 		}
+		if abs, err := filepath.Abs(path); err == nil {
+			if st, e := os.Lstat(abs); e == nil {
+				if !st.IsDir() || st.Mode()&os.ModeSymlink != 0 || isReparsePoint(abs) {
+					plan.Status, plan.Reason = "blocked", "artifacts_path_invalid"
+					return plan, nil
+				}
+				entries, e := os.ReadDir(abs)
+				if e != nil {
+					plan.Status, plan.Reason = "blocked", "artifacts_path_invalid"
+					return plan, nil
+				}
+				if len(entries) > 0 {
+					if _, e := validateExistingArtifacts(abs, artifactOS(opts)); e != nil {
+						plan.Status, plan.Reason = "blocked", "artifacts_directory_not_empty"
+						return plan, nil
+					}
+					if opts.Target != "" && artifactOverlap(opts.Target, abs) {
+						plan.Status, plan.Reason = "blocked", "artifacts_overlap_server_data"
+						return plan, nil
+					}
+					plan.Path, plan.Status = abs, "existing"
+					return plan, nil
+				}
+			} else if !os.IsNotExist(e) {
+				plan.Status, plan.Reason = "blocked", "artifacts_destination_unavailable"
+				return plan, nil
+			}
+		}
 		abs, err := validateArtifactDestination(path)
 		if err != nil {
 			plan.Status, plan.Reason = "blocked", err.Error()
@@ -214,6 +242,15 @@ func validateExistingArtifacts(path, goos string) (string, error) {
 	if info, err := os.Stat(filepath.Join(abs, exe)); err != nil || !info.Mode().IsRegular() {
 		return "", fmt.Errorf("artifacts_executable_missing")
 	}
+	if goos == "windows" {
+		if st, err := os.Stat(filepath.Join(abs, "citizen")); err != nil || !st.IsDir() {
+			return "", fmt.Errorf("artifacts_incomplete")
+		}
+	} else {
+		if st, err := os.Stat(filepath.Join(abs, "alpine", "opt", "cfx-server", "FXServer")); err != nil || !st.Mode().IsRegular() {
+			return "", fmt.Errorf("artifacts_incomplete")
+		}
+	}
 	return abs, nil
 }
 
@@ -254,7 +291,7 @@ func installArtifacts(ctx context.Context, opts FullOptions, target string, resu
 	if resolved.Status == "blocked" {
 		return resolved, fmt.Errorf("%s", resolved.Reason)
 	}
-	if resolved.Mode == "existing" {
+	if resolved.Status == "existing" {
 		return resolved, nil
 	}
 	parent := filepath.Dir(resolved.Path)

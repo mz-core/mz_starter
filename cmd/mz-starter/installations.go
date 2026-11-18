@@ -35,6 +35,7 @@ type installRequest struct {
 	Resources        []string `json:"resources"`
 	PartialConfirmed bool     `json:"partial_confirmed"`
 	FullConfirmed    bool     `json:"full_confirmed"`
+	ResumeExisting   bool     `json:"resume_existing"`
 	AllowIncomplete  bool     `json:"allow_incomplete"`
 	LocalRoot        string   `json:"local_root"`
 	LocalAuthorized  bool     `json:"local_authorized"`
@@ -129,9 +130,11 @@ func (m *installationJobs) handler(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 		}
-		if _, e := engine.PlanInstallation(m.catalog, starter.Assets, q.Server, "", "new", "", nil); e != nil {
-			respond(400, apiError{e.Error(), "invalid destination"})
-			return
+		if !q.ResumeExisting {
+			if _, e := engine.PlanInstallation(m.catalog, starter.Assets, q.Server, "", "new", "", nil); e != nil {
+				respond(400, apiError{e.Error(), "invalid destination"})
+				return
+			}
 		}
 		var b [16]byte
 		if _, e := rand.Read(b[:]); e != nil {
@@ -182,8 +185,8 @@ func (m *installationJobs) handler(w http.ResponseWriter, r *http.Request) {
 			result, _ := engine.InstallFull(ctx, m.catalog, starter.Assets, q.Server, engine.FullOptions{
 				GitHub: engine.GitHub{Token: os.Getenv("GITHUB_TOKEN")}, Target: q.Server,
 				LocalRoot: q.LocalRoot, LocalAuthorized: q.LocalAuthorized,
-				AllowIncomplete: q.AllowIncomplete,
-				ArtifactsMode:   q.ArtifactsMode, ArtifactsPath: q.ArtifactsPath,
+				AllowIncomplete: q.AllowIncomplete || q.ResumeExisting, ResumeExisting: q.ResumeExisting,
+				ArtifactsMode: q.ArtifactsMode, ArtifactsPath: q.ArtifactsPath,
 				MaxDownload: m.maxDownload,
 				Progress: func(p engine.FullProgress) {
 					p.InstalledResources = append([]string{}, p.InstalledResources...)

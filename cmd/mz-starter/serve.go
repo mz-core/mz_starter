@@ -37,7 +37,7 @@ func serve(args []string) {
 	flags := flag.NewFlagSet("serve", flag.ExitOnError)
 	port := flags.Int("port", 0, "porta loopback (0 automatica)")
 	noOpen := flags.Bool("no-open", false, "nao abrir navegador")
-	maxDownload := flags.Int("max-download-mib", 512, "limite de download em MiB (1-2048)")
+	maxDownload := flags.Int("max-download-mib", 1024, "limite de download em MiB (1-2048)")
 	flags.Parse(args)
 	if flags.NArg() != 0 || *port < 0 || *port > 65535 || *maxDownload < 1 || *maxDownload > 2048 {
 		fail("argumentos invalidos")

@@ -12,7 +12,7 @@ O foco aqui e deixar claro:
 
 O executavel `mz-starter` abre a interface local. Em Instalacao completa do MZ Core, informe um destino novo ou vazio, uma pasta de distribuicao local autorizada para os resources sem release publica e, opcionalmente, artifacts existentes. Clique em Verificar componentes para ver os 51 componentes, releases, dependencias, bloqueios e avisos antes de instalar. Sem bloqueios, o botao INSTALAR SERVIDOR e habilitado com a confirmacao marcada. Com bloqueios, o operador pode autorizar explicitamente a instalacao somente dos componentes disponiveis; o resultado fica marcado como incompleto.
 
-A instalacao completa escreve `server.cfg`, `logo.png`, `cfg/`, `resources/` e os resources resolvidos em um staging privado. O destino precisa continuar vazio e nao pode estar dentro de um servidor existente. Resources publicos sao resolvidos pela API dos releases reais e baixados pela URL publica, com SHA-256 verificado; se a API estiver limitada, o catalogo fixado e usado como fallback. Os demais usam pacotes locais autorizados, releases privados com token ou os snapshots oficiais fixados das dependencias externas.
+A instalacao completa escreve `server.cfg`, `logo.png`, `cfg/`, `resources/` e os resources resolvidos em um staging privado. O destino precisa continuar vazio e nao pode estar dentro de um servidor existente. Para cada resource MZ, o Starter consulta `releases/latest`, rejeita drafts e pre-releases e instala a release estavel escolhida pelo GitHub, mesmo quando o catalogo fixa uma versao anterior. O ZIP e selecionado pelo nome do resource, baixado por HTTPS oficial e verificado pelo SHA-256 publicado pelo GitHub; a versao instalada e a do asset/manifesto e a tag real aparece na interface. Se a API falhar temporariamente, o catalogo fixado pode ser usado como fallback explicitamente marcado; uma Latest existente sem ZIP valido ou com integridade invalida bloqueia o resource e nunca e substituida silenciosamente por uma versao antiga. Downloads publicos usam a URL HTTPS de release sem enviar token. O Starter mantem em memoria, por 10 minutos, os metadados da Latest ja consultados para que a verificacao e a instalacao no mesmo processo nao consumam duas vezes o limite publico do GitHub. Os demais usam pacotes locais autorizados, releases privados com token ou os snapshots oficiais fixados das dependencias externas.
 
 Os artifacts sao separados do server-data. O modo automatico baixa o build oficial recomendado no Windows e no Linux para `mz-artifacts`; o modo existente valida o executavel; o modo de download permite escolher o destino. Sem artifacts, o resultado e `completed_files_only`; com instalacao incompleta, o resultado e `incomplete`. Licenca, banco, endpoints e permissoes nunca sao preenchidos automaticamente.
 
@@ -37,6 +37,16 @@ ssh -L 40120:127.0.0.1:40120 usuario@vps
 ```
 
 O script nao inicia o servidor durante a instalacao, nao contem licenca, senha ou token e nao sobrescreve arquivos existentes.
+
+### Completar uma instalacao existente
+
+Se a primeira instalacao ficou incompleta, informe o mesmo server-data criado pelo Starter, clique em Verificar componentes e marque **Completar instalacao existente do Starter**. O Starter resolve as fontes atuais e adiciona somente os diretorios de resources ausentes; `server.cfg`, `cfg/*.cfg` e resources ja instalados nao sao reescritos. Um diretorio de resource que ja exista e tratado como conflito e permanece intacto.
+
+O artifact em `mz-artifacts` e reutilizado automaticamente quando a estrutura oficial e compativel (`FXServer.exe`/`citizen` no Windows ou `run.sh`/`alpine/opt/cfx-server/FXServer` no Linux). Um diretorio nao vazio e invalido e recusado, nunca apagado ou sobrescrito.
+
+Releases privados podem ser baixados quando o processo do Starter possui um `GITHUB_TOKEN` autorizado no ambiente. O token nao e exibido na interface, nos logs ou no resultado. Sem token, esses resources permanecem listados como pendentes e podem ser fornecidos por pacote local autorizado.
+
+A instalacao de retomada nao altera os `ensure` existentes. Revise `cfg/resources.cfg` manualmente depois de completar os pacotes, se desejar ativar resources que estavam comentados.
 
 O modo Instalacao parcial experimental continua disponivel e instala apenas um resource publico com confirmacao explicita. Os scripts `tools/install_deps.*` permanecem como contrato legado para atualizacao de uma arvore ja existente.
 
