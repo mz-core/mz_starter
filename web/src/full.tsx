@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { CheckCircle2, AlertTriangle, Info, Download, RefreshCw, XCircle } from 'lucide-react';
 import { api, token } from './api';
 import type { messages } from './i18n';
@@ -407,6 +407,10 @@ export function SimpleInstallPanel({ t, label, server, resources, suggested, onS
   const [id, setID] = useState('');
   const [job, setJob] = useState<Job | null>(null);
   const [error, setError] = useState('');
+  const resultDialog = useRef<HTMLDialogElement>(null);
+  useEffect(() => {
+    if (job?.done && resultDialog.current && !resultDialog.current.open) resultDialog.current.showModal();
+  }, [id, job?.done]);
   useEffect(() => {
     if (!id || job?.done) return;
     let active = true;
@@ -444,5 +448,14 @@ export function SimpleInstallPanel({ t, label, server, resources, suggested, onS
       {job.done && <p>{job.report.state === 'failed' ? t.fullFilesNotReady : t.simpleAfter}</p>}
       <button onClick={reset}>{job.done ? t.installClear : t.installCancel}</button>
     </div>}
+    <dialog ref={resultDialog} className="install-result" aria-labelledby="install-result-title">
+      <h2 id="install-result-title">{job?.report.state === 'cancelled' ? t.resultCancelled : job?.report.state === 'failed' ? t.resultFailed : job?.report.state === 'incomplete' || job?.report.state === 'completed_files_only' ? t.resultIncomplete : t.resultComplete}</h2>
+      <p>{job?.report.state === 'failed' ? t.resultFailedHint : job?.report.state === 'cancelled' ? t.resultCancelledHint : t.resultCompleteHint}</p>
+      {job?.report.missing && job.report.missing.length > 0 && <p>{t.simpleMissing}: {job.report.missing.join(', ')}</p>}
+      {job?.report.detail && job.report.state === 'failed' && <p>{job.report.detail.includes('untrusted writable principal') ? t.simpleUnsafeFolder : label(job.report.detail)}</p>}
+      {job?.report.detail?.includes('artifacts_failed:') && <p>{t.artifactsNotProvided}: {job.report.detail.split('artifacts_failed:')[1]}</p>}
+      {job?.report.destination && <p>{t.serverDataDirectory}: <code className="hash">{job.report.destination}</code></p>}
+      <button className="primary" onClick={() => resultDialog.current?.close()} autoFocus>{t.resultClose}</button>
+    </dialog>
   </section>;
 }
