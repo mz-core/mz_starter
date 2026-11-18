@@ -37,7 +37,7 @@ type LocalPackage struct {
 
 func localSkipDir(name string) bool {
 	switch strings.ToLower(name) {
-	case ".git", ".github", "node_modules", "graphify-out", "tests", "test-results", "logs", "cache", "crashes", "tmp":
+	case ".git", ".github", "node_modules", "graphify-out", "tests", "test-results", "cache", "crashes", "tmp":
 		return true
 	}
 	return false
@@ -191,7 +191,7 @@ func scanLocalFolder(source string, r Resource, authorized bool) (LocalPackage, 
 		}
 		rel = filepath.ToSlash(rel)
 		if d.IsDir() {
-			if localSkipDir(d.Name()) {
+			if localSkipDir(d.Name()) || strings.EqualFold(rel, "logs") {
 				return filepath.SkipDir
 			}
 			if rel == "web/src" {

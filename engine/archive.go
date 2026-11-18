@@ -33,7 +33,10 @@ func safeArchiveName(name string) bool {
 // forbiddenArchivePath reports distribution files that must never leave staging.
 func forbiddenArchivePath(name string) bool {
 	lower := strings.ToLower("/" + strings.TrimPrefix(filepath.ToSlash(name), "/"))
-	for _, part := range []string{"/.git/", "/.github/", "/node_modules/", "/graphify-out/", "/tests/", "/test-results/", "/.env", "/logs/", "/cache/", "/crashes/"} {
+	if strings.HasPrefix(lower, "/logs/") || (strings.Contains(lower, "/logs/") && strings.HasSuffix(lower, ".log")) {
+		return true
+	}
+	for _, part := range []string{"/.git/", "/.github/", "/node_modules/", "/graphify-out/", "/tests/", "/test-results/", "/.env", "/cache/", "/crashes/"} {
 		if strings.Contains(lower, part) {
 			return true
 		}
