@@ -36,6 +36,9 @@ type installRequest struct {
 	PartialConfirmed bool     `json:"partial_confirmed"`
 	FullConfirmed    bool     `json:"full_confirmed"`
 	ResumeExisting   bool     `json:"resume_existing"`
+	UpdateExisting   bool     `json:"update_existing"`
+	UpdateIDs        []string `json:"update_ids"`
+	ExcludedIDs      []string `json:"excluded_ids"`
 	AllowIncomplete  bool     `json:"allow_incomplete"`
 	LocalRoot        string   `json:"local_root"`
 	LocalAuthorized  bool     `json:"local_authorized"`
@@ -44,11 +47,12 @@ type installRequest struct {
 }
 
 type resolveRequest struct {
-	Server          string `json:"server"`
-	LocalRoot       string `json:"local_root"`
-	LocalAuthorized bool   `json:"local_authorized"`
-	ArtifactsMode   string `json:"artifacts_mode"`
-	ArtifactsPath   string `json:"artifacts_path"`
+	ExcludedIDs     []string `json:"excluded_ids"`
+	Server          string   `json:"server"`
+	LocalRoot       string   `json:"local_root"`
+	LocalAuthorized bool     `json:"local_authorized"`
+	ArtifactsMode   string   `json:"artifacts_mode"`
+	ArtifactsPath   string   `json:"artifacts_path"`
 }
 
 func reportState(report any) string {
@@ -69,6 +73,7 @@ func fullOptions(req resolveRequest, maxDownload int64) engine.FullOptions {
 		Target:          req.Server,
 		LocalRoot:       req.LocalRoot,
 		LocalAuthorized: req.LocalAuthorized,
+		ExcludedIDs:     req.ExcludedIDs,
 		ArtifactsMode:   req.ArtifactsMode,
 		ArtifactsPath:   req.ArtifactsPath,
 		MaxDownload:     maxDownload,
@@ -82,7 +87,7 @@ func (m *installationJobs) handler(w http.ResponseWriter, r *http.Request) {
 		var q resolveRequest
 		d := json.NewDecoder(http.MaxBytesReader(w, r.Body, 16384))
 		d.DisallowUnknownFields()
-		if d.Decode(&q) != nil || strings.TrimSpace(q.Server) == "" {
+		if d.Decode(&q) != nil || strings.TrimSpace(q.Server) == "" || len(q.ExcludedIDs) > 100 {
 			respond(400, apiError{"invalid_request", "server directory required"})
 			return
 		}
@@ -100,7 +105,7 @@ func (m *installationJobs) handler(w http.ResponseWriter, r *http.Request) {
 		var q installRequest
 		d := json.NewDecoder(http.MaxBytesReader(w, r.Body, 32768))
 		d.DisallowUnknownFields()
-		if d.Decode(&q) != nil || strings.TrimSpace(q.Server) == "" {
+		if d.Decode(&q) != nil || strings.TrimSpace(q.Server) == "" || len(q.ExcludedIDs) > 100 {
 			respond(400, apiError{"invalid_request", "server directory required"})
 			return
 		}
@@ -117,6 +122,14 @@ func (m *installationJobs) handler(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 		} else {
+			if len(q.UpdateIDs) > 100 || (len(q.UpdateIDs) > 0 && !q.UpdateExisting) {
+				respond(400, apiError{"invalid_request", "invalid update selection"})
+				return
+			}
+			if q.UpdateExisting && !q.ResumeExisting {
+				respond(400, apiError{"invalid_request", "update requires an existing installation"})
+				return
+			}
 			if !q.FullConfirmed {
 				respond(400, apiError{"invalid_request", "full installation confirmation required"})
 				return
@@ -185,12 +198,13 @@ func (m *installationJobs) handler(w http.ResponseWriter, r *http.Request) {
 			result, _ := engine.InstallFull(ctx, m.catalog, starter.Assets, q.Server, engine.FullOptions{
 				GitHub: engine.GitHub{Token: os.Getenv("GITHUB_TOKEN")}, Target: q.Server,
 				LocalRoot: q.LocalRoot, LocalAuthorized: q.LocalAuthorized,
-				AllowIncomplete: q.AllowIncomplete || q.ResumeExisting, ResumeExisting: q.ResumeExisting,
+				AllowIncomplete: q.AllowIncomplete || q.ResumeExisting, ResumeExisting: q.ResumeExisting, UpdateExisting: q.UpdateExisting, UpdateIDs: q.UpdateIDs, ExcludedIDs: q.ExcludedIDs,
 				ArtifactsMode: q.ArtifactsMode, ArtifactsPath: q.ArtifactsPath,
 				MaxDownload: m.maxDownload,
 				Progress: func(p engine.FullProgress) {
 					p.InstalledResources = append([]string{}, p.InstalledResources...)
 					p.Missing = append([]string{}, p.Missing...)
+					p.Backups = append([]string{}, p.Backups...)
 					if p.State != "failed" && p.State != "cancelled" && p.State != "completed" && p.State != "completed_files_only" {
 						p.Plan = nil
 					}

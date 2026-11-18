@@ -30,6 +30,9 @@ type FullOptions struct {
 	LocalAuthorized bool
 	AllowIncomplete bool
 	ResumeExisting  bool
+	UpdateExisting  bool
+	UpdateIDs       []string
+	ExcludedIDs     []string
 	ArtifactsMode   string
 	ArtifactsPath   string
 	ArtifactOS      string
@@ -41,24 +44,25 @@ type FullOptions struct {
 
 // Component is one resolvable piece of the server-data tree.
 type Component struct {
-	ID           string   `json:"id"`
-	Type         string   `json:"type"`
-	Version      string   `json:"version,omitempty"`
-	Tag          string   `json:"tag,omitempty"`
-	Repository   string   `json:"repository,omitempty"`
-	Asset        string   `json:"asset,omitempty"`
-	Digest       string   `json:"digest,omitempty"`
-	Size         int64    `json:"size,omitempty"`
-	Destination  string   `json:"destination,omitempty"`
-	Dependencies []string `json:"dependencies,omitempty"`
-	SourceKind   string   `json:"source_kind"`
-	SourceDetail string   `json:"source_detail,omitempty"`
-	Status       string   `json:"status"`
-	Reason       string   `json:"reason,omitempty"`
-	Protected    bool     `json:"protected,omitempty"`
-	Optional     bool     `json:"optional,omitempty"`
-	Installed    bool     `json:"installed,omitempty"`
-	Fallback     bool     `json:"fallback,omitempty"`
+	ID               string   `json:"id"`
+	Type             string   `json:"type"`
+	Version          string   `json:"version,omitempty"`
+	Tag              string   `json:"tag,omitempty"`
+	Repository       string   `json:"repository,omitempty"`
+	Asset            string   `json:"asset,omitempty"`
+	Digest           string   `json:"digest,omitempty"`
+	Size             int64    `json:"size,omitempty"`
+	Destination      string   `json:"destination,omitempty"`
+	Dependencies     []string `json:"dependencies,omitempty"`
+	SourceKind       string   `json:"source_kind"`
+	SourceDetail     string   `json:"source_detail,omitempty"`
+	Status           string   `json:"status"`
+	Reason           string   `json:"reason,omitempty"`
+	Protected        bool     `json:"protected,omitempty"`
+	Optional         bool     `json:"optional,omitempty"`
+	Installed        bool     `json:"installed,omitempty"`
+	InstalledVersion string   `json:"installed_version,omitempty"`
+	Fallback         bool     `json:"fallback,omitempty"`
 
 	kind       string
 	assetID    int64
@@ -112,6 +116,7 @@ type FullProgress struct {
 	InstalledResources []string         `json:"installed_resources,omitempty"`
 	Missing            []string         `json:"missing,omitempty"`
 	Failures           []InstallFailure `json:"failures,omitempty"`
+	Backups            []string         `json:"backups,omitempty"`
 	Artifacts          ArtifactPlan     `json:"artifacts"`
 	Plan               *FullPlan        `json:"plan,omitempty"`
 	Destination        string           `json:"destination,omitempty"`
@@ -195,6 +200,13 @@ func ResolveFull(ctx context.Context, c Catalog, opts FullOptions) (FullPlan, er
 	for _, r := range c.Resources {
 		byID[r.ID] = r
 	}
+	excluded := map[string]bool{}
+	for _, id := range opts.ExcludedIDs {
+		if _, ok := byID[id]; !ok && id != "baseevents" {
+			return plan, fmt.Errorf("unknown_component:%s", id)
+		}
+		excluded[id] = true
+	}
 	seen := map[string]bool{}
 	plan.Components = make([]Component, len(c.Resources))
 	var wg sync.WaitGroup
@@ -203,6 +215,10 @@ func ResolveFull(ctx context.Context, c Catalog, opts FullOptions) (FullPlan, er
 		wg.Add(1)
 		go func(i int, r Resource) {
 			defer wg.Done()
+			if excluded[r.ID] {
+				plan.Components[i] = Component{ID: r.ID, Type: r.Type, Dependencies: append([]string{}, r.Dependencies...), Destination: componentDestination(r), Status: "blocked", Reason: "not_selected"}
+				return
+			}
 			limit <- struct{}{}
 			defer func() { <-limit }()
 			plan.Components[i] = resolveComponent(ctx, r, opts)
@@ -221,6 +237,10 @@ func ResolveFull(ctx context.Context, c Catalog, opts FullOptions) (FullPlan, er
 				Digest: contract.ArchiveDigest,
 			}
 			comp.archiveURL = archiveURL(*opts.Sources, contract)
+			if excluded["baseevents"] {
+				comp.Status = "blocked"
+				comp.Reason = "not_selected"
+			}
 			plan.Components = append(plan.Components, comp)
 		}
 	}
@@ -231,6 +251,12 @@ func ResolveFull(ctx context.Context, c Catalog, opts FullOptions) (FullPlan, er
 				dest := filepath.Join(opts.Target, filepath.FromSlash(plan.Components[i].Destination))
 				if st, err := os.Stat(filepath.Join(dest, "fxmanifest.lua")); err == nil && st.Mode().IsRegular() {
 					plan.Components[i].Installed = true
+					parts := append(strings.Split(filepath.ToSlash(plan.Components[i].Destination), "/"), "fxmanifest.lua")
+					if manifest, e := noSymlinkPath(opts.Target, parts...); e == nil && st.Size() <= 1<<20 {
+						if data, e := os.ReadFile(manifest); e == nil {
+							plan.Components[i].InstalledVersion, _ = ParseManifest(data)
+						}
+					}
 					plan.Installed++
 				}
 			}
@@ -694,7 +720,7 @@ func InstallFull(ctx context.Context, c Catalog, templates fs.FS, target string,
 	}
 	if !plan.FilesReady {
 		result.Missing = blockedIDs(plan)
-		if !opts.AllowIncomplete || result.Total == 0 {
+		if !opts.AllowIncomplete || (result.Total == 0 && !artifactReady(plan.Artifacts.Status)) {
 			emit()
 			return result, fmt.Errorf("full_installation_blocked")
 		}
@@ -1009,12 +1035,17 @@ func writeManagedMarker(stage string, comp *Component) error {
 	if _, err := os.Lstat(marker); err == nil {
 		return nil
 	}
+	files, err := resourceFileHashes(dest)
+	if err != nil {
+		return err
+	}
 	record := map[string]any{
-		"schema_version": 1,
+		"schema_version": 2,
 		"id":             comp.ID,
 		"version":        comp.Version,
 		"sha256":         comp.Digest,
 		"source_kind":    comp.SourceKind,
+		"files":          files,
 	}
 	b, err := json.Marshal(record)
 	if err != nil {

@@ -435,20 +435,20 @@
       "type": "fivem_resource",
       "group": "[mz]",
       "repository": "https://github.com/mz-core/mz_menu",
-      "visibility": "private",
-      "source": "private_release_requires_authorization",
-      "version": "0.4.0-test",
-      "tag": "",
-      "asset": "",
-      "sha256": "",
+      "visibility": "public",
+      "source": "github_release",
+      "version": "0.4.1",
+      "tag": "v0.4.1",
+      "asset": "mz_menu-v0.4.1.zip",
+      "sha256": "sha256:d20bd5081d70e2ab87a18506e61d0e83bf285608a3d21c7be5cf08e51eb9fdb0",
       "dependencies": [],
       "required_files": [
         "fxmanifest.lua",
         "web/index.html"
       ],
       "mutable_policy": "unknown_preserve",
-      "channel": "prerelease",
-      "availability": "release_missing"
+      "channel": "stable",
+      "availability": "metadata_only_unverified"
     },
     {
       "id": "mz_interact",

@@ -41,10 +41,11 @@ type Plan struct {
 }
 
 type managedRecord struct {
-	SchemaVersion int    `json:"schema_version"`
-	ID            string `json:"id"`
-	Version       string `json:"version"`
-	SHA256        string `json:"sha256"`
+	SchemaVersion int               `json:"schema_version"`
+	ID            string            `json:"id"`
+	Version       string            `json:"version"`
+	SHA256        string            `json:"sha256"`
+	Files         map[string]string `json:"files,omitempty"`
 }
 
 func noSymlinkPath(root string, parts ...string) (string, error) {
@@ -194,7 +195,7 @@ func BuildPlan(c Catalog, boot []string, server, workspace string, remote map[st
 				if st, e := os.Lstat(marker); e == nil && st.Mode().IsRegular() && st.Size() <= 16384 {
 					if data, e := os.ReadFile(marker); e == nil {
 						var m managedRecord
-						if json.Unmarshal(data, &m) == nil && m.SchemaVersion == 1 && m.ID == id && m.Version == step.InstalledVersion && hashPattern.MatchString(m.SHA256) {
+						if json.Unmarshal(data, &m) == nil && (m.SchemaVersion == 1 || m.SchemaVersion == 2) && m.ID == id && m.Version == step.InstalledVersion && hashPattern.MatchString(m.SHA256) {
 							step.Provenance = "managed_record_unverified"
 						}
 					}

@@ -13,6 +13,7 @@ import (
 	"net/http"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"runtime"
 	"strings"
 	"time"
@@ -86,7 +87,12 @@ func serve(args []string) {
 			writeError(w, 405, "method", "method not allowed")
 			return
 		}
-		_ = json.NewEncoder(w).Encode(map[string]any{"catalog": catalog, "os": runtime.GOOS, "bootstrap_files": engine.BootstrapFiles, "required_configuration": engine.BootstrapConfigurations, "phases": engine.PlanningPhases})
+		home, _ := os.UserHomeDir()
+		suggested := ""
+		if home != "" {
+			suggested = filepath.Join(home, "MZ-servidor")
+		}
+		_ = json.NewEncoder(w).Encode(map[string]any{"catalog": catalog, "os": runtime.GOOS, "suggested_target": suggested, "bootstrap_files": engine.BootstrapFiles, "required_configuration": engine.BootstrapConfigurations, "phases": engine.PlanningPhases})
 	})
 	mux.HandleFunc("/api/plan", func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != "POST" {

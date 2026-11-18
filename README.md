@@ -2,11 +2,24 @@
 
 O Starter 2.0 planeja o ambiente e executa duas modalidades de instalacao apos confirmacao explicita: instalacao completa do MZ Core e instalacao parcial experimental. O planejamento e a instalacao estao documentados em [planejamento e catalogo](docs/planning.md). O Starter nao substitui os instaladores atuais e nao inicia o FXServer.
 
+## Abrir no Linux
+
+Baixe o pacote Linux amd64 da [pagina de releases](https://github.com/mz-core/mz_starter/releases), extraia o ZIP e, no terminal da pasta extraida, execute:
+
+```sh
+chmod u+x mz-starter
+./mz-starter
+```
+
+Se o navegador nao abrir, copie o endereco completo exibido no terminal. Em uma VPS sem interface grafica, execute `./mz-starter serve --no-open --port 39123` na VPS e, em outro terminal no seu computador, execute `ssh -L 39123:127.0.0.1:39123 usuario@IP_DA_VPS`. Abra no navegador do seu computador o endereco completo exibido pelo Starter, incluindo a parte depois de `#`. Mantenha os dois terminais abertos e nao compartilhe esse endereco: ele contem a chave da sessao local.
+
+Para instalar, informe uma pasta nova ou vazia, clique em **Verificar componentes** e siga as instrucoes da tela. Recursos privados ou sem release publica precisam de distribuicao autorizada. A opcao de atualizar pode substituir resources MZ com registro de arquivos verificavel e preservar personalizacoes; registros antigos, manifestos alterados, Core e artifacts exigem revisao. Consulte [Atualizacao](docs/update.md).
+
 ## Instalacao completa do MZ Core
 
 Na interface, escolha Instalacao completa do MZ Core, informe um destino novo ou vazio e clique em Verificar componentes. O Starter consulta os releases reais dos repositorios oficiais `mz-core`, resolve os 51 componentes do perfil e mostra os bloqueios antes de instalar. O botao INSTALAR SERVIDOR baixa os componentes disponiveis, verifica SHA-256, inspeciona cada ZIP, extrai em staging privado e publica com rename sem sobrescrita.
 
-O perfil resolve automaticamente a release estavel marcada como **Latest** no GitHub para cada resource MZ, sem depender da versao fixada no catalogo. Como a resolucao consulta o GitHub em tempo de instalacao, uma nova release estavel passa a ser instalada pelo proximo cliente sem atualizar o executavel do Starter. O perfil publico atual instala 40 resources MZ com release publica, incluindo `mz_vehicles`, `mz_phone`, `mz_hud`, `mz_assets`, `mz_status` e `mz_transport`, alem de 7 snapshots oficiais de dependencias (`oxmysql`, `ox_lib`, `pma-voice` com patch, `bob74_ipl`, `screenshot-basic`, `mapmanager` e `spawnmanager`), `baseevents` e 2 system resources. `mz_menu` ainda nao possui release estavel publicada e permanece bloqueado; `mz_banguard` permanece protegido e so pode vir de fonte local autorizada. Recursos sem release publica utilizavel continuam identificados individualmente e podem ser atendidos por uma pasta local explicitamente autorizada. Releases privados exigem token autorizado ou pacote local.
+O perfil resolve automaticamente a release estavel marcada como **Latest** no GitHub para cada resource MZ, sem depender da versao fixada no catalogo. Como a resolucao consulta o GitHub em tempo de instalacao, uma nova release estavel passa a ser instalada pelo proximo cliente sem atualizar o executavel do Starter. O perfil publico atual instala 40 resources MZ com release publica, incluindo `mz_vehicles`, `mz_phone`, `mz_hud`, `mz_assets`, `mz_status` e `mz_transport`, alem de 7 snapshots oficiais de dependencias (`oxmysql`, `ox_lib`, `pma-voice` com patch, `bob74_ipl`, `screenshot-basic`, `mapmanager` e `spawnmanager`), `baseevents` e 2 system resources. `mz_menu` possui release estavel publica; `mz_banguard` permanece protegido e so pode vir de fonte local autorizada. Recursos sem release publica utilizavel continuam identificados individualmente e podem ser atendidos por uma pasta local explicitamente autorizada. Releases privados exigem token autorizado ou pacote local.
 
 Os artifacts do FXServer sao separados do server-data. Na instalacao nova no Windows e no Linux, a opcao automatica baixa o build oficial recomendado e habilita `yarn`, `webpack`, `screenshot-basic` e `mz_feedback`. Se houver componentes obrigatorios sem distribuicao, o operador pode autorizar uma instalacao incompleta dos componentes disponiveis; o resultado e explicitamente marcado como incompleto e o servidor nao e declarado pronto. Licenca, banco, endpoints e permissoes continuam sendo responsabilidade do operador.
 

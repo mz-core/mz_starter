@@ -5,9 +5,15 @@ Este documento resume como atualizar um ambiente ja instalado com o `mz_starter`
 
 ## Instalacoes feitas com ZIPs do Starter
 
-A opcao de completar uma instalacao adiciona apenas recursos ausentes: ela nao
-atualiza pastas ja existentes. Os instaladores legados tambem preservam pastas
-sem `.git`. Para atualizar esses recursos, pare o servidor, faca backup
+A opcao de completar uma instalacao adiciona recursos ausentes. A opcao adicional
+de atualizar verifica os hashes registrados pelo Starter e atualiza somente
+resources MZ com registro verificavel, preservando arquivos personalizados, depois da confirmacao de que o servidor esta
+parado. Cada versao anterior permanece em uma pasta `.mz-starter-backup-*` ao lado
+do server-data. Se houver manifesto alterado, arquivo removido ou registro antigo sem hashes, o
+resource permanece intacto e e indicado como pendente. O Core exige revisao
+manual de migracao SQL. Dependencias externas e artifacts ainda nao sao
+atualizados por essa opcao. Os instaladores legados preservam pastas sem `.git`.
+Para atualizar os recursos que exigem revisao, pare o servidor, faca backup
 restauravel dos arquivos e do banco e compare cada pacote da release com os
 arquivos e configuracoes locais antes de substitui-los manualmente. Preserve as
 personalizacoes e valide as dependencias antes de reiniciar.
