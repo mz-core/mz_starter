@@ -402,6 +402,8 @@ func installResume(ctx context.Context, c Catalog, templates fs.FS, target strin
 			result.TxAdminURL = "http://127.0.0.1:40120"
 			if created {
 				result.Files += 2
+			} else if artifactResult.Status == "installed" {
+				launchWarning = "launch_script_existing_review_required"
 			}
 		}
 	}

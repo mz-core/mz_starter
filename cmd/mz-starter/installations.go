@@ -47,6 +47,7 @@ type installRequest struct {
 }
 
 type resolveRequest struct {
+	Existing        bool     `json:"existing"`
 	ExcludedIDs     []string `json:"excluded_ids"`
 	Server          string   `json:"server"`
 	LocalRoot       string   `json:"local_root"`
@@ -91,6 +92,12 @@ func (m *installationJobs) handler(w http.ResponseWriter, r *http.Request) {
 			respond(400, apiError{"invalid_request", "server directory required"})
 			return
 		}
+		if q.Existing {
+			if _, e := engine.InspectExistingDirectory(q.Server); e != nil {
+				respond(400, apiError{e.Error(), "invalid server directory"})
+				return
+			}
+		}
 		ctx, cancel := context.WithTimeout(r.Context(), 3*time.Minute)
 		defer cancel()
 		plan, e := engine.ResolveFull(ctx, m.catalog, fullOptions(q, m.maxDownload))
@@ -112,7 +119,7 @@ func (m *installationJobs) handler(w http.ResponseWriter, r *http.Request) {
 		if q.Kind == "" {
 			q.Kind = "partial"
 		}
-		if q.Kind != "partial" && q.Kind != "full" {
+		if q.Kind != "partial" && q.Kind != "full" && q.Kind != "artifacts" {
 			respond(400, apiError{"invalid_request", "unknown installation kind"})
 			return
 		}
@@ -121,7 +128,7 @@ func (m *installationJobs) handler(w http.ResponseWriter, r *http.Request) {
 				respond(400, apiError{"invalid_request", "partial confirmation and resources required"})
 				return
 			}
-		} else {
+		} else if q.Kind == "full" {
 			if len(q.UpdateIDs) > 100 || (len(q.UpdateIDs) > 0 && !q.UpdateExisting) {
 				respond(400, apiError{"invalid_request", "invalid update selection"})
 				return
@@ -143,7 +150,12 @@ func (m *installationJobs) handler(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 		}
-		if !q.ResumeExisting {
+		if q.Kind == "artifacts" {
+			if _, e := engine.InspectExistingDirectory(q.Server); e != nil {
+				respond(400, apiError{e.Error(), "invalid server directory"})
+				return
+			}
+		} else if !q.ResumeExisting {
 			if _, e := engine.PlanInstallation(m.catalog, starter.Assets, q.Server, "", "new", "", nil); e != nil {
 				respond(400, apiError{e.Error(), "invalid destination"})
 				return
@@ -179,6 +191,15 @@ func (m *installationJobs) handler(w http.ResponseWriter, r *http.Request) {
 		m.mu.Unlock()
 		go func() {
 			defer cancel()
+			if q.Kind == "artifacts" {
+				result, _ := engine.InstallArtifactsOnly(ctx, q.Server, engine.FullOptions{Progress: func(p engine.FullProgress) { m.mu.Lock(); j.Report = p; m.mu.Unlock() }})
+				m.mu.Lock()
+				j.Report = result
+				j.Done = true
+				m.active = false
+				m.mu.Unlock()
+				return
+			}
 			if q.Kind == "partial" {
 				result, _ := engine.InstallPartial(ctx, m.catalog, starter.Assets, q.Server, q.Resources, engine.InstallOptions{GitHub: engine.GitHub{Token: os.Getenv("GITHUB_TOKEN")}, Verify: engine.VerifyOptions{MaxDownload: m.maxDownload}, Progress: func(p engine.InstallProgress) {
 					p.Installed = append([]string{}, p.Installed...)

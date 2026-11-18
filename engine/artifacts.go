@@ -46,6 +46,51 @@ func artifactOS(opts FullOptions) string {
 	return runtime.GOOS
 }
 
+// InspectExistingDirectory validates the selected server-data path without changing it.
+func InspectExistingDirectory(target string) (string, error) {
+	abs, err := filepath.Abs(target)
+	if err != nil || strings.TrimSpace(target) == "" {
+		return "", fmt.Errorf("existing_installation_missing")
+	}
+	st, err := os.Lstat(abs)
+	if err != nil || !st.IsDir() || st.Mode()&os.ModeSymlink != 0 || isReparsePoint(abs) {
+		return "", fmt.Errorf("existing_installation_missing")
+	}
+	resources := filepath.Join(abs, "resources")
+	st, err = os.Lstat(resources)
+	if err != nil || !st.IsDir() || st.Mode()&os.ModeSymlink != 0 || isReparsePoint(resources) {
+		return "", fmt.Errorf("existing_resources_missing")
+	}
+	return abs, nil
+}
+
+// InstallArtifactsOnly never modifies the selected server-data directory.
+func InstallArtifactsOnly(ctx context.Context, target string, opts FullOptions) (result FullProgress, err error) {
+	opts = opts.defaults()
+	abs, err := InspectExistingDirectory(target)
+	if err != nil {
+		return FullProgress{State: "failed", Detail: err.Error()}, err
+	}
+	opts.Target, opts.ArtifactsMode = abs, "auto"
+	result.State, result.Destination = "preflight", abs
+	emit := func() {
+		if opts.Progress != nil {
+			opts.Progress(result)
+		}
+	}
+	result.Artifacts, err = installArtifacts(ctx, opts, abs, &result, emit)
+	if err != nil {
+		result.State, result.Detail = "failed", err.Error()
+		if ctx.Err() != nil {
+			result.State = "cancelled"
+		}
+	} else {
+		result.State, result.Detail = "completed", "artifacts_only_complete"
+	}
+	emit()
+	return result, err
+}
+
 func resolveArtifacts(ctx context.Context, opts FullOptions) (ArtifactPlan, error) {
 	plan := ArtifactPlan{Mode: opts.ArtifactsMode, Path: opts.ArtifactsPath}
 	switch opts.ArtifactsMode {
@@ -82,6 +127,11 @@ func resolveArtifacts(ctx context.Context, opts FullOptions) (ArtifactPlan, erro
 		plan.Path, plan.Status, plan.Version, plan.URL, plan.Archive = abs, "ready", info.Build, info.URL, info.Archive
 		return plan, nil
 	case "auto":
+		info, err := fetchRecommendedArtifact(ctx, opts)
+		if err != nil {
+			plan.Status, plan.Reason = "blocked", err.Error()
+			return plan, nil
+		}
 		path := opts.ArtifactsPath
 		if strings.TrimSpace(path) == "" {
 			absTarget, err := filepath.Abs(opts.Target)
@@ -89,52 +139,58 @@ func resolveArtifacts(ctx context.Context, opts FullOptions) (ArtifactPlan, erro
 				plan.Status, plan.Reason = "blocked", "artifacts_path_invalid"
 				return plan, nil
 			}
-			path = filepath.Join(filepath.Dir(absTarget), "mz-artifacts")
+			path = filepath.Join(filepath.Dir(absTarget), "mz-artifacts-"+artifactOS(opts)+"-"+info.Build)
 		}
-		if abs, err := filepath.Abs(path); err == nil {
-			if st, e := os.Lstat(abs); e == nil {
-				if !st.IsDir() || st.Mode()&os.ModeSymlink != 0 || isReparsePoint(abs) {
-					plan.Status, plan.Reason = "blocked", "artifacts_path_invalid"
-					return plan, nil
-				}
-				entries, e := os.ReadDir(abs)
-				if e != nil {
-					plan.Status, plan.Reason = "blocked", "artifacts_path_invalid"
-					return plan, nil
-				}
-				if len(entries) > 0 {
-					if _, e := validateExistingArtifacts(abs, artifactOS(opts)); e != nil {
-						plan.Status, plan.Reason = "blocked", "artifacts_directory_not_empty"
-						return plan, nil
-					}
-					if opts.Target != "" && artifactOverlap(opts.Target, abs) {
-						plan.Status, plan.Reason = "blocked", "artifacts_overlap_server_data"
-						return plan, nil
-					}
-					plan.Path, plan.Status = abs, "existing"
-					return plan, nil
-				}
-			} else if !os.IsNotExist(e) {
-				plan.Status, plan.Reason = "blocked", "artifacts_destination_unavailable"
-				return plan, nil
-			}
-		}
-		abs, err := validateArtifactDestination(path)
+		abs, err := filepath.Abs(path)
 		if err != nil {
-			plan.Status, plan.Reason = "blocked", err.Error()
+			plan.Status, plan.Reason = "blocked", "artifacts_path_invalid"
 			return plan, nil
 		}
 		if opts.Target != "" && artifactOverlap(opts.Target, abs) {
 			plan.Status, plan.Reason = "blocked", "artifacts_overlap_server_data"
 			return plan, nil
 		}
-		info, err := fetchRecommendedArtifact(ctx, opts)
-		if err != nil {
+		plan.Path, plan.Version, plan.URL, plan.Archive = abs, info.Build, info.URL, info.Archive
+		if st, e := os.Lstat(abs); e == nil {
+			if !st.IsDir() || st.Mode()&os.ModeSymlink != 0 || isReparsePoint(abs) {
+				plan.Status, plan.Reason = "blocked", "artifacts_path_invalid"
+				return plan, nil
+			}
+			entries, e := os.ReadDir(abs)
+			if e != nil {
+				plan.Status, plan.Reason = "blocked", "artifacts_path_invalid"
+				return plan, nil
+			}
+			if len(entries) > 0 {
+				markerPath := filepath.Join(abs, ".mz-artifact-version")
+				markerInfo, e := os.Lstat(markerPath)
+				if e != nil || !markerInfo.Mode().IsRegular() || markerInfo.Size() > 128 || isReparsePoint(markerPath) {
+					plan.Status, plan.Reason = "blocked", "artifacts_version_unverified"
+					return plan, nil
+				}
+				marker, e := os.ReadFile(markerPath)
+				if e != nil || string(marker) != artifactOS(opts)+":"+info.Build || len(marker) > 128 {
+					plan.Status, plan.Reason = "blocked", "artifacts_version_unverified"
+					return plan, nil
+				}
+				if _, e := validateExistingArtifacts(abs, artifactOS(opts)); e != nil {
+					plan.Status, plan.Reason = "blocked", "artifacts_directory_not_empty"
+					return plan, nil
+				}
+				plan.Status = "existing"
+				return plan, nil
+			}
+		} else if !os.IsNotExist(e) {
+			plan.Status, plan.Reason = "blocked", "artifacts_destination_unavailable"
+			return plan, nil
+		}
+		if _, err = validateArtifactDestination(abs); err != nil {
 			plan.Status, plan.Reason = "blocked", err.Error()
 			return plan, nil
 		}
-		plan.Path, plan.Status, plan.Version, plan.URL, plan.Archive = abs, "ready", info.Build, info.URL, info.Archive
+		plan.Status = "ready"
 		return plan, nil
+
 	default:
 		plan.Status, plan.Reason = "blocked", "invalid_artifacts_mode"
 		return plan, nil
@@ -176,6 +232,9 @@ func fetchRecommendedArtifact(ctx context.Context, opts FullOptions) (recommende
 	}
 	var v changelogVersions
 	if err = json.NewDecoder(io.LimitReader(resp.Body, 1<<20)).Decode(&v); err != nil || v.Recommended == "" || v.RecommendedDownload == "" {
+		return recommendedArtifact{}, fmt.Errorf("artifact_changelog_invalid")
+	}
+	if len(v.Recommended) > 20 || strings.Trim(v.Recommended, "0123456789") != "" {
 		return recommendedArtifact{}, fmt.Errorf("artifact_changelog_invalid")
 	}
 	if err = validateArtifactURL(v.RecommendedDownload, v.Recommended, opts.Sources.RuntimeBase, goos); err != nil {
@@ -326,6 +385,11 @@ func installArtifacts(ctx context.Context, opts FullOptions, target string, resu
 	}
 	if err != nil {
 		return resolved, err
+	}
+	if opts.ArtifactsMode == "auto" {
+		if err = os.WriteFile(filepath.Join(extract, ".mz-artifact-version"), []byte(artifactOS(opts)+":"+resolved.Version), 0600); err != nil {
+			return resolved, err
+		}
 	}
 	if err = publishInstallStage(extract, resolved.Path); err != nil {
 		return resolved, err

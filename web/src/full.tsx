@@ -400,9 +400,27 @@ export function FullInstallPanel({ t, label, server, planReady }: Props) {
   );
 }
 
+function versionStatus(component: Component, t: T): string {
+  const current = component.installed_version;
+  const available = component.version;
+  if (component.status !== 'ready' || component.fallback || !current || !available) return t.simpleUnknownVersion;
+  if (current === available) return t.simpleUpToDate;
+  const a = current.match(/^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)$/);
+  const b = available.match(/^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)$/);
+  if (!a || !b) return t.simpleUnknownVersion;
+  for (let i = 1; i <= 3; i++) {
+    if (a[i] === b[i]) continue;
+    return a[i].length < b[i].length || (a[i].length === b[i].length && a[i] < b[i]) ? t.simpleUpdateAvailable : t.simpleNewerVersion;
+  }
+  return t.simpleUnknownVersion;
+}
+
 // Simple new-server flow; advanced resume/update remains separate.
 export function SimpleInstallPanel({ t, label, server, resources, suggested, onSuggestion }: { t: T; label: (v: string) => string; server: string; resources: {id:string; type:string}[]; suggested: string; onSuggestion: (value:string) => void }) {
   const [artifacts, setArtifacts] = useState(true);
+  const [mode, setMode] = useState<'new'|'existing'>('new');
+  const [inspection, setInspection] = useState<FullPlan | null>(null);
+  const [checking, setChecking] = useState(false);
   const [excluded, setExcluded] = useState<string[]>(['mz_banguard']);
   const [id, setID] = useState('');
   const [job, setJob] = useState<Job | null>(null);
@@ -421,9 +439,15 @@ export function SimpleInstallPanel({ t, label, server, resources, suggested, onS
   const start = async () => {
     setError('');
     try {
-      const next = await api<{id:string}>('/api/installations', { kind:'full', server, full_confirmed:true, allow_incomplete:true, artifacts_mode:artifacts ? 'auto' : 'none', excluded_ids:excluded.filter(id => resources.some(r => r.id === id)) });
+      const next = await api<{id:string}>('/api/installations', mode === 'existing' ? {kind:'artifacts', server} : { kind:'full', server, full_confirmed:true, allow_incomplete:true, artifacts_mode:artifacts ? 'auto' : 'none', excluded_ids:excluded.filter(id => resources.some(r => r.id === id)) });
       setJob(null); setID(next.id);
     } catch (e) { setError(e instanceof Error ? e.message : t.failed); }
+  };
+  const inspect = async () => {
+    setError(''); setChecking(true); setInspection(null);
+    try { setInspection(await api<FullPlan>('/api/installations/resolve', {server, existing:true, artifacts_mode:'none'})); }
+    catch (e) { setError(e instanceof Error ? e.message : t.failed); }
+    finally { setChecking(false); }
   };
   const reset = async () => {
     if (!id) return;
@@ -432,25 +456,32 @@ export function SimpleInstallPanel({ t, label, server, resources, suggested, onS
     if (job?.done) { setID(''); setJob(null); }
   };
   return <section className="full-install">
-    <h3>{t.simpleInstall}</h3><p>{t.simpleIntro}</p>
-    <label className="check"><input type="checkbox" checked={artifacts} onChange={e => setArtifacts(e.target.checked)} />{t.simpleArtifacts}</label>
-    <details><summary>{t.simpleChoose}</summary><p>{t.simpleChooseHint}</p>{resources.filter(r => r.type !== 'artifact').map(r => <label className="check" key={r.id}><input type="checkbox" checked={!excluded.includes(r.id)} onChange={e => setExcluded(e.target.checked ? excluded.filter(id => id !== r.id) : [...excluded,r.id])} />{r.id}</label>)}</details>
-    <button className="primary" disabled={!server.trim() || !!id} onClick={start}><Download size={16}/>{t.simpleStart}</button>
+    <h3>{t.simpleInstall}</h3>
+    <label className="check"><input type="radio" name="simple-mode" checked={mode === 'new'} onChange={() => { setMode('new'); setInspection(null); }} />{t.simpleNewMode}</label>
+    <label className="check"><input type="radio" name="simple-mode" checked={mode === 'existing'} onChange={() => { setMode('existing'); setInspection(null); }} />{t.simpleExistingMode}</label>
+    <p>{mode === 'new' ? t.simpleIntro : t.simpleExistingHint}</p>
+    {mode === 'new' && <><label className="check"><input type="checkbox" checked={artifacts} onChange={e => setArtifacts(e.target.checked)} />{t.simpleArtifacts}</label>
+    <details><summary>{t.simpleChoose}</summary><p>{t.simpleChooseHint}</p>{resources.filter(r => r.type !== 'artifact').map(r => <label className="check" key={r.id}><input type="checkbox" checked={!excluded.includes(r.id)} onChange={e => setExcluded(e.target.checked ? excluded.filter(id => id !== r.id) : [...excluded,r.id])} />{r.id}</label>)}</details></>}
+    {mode === 'existing' && <><button disabled={!server.trim() || checking || !!id} onClick={inspect}>{checking ? t.resolving : t.simpleInspect}</button>
+      {inspection && inspection.target === server && <details open><summary>{t.simpleDetected}: {inspection.components.filter(c => c.installed).length}</summary>
+        {inspection.components.filter(c => c.installed).map(c => <p key={c.id}>{c.id}: {t.installed} {c.installed_version || '—'} · {t.available} {c.status === 'ready' ? c.version || '—' : '—'}{c.fallback ? ` (${t.fallbackVersion})` : ''} · {versionStatus(c, t)}</p>)}
+        <small>{t.simpleInspectionHint}</small></details>}</>}
+    <button className="primary" disabled={!server.trim() || !!id} onClick={start}><Download size={16}/>{mode === 'existing' ? t.simpleArtifactStart : t.simpleStart}</button>
     {error && <p className="error" role="alert">{label(error)}</p>}
     {job && <div role="status"><p><strong>{label(job.report.state)}</strong> {job.report.resource || ''}</p>
       {job.report.total ? <progress value={job.report.installed || 0} max={job.report.total}/> : null}
-      {job.report.detail && <p>{job.report.detail.includes('untrusted writable principal') ? t.simpleUnsafeFolder : label(job.report.detail)}</p>}
+      {job.report.detail && <p>{job.report.detail === 'artifacts_only_complete' ? t.simpleArtifactsDone : job.report.detail.includes('untrusted writable principal') ? t.simpleUnsafeFolder : label(job.report.detail)}</p>}
       {job.done && job.report.detail?.includes('untrusted writable principal') && suggested && <button onClick={() => { onSuggestion(suggested); reset(); }}>{t.simpleUseSuggested}: {suggested}</button>}
       {job.report.missing && job.report.missing.length > 0 && <p>{t.simpleMissing}: {job.report.missing.join(', ')}</p>}
       {job.report.destination && <p>{t.serverDataDirectory}: {job.report.destination}</p>}
       {job.report.artifacts?.path && <p>{t.fxserverDirectory}: {job.report.artifacts.path}</p>}
       {job.report.launch_script && <p>{t.txAdminRun} <code>{job.report.launch_script}</code></p>}
-      {job.done && <p>{job.report.state === 'failed' ? t.fullFilesNotReady : t.simpleAfter}</p>}
+      {job.done && <p>{job.report.state === 'failed' ? t.fullFilesNotReady : job.kind === 'artifacts' ? t.simpleArtifactsDone : t.simpleAfter}</p>}
       <button onClick={reset}>{job.done ? t.installClear : t.installCancel}</button>
     </div>}
     <dialog ref={resultDialog} className="install-result" aria-labelledby="install-result-title">
       <h2 id="install-result-title">{job?.report.state === 'cancelled' ? t.resultCancelled : job?.report.state === 'failed' ? t.resultFailed : job?.report.state === 'incomplete' || job?.report.state === 'completed_files_only' ? t.resultIncomplete : t.resultComplete}</h2>
-      <p>{job?.report.state === 'failed' ? t.resultFailedHint : job?.report.state === 'cancelled' ? t.resultCancelledHint : t.resultCompleteHint}</p>
+      <p>{job?.report.state === 'failed' ? t.resultFailedHint : job?.report.state === 'cancelled' ? t.resultCancelledHint : job?.kind === 'artifacts' ? t.simpleArtifactsDone : t.resultCompleteHint}</p>
       {job?.report.missing && job.report.missing.length > 0 && <p>{t.simpleMissing}: {job.report.missing.join(', ')}</p>}
       {job?.report.detail && job.report.state === 'failed' && <p>{job.report.detail.includes('untrusted writable principal') ? t.simpleUnsafeFolder : label(job.report.detail)}</p>}
       {job?.report.detail?.includes('artifacts_failed:') && <p>{t.artifactsNotProvided}: {job.report.detail.split('artifacts_failed:')[1]}</p>}

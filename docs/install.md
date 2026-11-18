@@ -14,7 +14,7 @@ O executavel `mz-starter` abre a interface local. Em Instalacao completa do MZ C
 
 A instalacao completa escreve `server.cfg`, `logo.png`, `cfg/`, `resources/` e os resources resolvidos em um staging privado. O destino precisa continuar vazio e nao pode estar dentro de um servidor existente. Para cada resource MZ, o Starter consulta `releases/latest`, rejeita drafts e pre-releases e instala a release estavel escolhida pelo GitHub, mesmo quando o catalogo fixa uma versao anterior. O ZIP e selecionado pelo nome do resource, baixado por HTTPS oficial e verificado pelo SHA-256 publicado pelo GitHub; a versao instalada e a do asset/manifesto e a tag real aparece na interface. Se a API falhar temporariamente, o catalogo fixado pode ser usado como fallback explicitamente marcado; uma Latest existente sem ZIP valido ou com integridade invalida bloqueia o resource e nunca e substituida silenciosamente por uma versao antiga. Downloads publicos usam a URL HTTPS de release sem enviar token. O Starter mantem em memoria, por 10 minutos, os metadados da Latest ja consultados para que a verificacao e a instalacao no mesmo processo nao consumam duas vezes o limite publico do GitHub. Os demais usam pacotes locais autorizados, releases privados com token ou os snapshots oficiais fixados das dependencias externas.
 
-Os artifacts sao separados do server-data. O modo automatico baixa o build oficial recomendado no Windows e no Linux para `mz-artifacts`; o modo existente valida o executavel; o modo de download permite escolher o destino. Sem artifacts, o resultado e `completed_files_only`; com instalacao incompleta, o resultado e `incomplete`. Licenca, banco, endpoints e permissoes nunca sao preenchidos automaticamente.
+Os artifacts sao separados do server-data. O modo automatico baixa o build oficial recomendado no Windows e no Linux para `mz-artifacts-<sistema>-<versao>`; o modo existente valida o executavel; o modo de download permite escolher o destino. Sem artifacts, o resultado e `completed_files_only`; com instalacao incompleta, o resultado e `incomplete`. Licenca, banco, endpoints e permissoes nunca sao preenchidos automaticamente.
 
 ### Abrir o txAdmin da instalacao nova
 
@@ -28,7 +28,7 @@ start-txadmin.cmd
 ./start-txadmin.sh
 ```
 
-O script localiza os artifacts em `../mz-artifacts` (ou no caminho escolhido), inicia o FXServer sem `+exec server.cfg` e cria o `txData` no proprio server-data. Abra a URL impressa no console; o padrao e `http://127.0.0.1:40120`.
+O script localiza os artifacts na pasta de artifacts registrada durante a instalacao, inicia o FXServer sem `+exec server.cfg` e cria o `txData` no proprio server-data. Abra a URL impressa no console; o padrao e `http://127.0.0.1:40120`.
 
 Na primeira configuracao, escolha a opcao de servidor existente e selecione o diretorio do server-data criado pelo Starter. Nao use a opcao de criar outro servidor. Em uma VPS remota, use um tunel SSH:
 
@@ -42,7 +42,7 @@ O script nao inicia o servidor durante a instalacao, nao contem licenca, senha o
 
 Se a primeira instalacao ficou incompleta, informe o mesmo server-data criado pelo Starter, clique em Verificar componentes e marque **Completar instalacao existente do Starter**. O Starter resolve as fontes atuais e adiciona somente os diretorios de resources ausentes; `server.cfg`, `cfg/*.cfg` e resources ja instalados nao sao reescritos. Um diretorio de resource que ja exista e tratado como conflito e permanece intacto.
 
-O artifact em `mz-artifacts` e reutilizado automaticamente quando a estrutura oficial e compativel (`FXServer.exe`/`citizen` no Windows ou `run.sh`/`alpine/opt/cfx-server/FXServer` no Linux). Um diretorio nao vazio e invalido e recusado, nunca apagado ou sobrescrito.
+O modo automatico consulta a versao oficial recomendada e usa uma pasta separada por sistema e versao. Uma pasta existente so e reutilizada se tiver o registro da mesma versao e a estrutura compativel. Pastas anteriores nao sao apagadas ou sobrescritas; launchers existentes devem ser revisados quando se instalar outra versao.
 
 Releases privados podem ser baixados quando o processo do Starter possui um `GITHUB_TOKEN` autorizado no ambiente. O token nao e exibido na interface, nos logs ou no resultado. Sem token, esses resources permanecem listados como pendentes e podem ser fornecidos por pacote local autorizado.
 
