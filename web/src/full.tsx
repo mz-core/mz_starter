@@ -464,11 +464,13 @@ export function SimpleInstallPanel({ t, label, server, resources, suggested, onS
     <details><summary>{t.simpleChoose}</summary><p>{t.simpleChooseHint}</p>{resources.filter(r => r.type !== 'artifact').map(r => <label className="check" key={r.id}><input type="checkbox" checked={!excluded.includes(r.id)} onChange={e => setExcluded(e.target.checked ? excluded.filter(id => id !== r.id) : [...excluded,r.id])} />{r.id}</label>)}</details></>}
     {mode === 'existing' && <><button disabled={!server.trim() || checking || !!id} onClick={inspect}>{checking ? t.resolving : t.simpleInspect}</button>
       {inspection && inspection.target === server && <details open><summary>{t.simpleDetected}: {inspection.components.filter(c => c.installed).length}</summary>
+        {inspection.warnings?.some(w => w.startsWith('catalogo_remoto_indisponivel')) && <p role="alert">Não foi possível consultar o catálogo oficial. As versões exibidas podem estar desatualizadas.</p>}
         {inspection.components.filter(c => c.installed).map(c => <p key={c.id}>{c.id}: {t.installed} {c.installed_version || '—'} · {t.available} {c.status === 'ready' ? c.version || '—' : '—'}{c.fallback ? ` (${t.fallbackVersion})` : ''} · {versionStatus(c, t)}</p>)}
         <small>{t.simpleInspectionHint}</small></details>}</>}
     <button className="primary" disabled={!server.trim() || !!id} onClick={start}><Download size={16}/>{mode === 'existing' ? t.simpleArtifactStart : t.simpleStart}</button>
     {error && <p className="error" role="alert">{label(error)}</p>}
     {job && <div role="status"><p><strong>{label(job.report.state)}</strong> {job.report.resource || ''}</p>
+      {job.report.plan?.warnings?.some(w => w.startsWith('catalogo_remoto_indisponivel')) && <p role="alert">Não foi possível consultar o catálogo oficial; algumas versões podem estar desatualizadas.</p>}
       {job.report.total ? <progress value={job.report.installed || 0} max={job.report.total}/> : null}
       {job.report.detail && <p>{job.report.detail === 'artifacts_only_complete' ? t.simpleArtifactsDone : job.report.detail.includes('untrusted writable principal') ? t.simpleUnsafeFolder : label(job.report.detail)}</p>}
       {job.done && job.report.detail?.includes('untrusted writable principal') && suggested && <button onClick={() => { onSuggestion(suggested); reset(); }}>{t.simpleUseSuggested}: {suggested}</button>}
@@ -503,7 +505,7 @@ export function ResourceManagerPanel({t, label, server, onServer, resources, os}
   const mz = resources.filter(r => r.type === 'fivem_resource');
   const inspect = async () => {
     setChecking(true); setError(''); setPlan(null);
-    try { setPlan(await api<FullPlan>('/api/installations/resolve', {server, existing:true, artifacts_mode:'none', excluded_ids:[...ids, 'baseevents']})); }
+    try { setPlan(await api<FullPlan>('/api/installations/resolve', {server, existing:true, artifacts_mode:'none', excluded_ids:[...resources.filter(r => r.type !== 'fivem_resource' || r.id === 'mz_banguard').map(r => r.id), 'baseevents']})); }
     catch (e) { setError(e instanceof Error ? e.message : t.failed); }
     finally { setChecking(false); }
   };
@@ -534,13 +536,15 @@ export function ResourceManagerPanel({t, label, server, onServer, resources, os}
     <button disabled={!server.trim() || checking || !!jobID} onClick={inspect}>{checking ? t.resolving : t.resourceScan}</button>
     {error && <p className="error" role="alert">{label(error)}</p>}
     {plan && plan.target === server && <>
+      {plan.warnings?.some(w => w.startsWith('catalogo_remoto_indisponivel')) && <p role="alert">Não foi possível consultar o catálogo oficial. As versões podem estar desatualizadas.</p>}
       <p>{t.resourceListHint}</p>
       <label className="check"><input type="checkbox" checked={stopped} onChange={e => setStopped(e.target.checked)}/>{t.resourceStopped}</label>
-      <div className="table-wrap"><table><thead><tr><th>{t.component}</th><th>{t.installed}</th><th>{t.status}</th><th>{t.resourceAction}</th></tr></thead><tbody>
-        {mz.map(r => {const c=components.get(r.id); return <tr key={r.id}><td>{r.id}</td><td>{c?.installed ? (c.installed_version || t.unknown) : '—'}</td><td>{c?.installed ? t.resourcePresent : t.resourceAbsent}</td><td><button disabled={!!jobID || (c?.installed && !stopped)} onClick={() => start(r.id)}>{c?.installed ? t.resourceUpdate : t.resourceDownload}</button></td></tr>})}
+      <div className="table-wrap"><table><thead><tr><th>{t.component}</th><th>{t.installed}</th><th>{t.available}</th><th>{t.status}</th><th>{t.resourceAction}</th></tr></thead><tbody>
+        {mz.map(r => {const c=components.get(r.id); return <tr key={r.id}><td>{r.id}</td><td>{c?.installed ? (c.installed_version || t.unknown) : '—'}</td><td>{c?.status === 'ready' ? c.version || '—' : '—'}</td><td>{c?.installed ? t.resourcePresent : t.resourceAbsent}</td><td><button disabled={!!jobID || (c?.installed && !stopped)} onClick={() => start(r.id)}>{c?.installed ? t.resourceUpdate : t.resourceDownload}</button></td></tr>})}
       </tbody></table></div>
     </>}
     {job && <div role="status"><p>{selected}: {label(job.report.state)} {job.report.resource || ''}</p>
+      {job.report.plan?.warnings?.some(w => w.startsWith('catalogo_remoto_indisponivel')) && <p role="alert">Não foi possível consultar o catálogo oficial; a versão pode estar desatualizada.</p>}
       {job.done && job.report.failures && job.report.failures.length > 0 && <p className="error">{humanReason}</p>}
       {job.done && !job.report.failures?.length && job.report.missing?.includes(selected) && <p className="error">{humanReason || t.resourceUnavailable}</p>}
       {job.done && job.report.state === 'failed' && <p className="error">{humanReason}</p>}

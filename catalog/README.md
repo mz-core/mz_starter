@@ -1,0 +1,7 @@
+# Catálogo de releases
+
+O Starter consulta `catalog/releases.json` no repositório público e baixa cada ZIP diretamente da respectiva release. O SHA-256 publicado é conferido durante o download. O catálogo fornece apenas versão, tag, nome e hash; regras de instalação e recursos protegidos continuam definidos no aplicativo.
+
+O workflow atualiza o catálogo a cada seis horas e pode ser iniciado em **Actions → Atualizar catálogo de releases → Run workflow**. É necessário permitir escrita para o GitHub Actions e, se a branch for protegida, conceder ao workflow permissão de publicar nela. Se a publicação falhar, consulte o log do workflow; o catálogo anterior permanecerá disponível. Alternativamente, execute `python tools/update_release_catalog.py` com `gh` autenticado ou `GH_TOKEN` configurado, revise e publique o arquivo gerado. O token não é incluído no catálogo nem no Starter.
+
+A ferramenta consulta apenas repositórios públicos e releases estáveis com um único ZIP reconhecido e SHA-256. Uma resposta inválida interrompe a geração sem substituir o catálogo. `mz_banguard` permanece protegido. Atualizar o catálogo não atualiza o aplicativo: clientes antigos precisam receber uma vez a versão do Starter que lê o catálogo remoto. Novas versões de recursos aparecem após a atualização do catálogo, sem reinstalar o Starter. O servidor precisa ter acesso ao arquivo do catálogo e aos downloads públicos do GitHub.

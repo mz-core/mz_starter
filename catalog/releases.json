@@ -1,0 +1,292 @@
+{
+  "schema_version": 1,
+  "resources": [
+    {
+      "id": "mz_lib",
+      "version": "1.0.0",
+      "tag": "mz_lib-v1.0.0",
+      "asset": "mz_lib-v1.0.0.zip",
+      "sha256": "sha256:cf187249131e4869339da657548b010902312e01d5aeee65721d8c8c33c7ad5a"
+    },
+    {
+      "id": "mz_notify",
+      "version": "1.0.0",
+      "tag": "mz_notify-v1.0.0",
+      "asset": "mz_notify-v1.0.0.zip",
+      "sha256": "sha256:b179115b6fe527bdc545b8b21a79958ac74fc35b55af54992eed3549a58b55f7"
+    },
+    {
+      "id": "mz_sync",
+      "version": "1.0.0",
+      "tag": "v1.0.0",
+      "asset": "mz_sync-v1.0.0.zip",
+      "sha256": "sha256:472494ff5478ccb42f3ec78cdeda4b8c7c137e574331e19ed7623d118c5772f9"
+    },
+    {
+      "id": "mz_core",
+      "version": "1.0.1",
+      "tag": "v1.0.1",
+      "asset": "mz_core-v1.0.1.zip",
+      "sha256": "sha256:b63e997cdd6ac16e5515a7e0837ef1329070fd1e041c7de75134b504b4e8049f"
+    },
+    {
+      "id": "mz_assets",
+      "version": "1.0.0",
+      "tag": "mz_assets-v1.0.0",
+      "asset": "mz_assets-v1.0.0.zip",
+      "sha256": "sha256:f41c13d9bf9c95cf46bf72ac613b1d25ac64ef3ad0fb5b094be0d22aeb83076a"
+    },
+    {
+      "id": "mz_inventory",
+      "version": "1.0.0",
+      "tag": "v1.0.0",
+      "asset": "mz_inventory-v1.0.0.zip",
+      "sha256": "sha256:1422064ab7daf038b68a30dabe3f786506c05b512d1124a744b0061d1f5ef7cc"
+    },
+    {
+      "id": "mz_economy",
+      "version": "1.0.0",
+      "tag": "mz_economy-v1.0.0",
+      "asset": "mz_economy-v1.0.0.zip",
+      "sha256": "sha256:7cc2b355a8aebf9a71b38d8b51d3abd5a61a92b0ca20f3eed2b738da77693236"
+    },
+    {
+      "id": "mz_status",
+      "version": "1.0.0",
+      "tag": "mz_status-v1.0.0",
+      "asset": "mz_status-v1.0.0.zip",
+      "sha256": "sha256:392390411b7ce5780df0e974808312e8053617fe0dd0cd665dbfc14858aa9b2f"
+    },
+    {
+      "id": "mz_progress",
+      "version": "1.0.0",
+      "tag": "mz_progress-v1.0.0",
+      "asset": "mz_progress-v1.0.0.zip",
+      "sha256": "sha256:0476e8c3dea72a82d265d945746d372c56d70b131e594b4b87ed04f971c28d1d"
+    },
+    {
+      "id": "mz_settings",
+      "version": "2.2.0",
+      "tag": "mz_settings-v2.2.0",
+      "asset": "mz_settings-v2.2.0.zip",
+      "sha256": "sha256:907f18b4768ffa790e6b1e5713a2f72f3d2cd61d443a25c5e9d97200c0986e90"
+    },
+    {
+      "id": "mz_cayo",
+      "version": "1.0.0",
+      "tag": "mz_cayo-v1.0.0",
+      "asset": "mz_cayo-v1.0.0.zip",
+      "sha256": "sha256:03f70c3645c04b236c5c33cb97379c2d3d17934001daab1b54d6394d9a3fe910"
+    },
+    {
+      "id": "mz_menu",
+      "version": "0.4.1",
+      "tag": "v0.4.1",
+      "asset": "mz_menu-v0.4.1.zip",
+      "sha256": "sha256:d20bd5081d70e2ab87a18506e61d0e83bf285608a3d21c7be5cf08e51eb9fdb0"
+    },
+    {
+      "id": "mz_interact",
+      "version": "0.2.0",
+      "tag": "mz_interact-v0.2.0",
+      "asset": "mz_interact-v0.2.0.zip",
+      "sha256": "sha256:0abf24e2d3ea90277aec45266157331ecdb217060a2d2df2ca1331c303bfe420"
+    },
+    {
+      "id": "mz_world_editor",
+      "version": "0.3.0",
+      "tag": "mz_world_editor-v0.3.0",
+      "asset": "mz_world_editor-v0.3.0.zip",
+      "sha256": "sha256:eec8a6a2420fdf10ac55af626df242bb189eeb36a738e106e04c70448d889bc3"
+    },
+    {
+      "id": "mz_vehicles",
+      "version": "0.1.0",
+      "tag": "v1.0.0",
+      "asset": "mz_vehicles-v0.1.0.zip",
+      "sha256": "sha256:507d364a22f22804dbbc718e64f8b1e8c42520d7f7a82bf6bc0a3b2a07b4650b"
+    },
+    {
+      "id": "mz_org",
+      "version": "0.1.0",
+      "tag": "mz_org-v0.1.0",
+      "asset": "mz_org-v0.1.0.zip",
+      "sha256": "sha256:7d4d438c7458a566f36afdbb68db10811a2398bbcc5f19e9585e7d77583875dd"
+    },
+    {
+      "id": "mz_target",
+      "version": "1.0.0",
+      "tag": "mz_target-v1.0.0",
+      "asset": "mz_target-v1.0.0.zip",
+      "sha256": "sha256:d42dd24e9c6a0239c1cd77fb8637addbb3a439c49325da8923f17eec79f17200"
+    },
+    {
+      "id": "mz_fuel",
+      "version": "1.0.0",
+      "tag": "mz_fuel-v1.0.0",
+      "asset": "mz_fuel-v1.0.0.zip",
+      "sha256": "sha256:f94736e5a42b1f138f162e2ce3bdabc30c47ae39c3b54c73be236186f7dd7a6e"
+    },
+    {
+      "id": "mz_garagem",
+      "version": "0.1.0",
+      "tag": "mz_garagem-v0.1.0",
+      "asset": "mz_garagem-v0.1.0.zip",
+      "sha256": "sha256:f7050deafdd810b5791a2650af2d2b175d11d3da11060ac2f5977ebdf5b5ccfb"
+    },
+    {
+      "id": "mz_prison",
+      "version": "0.3.0",
+      "tag": "mz_prison-v0.3.0",
+      "asset": "mz_prison-v0.3.0.zip",
+      "sha256": "sha256:81443031141323b46391304df4782fc970890b467cabf13c98bffc42d12a5ae0"
+    },
+    {
+      "id": "mz_dispatch",
+      "version": "1.0.0",
+      "tag": "mz_dispatch-v1.0.0",
+      "asset": "mz_dispatch-v1.0.0.zip",
+      "sha256": "sha256:3749cb7ccd21e8ea61fa8c6a3a1c2785b72191ea4709e27b63f3b35839c51263"
+    },
+    {
+      "id": "mz_police",
+      "version": "0.11.0",
+      "tag": "mz_police-v0.11.0",
+      "asset": "mz_police-v0.11.0.zip",
+      "sha256": "sha256:d07ed4db41abb622cf85d3c1fff40c82902a9f130bf8327d37bc586da910379b"
+    },
+    {
+      "id": "mz_medical",
+      "version": "1.0.0",
+      "tag": "mz_medical-v1.0.0",
+      "asset": "mz_medical-v1.0.0.zip",
+      "sha256": "sha256:639541a20685456ae4f79561a575bceb99b8c8544db6e8de07525f61eda8cb51"
+    },
+    {
+      "id": "mz_bank",
+      "version": "2.0.0",
+      "tag": "mz_bank-v2.0.0",
+      "asset": "mz_bank-v2.0.0.zip",
+      "sha256": "sha256:b4250644f77c96ddf53bd6bdda8c9b92e1b7bd8f839571294156e12bc8dad1b4"
+    },
+    {
+      "id": "mz_navigation",
+      "version": "1.1.0",
+      "tag": "mz_navigation-v1.1.0",
+      "asset": "mz_navigation-v1.1.0.zip",
+      "sha256": "sha256:227dc45c724b0a48929553dc0b892cec225c6a22211dc03296271c2e10912080"
+    },
+    {
+      "id": "mz_phone",
+      "version": "1.0.0",
+      "tag": "mz_phone-v1.0.0",
+      "asset": "mz_phone-v1.0.0.zip",
+      "sha256": "sha256:fb3d75ab1c2cc7b5d4e59595416b225c76a332fa8050de10148eadd631eb6d7a"
+    },
+    {
+      "id": "mz_transport",
+      "version": "1.0.0",
+      "tag": "mz_transport-v1.0.0",
+      "asset": "mz_transport-v1.0.0.zip",
+      "sha256": "sha256:1b0bc59f0421d2eaefdf4089fd2af08c908399911de1f3967e40c0e88d07d45a"
+    },
+    {
+      "id": "mz_interiors",
+      "version": "0.2.0",
+      "tag": "mz_interiors-v0.2.0",
+      "asset": "mz_interiors-v0.2.0.zip",
+      "sha256": "sha256:0c62aa1b548fe6a3e5a84d292eb1d0adf94520a954b6f6ede3242948ccf00d41"
+    },
+    {
+      "id": "mz_houses",
+      "version": "0.2.0",
+      "tag": "mz_houses-v0.2.0",
+      "asset": "mz_houses-v0.2.0.zip",
+      "sha256": "sha256:e395bb2bdca362e7c364d92006e5fe233dcaceec9ebd909fd88bbfedde4a3fb3"
+    },
+    {
+      "id": "mz_furniture",
+      "version": "0.10.0",
+      "tag": "mz_furniture-v0.10.0",
+      "asset": "mz_furniture-v0.10.0.zip",
+      "sha256": "sha256:c7082adbdf5620f929f78fefc93a4309955dc86ad4afdc2d5214bdf2af690229"
+    },
+    {
+      "id": "mz_org_activities",
+      "version": "0.2.0",
+      "tag": "mz_org_activities-v0.2.0",
+      "asset": "mz_org_activities-v0.2.0.zip",
+      "sha256": "sha256:cf74606d93d58a2738ab93ed0d25610a4705b0b08efc6f576ba7509381430408"
+    },
+    {
+      "id": "mz_computer",
+      "version": "1.3.3",
+      "tag": "mz_computer-v1.3.3",
+      "asset": "mz_computer-v1.3.3.zip",
+      "sha256": "sha256:e37c9003ff615fb93b8a9a32cf65d6349bc875da97b1529c199618560a71dd5c"
+    },
+    {
+      "id": "mz_radio",
+      "version": "0.1.0",
+      "tag": "mz_radio-v0.1.0",
+      "asset": "mz_radio-v0.1.0.zip",
+      "sha256": "sha256:4171d6e3f077db8e1e62488849dd50d64d310c2ba4682522911b8f133865fab8"
+    },
+    {
+      "id": "mz_creator",
+      "version": "0.1.1",
+      "tag": "mz_creator-v0.1.1",
+      "asset": "mz_creator-v0.1.1.zip",
+      "sha256": "sha256:2bd263b6b6ab31e80352fe7c42c4f6c0ef3e2f707e2c4e8ff6034a41db781a02"
+    },
+    {
+      "id": "mz_multichar",
+      "version": "0.1.1",
+      "tag": "mz_multichar-v0.1.1",
+      "asset": "mz_multichar-v0.1.1.zip",
+      "sha256": "sha256:99d40fa032678c4a703999776d2df87a60775ecf7efe2a0fbb3ae9cd0767d501"
+    },
+    {
+      "id": "mz_clothing",
+      "version": "0.1.0",
+      "tag": "mz_clothing-v0.1.0",
+      "asset": "mz_clothing-v0.1.0.zip",
+      "sha256": "sha256:e1e60d4ec394cbd0fb32ab80ebb9c2ee872913822c95be1e221a9d2cc6c18601"
+    },
+    {
+      "id": "mz_tatto",
+      "version": "1.0.0",
+      "tag": "mz_tatto-v1.0.0",
+      "asset": "mz_tatto-v1.0.0.zip",
+      "sha256": "sha256:feba92afeb1d6468f74d2664448c79e675e7757750b21d32dd6ddbfc8caa406f"
+    },
+    {
+      "id": "mz_hud",
+      "version": "1.0.1",
+      "tag": "mz_hud-v1.0.1",
+      "asset": "mz_hud-v1.0.1.zip",
+      "sha256": "sha256:d569588e34e7d750ff4f309df9f3b2f6d03054fdc723f27729462e81296b7124"
+    },
+    {
+      "id": "mz_warns",
+      "version": "1.0.0",
+      "tag": "mz_warns-v1.0.0",
+      "asset": "mz_warns-v1.0.0.zip",
+      "sha256": "sha256:190d95ea3508eca49c9d776d7c4e4c1940960affd5a541b18e9e928cb93dd967"
+    },
+    {
+      "id": "mz_admin",
+      "version": "0.3.1",
+      "tag": "v0.3.1",
+      "asset": "mz_admin-v0.3.1.zip",
+      "sha256": "sha256:d223a22c929b87e9643bc15e202dad8a814f7455f73ee9f5722645a558b9b00b"
+    },
+    {
+      "id": "mz_feedback",
+      "version": "1.0.0",
+      "tag": "mz_feedback-v1.0.0",
+      "asset": "mz_feedback-v1.0.0.zip",
+      "sha256": "sha256:0fcf28023dd21cf30b1582e078b370d6f1b58c851cd044197933f4679f44a112"
+    }
+  ]
+}

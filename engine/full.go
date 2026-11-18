@@ -24,22 +24,25 @@ const fullBootstrapNotice = `# -------------------------------------------------
 `
 
 type FullOptions struct {
-	GitHub          GitHub
-	Target          string
-	LocalRoot       string
-	LocalAuthorized bool
-	AllowIncomplete bool
-	ResumeExisting  bool
-	UpdateExisting  bool
-	UpdateIDs       []string
-	ExcludedIDs     []string
-	ArtifactsMode   string
-	ArtifactsPath   string
-	ArtifactOS      string
-	MaxDownload     int64
-	Progress        func(FullProgress)
-	Sources         *Sources
-	ArtifactClient  *http.Client
+	GitHub               GitHub
+	Target               string
+	LocalRoot            string
+	LocalAuthorized      bool
+	AllowIncomplete      bool
+	ResumeExisting       bool
+	UpdateExisting       bool
+	UpdateIDs            []string
+	ExcludedIDs          []string
+	ArtifactsMode        string
+	ArtifactsPath        string
+	ArtifactOS           string
+	MaxDownload          int64
+	Progress             func(FullProgress)
+	Sources              *Sources
+	ArtifactClient       *http.Client
+	ReleaseCatalogURL    string
+	ReleaseCatalogClient *http.Client
+	releases             map[string]Resource
 }
 
 // Component is one resolvable piece of the server-data tree.
@@ -184,6 +187,14 @@ func ResolveFull(ctx context.Context, c Catalog, opts FullOptions) (FullPlan, er
 		Blockers:              []string{},
 		Warnings:              []string{},
 		ConfigurationRequired: append([]string{}, BootstrapConfigurations...),
+	}
+	// A custom GitHub endpoint is used by existing offline fixtures.
+	if opts.ReleaseCatalogURL != "" || (opts.GitHub.BaseURL == "" && opts.GitHub.Client == nil) {
+		var catalogErr error
+		opts.releases, catalogErr = fetchReleaseCatalog(ctx, c, opts.ReleaseCatalogURL, opts.ReleaseCatalogClient)
+		if catalogErr != nil {
+			plan.Warnings = append(plan.Warnings, "catalogo_remoto_indisponivel: "+catalogErr.Error())
+		}
 	}
 	artifact, err := resolveArtifacts(ctx, opts)
 	if err != nil {
@@ -380,9 +391,14 @@ func resolveMZ(ctx context.Context, r Resource, opts FullOptions, comp Component
 		comp.Reason = "repository_missing_or_unknown"
 		return comp
 	}
+	if release, ok := opts.releases[r.ID]; ok {
+		if direct, err := directReleaseComponent(release, release.SHA256, opts.Sources.ReleaseBase); err == nil {
+			direct.SourceDetail = "catalogo oficial: " + release.Tag
+			return direct
+		}
+	}
 
-	// The GitHub latest stable release is authoritative: the catalog only
-	// supplies identity, destination, dependencies and distribution policy.
+	// Fall back to the existing GitHub lookup when no catalog release is available.
 	remote, err := resolveLatestRelease(ctx, r, opts)
 	if err == nil {
 		return remote

@@ -1,0 +1,25 @@
+name: Atualizar catálogo de releases
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '17 */6 * * *'
+permissions:
+  contents: write
+jobs:
+  catalog:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Consultar releases públicas
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 tools/update_release_catalog.py
+      - name: Publicar alterações do catálogo
+        run: |
+          if ! git diff --quiet -- catalog/releases.json; then
+            git config user.name github-actions[bot]
+            git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+            git add catalog/releases.json
+            git commit -m 'Atualiza catálogo de releases'
+            git push
+          fi
