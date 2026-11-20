@@ -540,7 +540,7 @@ export function ResourceManagerPanel({t, label, server, onServer, resources, os}
       <p>{t.resourceListHint}</p>
       <label className="check"><input type="checkbox" checked={stopped} onChange={e => setStopped(e.target.checked)}/>{t.resourceStopped}</label>
       <div className="table-wrap"><table><thead><tr><th>{t.component}</th><th>{t.installed}</th><th>{t.available}</th><th>{t.status}</th><th>{t.resourceAction}</th></tr></thead><tbody>
-        {mz.map(r => {const c=components.get(r.id); return <tr key={r.id}><td>{r.id}</td><td>{c?.installed ? (c.installed_version || t.unknown) : '—'}</td><td>{c?.status === 'ready' ? c.version || '—' : '—'}</td><td>{c?.installed ? t.resourcePresent : t.resourceAbsent}</td><td><button disabled={!!jobID || (c?.installed && !stopped)} onClick={() => start(r.id)}>{c?.installed ? t.resourceUpdate : t.resourceDownload}</button></td></tr>})}
+        {mz.map(r => {const c=components.get(r.id); const unavailable=c?.reason === 'github:release_missing'; return <tr key={r.id}><td>{r.id}</td><td>{c?.installed ? (c.installed_version || t.unknown) : '—'}</td><td>{c?.status === 'ready' ? c.version || '—' : '—'}</td><td>{unavailable ? 'Sem release disponível' : c?.installed ? t.resourcePresent : t.resourceAbsent}</td><td><button disabled={!!jobID || unavailable || (c?.installed && !stopped)} onClick={() => start(r.id)}>{c?.installed ? t.resourceUpdate : t.resourceDownload}</button></td></tr>})}
       </tbody></table></div>
     </>}
     {job && <div role="status"><p>{selected}: {label(job.report.state)} {job.report.resource || ''}</p>

@@ -397,6 +397,13 @@ func resolveMZ(ctx context.Context, r Resource, opts FullOptions, comp Component
 			return direct
 		}
 	}
+	if opts.releases != nil && r.Availability == "release_missing" {
+		if local, err := resolveLocalPackage(opts.LocalRoot, r, opts.LocalAuthorized); err == nil {
+			return applyLocal(comp, local, r)
+		}
+		comp.Reason = "github:release_missing"
+		return comp
+	}
 
 	// Fall back to the existing GitHub lookup when no catalog release is available.
 	remote, err := resolveLatestRelease(ctx, r, opts)

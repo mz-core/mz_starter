@@ -287,6 +287,48 @@
       "tag": "mz_feedback-v1.0.0",
       "asset": "mz_feedback-v1.0.0.zip",
       "sha256": "sha256:0fcf28023dd21cf30b1582e078b370d6f1b58c851cd044197933f4679f44a112"
+    },
+    {
+      "id": "mz_loading",
+      "version": "1.1.1",
+      "tag": "mz_loading-v1.1.1",
+      "asset": "mz_loading-v1.1.1.zip",
+      "sha256": "sha256:ae3fa6b65041da09458b91211508df2c8318e18519f46238938a7169bb84e2ac"
+    },
+    {
+      "id": "mz_chat",
+      "version": "1.0.0",
+      "tag": "mz_chat-v1.0.0",
+      "asset": "mz_chat-v1.0.0.zip",
+      "sha256": "sha256:df717962102f23fcfaf98a7014a5269cb56e1a303fd55cdefa922c77833b592e"
+    },
+    {
+      "id": "mz_animations",
+      "version": "0.1.0",
+      "tag": "v0.1.0",
+      "asset": "mz_animations-v0.1.0.zip",
+      "sha256": "sha256:a3d6faf98df8b05c29cd137383643b578407f08b169644369069278ed2402824"
+    },
+    {
+      "id": "mz_population",
+      "version": "0.1.0",
+      "tag": "mz_population-v0.1.0",
+      "asset": "mz_population-v0.1.0.zip",
+      "sha256": "sha256:ee8f38a675e8abcbcc899561e7cb736244cb35418fd66fecbc32c605b6c9a3d3"
+    },
+    {
+      "id": "mz_mechanic",
+      "version": "0.1.0",
+      "tag": "mz_mechanic-v0.1.0",
+      "asset": "mz_mechanic-v0.1.0.zip",
+      "sha256": "sha256:07a3db65155fa62ed35a0ff360a22827dd4ae64ea8e00236c0e73391f3a19bce"
+    },
+    {
+      "id": "mz_whitelist",
+      "version": "1.0.0",
+      "tag": "mz_whitelist-v1.0.0",
+      "asset": "mz_whitelist-v1.0.0.zip",
+      "sha256": "sha256:a7cebb76ea78df5d84e02cb4453ed1ef182d0a3710dee0af4ae12565aaecca58"
     }
   ]
 }
