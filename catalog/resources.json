@@ -852,6 +852,102 @@
       "availability": "metadata_only_unverified"
     },
     {
+      "id": "mz_sd_bridge",
+      "name": "mz_sd_bridge",
+      "type": "fivem_resource",
+      "group": "[mz]",
+      "repository": "",
+      "visibility": "unknown",
+      "source": "unavailable",
+      "version": "",
+      "tag": "",
+      "asset": "",
+      "sha256": "",
+      "dependencies": [
+        "mz_core",
+        "mz_inventory"
+      ],
+      "required_files": [
+        "fxmanifest.lua",
+        "server/main.lua"
+      ],
+      "mutable_policy": "unknown_preserve",
+      "channel": "stable",
+      "availability": "release_missing"
+    },
+    {
+      "id": "sd-phone",
+      "name": "sd-phone",
+      "type": "fivem_resource",
+      "group": "[mz]",
+      "repository": "https://github.com/mz-core/sd-phone",
+      "visibility": "public",
+      "source": "github_release",
+      "version": "1.1.0",
+      "tag": "",
+      "asset": "",
+      "sha256": "",
+      "dependencies": [
+        "ox_lib",
+        "oxmysql"
+      ],
+      "required_files": [
+        "fxmanifest.lua",
+        "web/build/index.html"
+      ],
+      "mutable_policy": "unknown_preserve",
+      "channel": "stable",
+      "availability": "release_missing"
+    },
+    {
+      "id": "sd-computers",
+      "name": "sd-computers",
+      "type": "fivem_resource",
+      "group": "[mz]",
+      "repository": "https://github.com/mz-core/sd-computers",
+      "visibility": "public",
+      "source": "github_release",
+      "version": "1.2.1",
+      "tag": "",
+      "asset": "",
+      "sha256": "",
+      "dependencies": [
+        "ox_lib",
+        "oxmysql"
+      ],
+      "required_files": [
+        "fxmanifest.lua",
+        "web/build/index.html"
+      ],
+      "mutable_policy": "unknown_preserve",
+      "channel": "stable",
+      "availability": "release_missing"
+    },
+    {
+      "id": "sd-tablet",
+      "name": "sd-tablet",
+      "type": "fivem_resource",
+      "group": "[mz]",
+      "repository": "https://github.com/mz-core/sd-tablet",
+      "visibility": "public",
+      "source": "github_release",
+      "version": "1.0.8",
+      "tag": "",
+      "asset": "",
+      "sha256": "",
+      "dependencies": [
+        "ox_lib",
+        "sd-phone"
+      ],
+      "required_files": [
+        "fxmanifest.lua",
+        "web/build/index.html"
+      ],
+      "mutable_policy": "unknown_preserve",
+      "channel": "stable",
+      "availability": "release_missing"
+    },
+    {
       "id": "mz_interiors",
       "name": "mz_interiors",
       "type": "fivem_resource",
@@ -1584,78 +1680,6 @@
       "dependencies": [],
       "required_files": [
         "fxmanifest.lua"
-      ],
-      "mutable_policy": "unknown_preserve",
-      "channel": "stable",
-      "availability": "release_missing"
-    },
-    {
-      "id": "sd-phone",
-      "name": "sd-phone",
-      "type": "fivem_resource",
-      "group": "[mz]",
-      "repository": "https://github.com/mz-core/sd-phone",
-      "visibility": "public",
-      "source": "github_release",
-      "version": "1.1.0",
-      "tag": "",
-      "asset": "",
-      "sha256": "",
-      "dependencies": [
-        "ox_lib",
-        "oxmysql"
-      ],
-      "required_files": [
-        "fxmanifest.lua",
-        "web/build/index.html"
-      ],
-      "mutable_policy": "unknown_preserve",
-      "channel": "stable",
-      "availability": "release_missing"
-    },
-    {
-      "id": "sd-computers",
-      "name": "sd-computers",
-      "type": "fivem_resource",
-      "group": "[mz]",
-      "repository": "https://github.com/mz-core/sd-computers",
-      "visibility": "public",
-      "source": "github_release",
-      "version": "1.2.1",
-      "tag": "",
-      "asset": "",
-      "sha256": "",
-      "dependencies": [
-        "ox_lib",
-        "oxmysql"
-      ],
-      "required_files": [
-        "fxmanifest.lua",
-        "web/build/index.html"
-      ],
-      "mutable_policy": "unknown_preserve",
-      "channel": "stable",
-      "availability": "release_missing"
-    },
-    {
-      "id": "sd-tablet",
-      "name": "sd-tablet",
-      "type": "fivem_resource",
-      "group": "[mz]",
-      "repository": "https://github.com/mz-core/sd-tablet",
-      "visibility": "public",
-      "source": "github_release",
-      "version": "1.0.8",
-      "tag": "",
-      "asset": "",
-      "sha256": "",
-      "dependencies": [
-        "ox_lib",
-        "sd-phone"
-      ],
-      "required_files": [
-        "fxmanifest.lua",
-        "web/build/index.html"
       ],
       "mutable_policy": "unknown_preserve",
       "channel": "stable",

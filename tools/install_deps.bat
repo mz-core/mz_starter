@@ -150,6 +150,9 @@ if errorlevel 1 goto :git_error
 call :sync_mz_resource mz_bank https://github.com/mz-core/mz_bank.git
 if errorlevel 1 goto :git_error
 
+call :sync_mz_resource mz_sd_bridge ""
+if errorlevel 1 goto :git_error
+
 call :sync_mz_resource sd-phone https://github.com/mz-core/sd-phone.git
 if errorlevel 1 goto :git_error
 
@@ -238,6 +241,7 @@ exit /b 0
 :preflight_distribution_resources
 set "DISTRIBUTION_MISSING=0"
 for %%R in (
+  mz_sd_bridge
   mz_status
   mz_medical
   mz_world_editor

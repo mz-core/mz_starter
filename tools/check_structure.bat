@@ -204,6 +204,7 @@ for %%D in (
   "resources\[mz]\mz_progress"
   "resources\[mz]\mz_medical"
   "resources\[mz]\mz_bank"
+  "resources\[mz]\mz_sd_bridge"
   "resources\[mz]\sd-phone"
   "resources\[mz]\sd-computers"
   "resources\[mz]\sd-tablet"

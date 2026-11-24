@@ -81,6 +81,7 @@ preflight_distribution_resources() {
   local resource=""
   local missing=0
   local distribution_resources=(
+    mz_sd_bridge
     mz_status
     mz_medical
     mz_world_editor
@@ -501,6 +502,7 @@ sync_mz_resource "mz_dispatch" ""
 sync_mz_resource "mz_police" ""
 sync_mz_resource "mz_medical" ""
 sync_mz_resource "mz_bank" "https://github.com/mz-core/mz_bank.git"
+sync_mz_resource "mz_sd_bridge" ""
 sync_mz_resource "sd-phone" "https://github.com/mz-core/sd-phone.git"
 sync_mz_resource "sd-computers" "https://github.com/mz-core/sd-computers.git"
 sync_mz_resource "sd-tablet" "https://github.com/mz-core/sd-tablet.git"

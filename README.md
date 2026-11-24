@@ -122,4 +122,6 @@ O `pma-voice` e instalado em `resources/[som]/pma-voice` antes de `sd-phone` e `
 
 Nao atualize esse resource com `git pull` isolado. Para atualizar, mude tag, commit e patch juntos nos dois instaladores, valide o spoof de `pma-voice:setPlayerCall` e execute as regressões dos dispositivos SD e de `mz_radio`.
 
-O perfil SD substitui `mz_phone` e `mz_computer`. `mz_transport` permanece desativado enquanto depende do telefone legado. As releases SD precisam conter ZIP e SHA-256 compatíveis com o catálogo; até lá, forneça uma distribuição local autorizada.
+O perfil SD substitui `mz_phone` e `mz_computer`. `mz_transport` permanece desativado enquanto depende do telefone legado. As releases SD publicadas fornecem ZIP e SHA-256 compatíveis com o catálogo.
+
+A integração SD requer `mz_sd_bridge`, iniciado antes dos dispositivos. Sua distribuição ainda deve ser fornecida localmente; a integração permanece parcial.
