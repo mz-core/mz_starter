@@ -3,10 +3,10 @@
   "resources": [
     {
       "id": "mz_lib",
-      "version": "1.0.1",
-      "tag": "mz_lib-v1.0.1",
-      "asset": "mz_lib-v1.0.1.zip",
-      "sha256": "sha256:d5ad331decbef2cd5b4d412c64163b12a8f44015467bb1bfa487dae33fba6c4c"
+      "version": "1.0.2",
+      "tag": "mz_lib-v1.0.2",
+      "asset": "mz_lib-v1.0.2.zip",
+      "sha256": "sha256:f3c39337adf6ba1887c18f209cc157e0d84af05f4b3352e952571d3ed2eebd54"
     },
     {
       "id": "mz_notify",
@@ -38,10 +38,10 @@
     },
     {
       "id": "mz_inventory",
-      "version": "1.0.1",
-      "tag": "mz_inventory-v1.0.1",
-      "asset": "mz_inventory-v1.0.1.zip",
-      "sha256": "sha256:a59fb0f1ce2a5a36623eeb59251442edce1b4cb83d1898701cc473fd5e37b2c8"
+      "version": "1.0.2",
+      "tag": "mz_inventory-v1.0.2",
+      "asset": "mz_inventory-v1.0.2.zip",
+      "sha256": "sha256:ae91569c426f40ab3bb85e09844d21e7427ec55d6dc84e8814c830f2647ee139"
     },
     {
       "id": "mz_economy",
@@ -87,10 +87,10 @@
     },
     {
       "id": "mz_interact",
-      "version": "0.2.1",
-      "tag": "mz_interact-v0.2.1",
-      "asset": "mz_interact-v0.2.1.zip",
-      "sha256": "sha256:e9cb2b8c92b76293ccb35ab959e76be6187b7fd46c252ca3c966e9fa492d57e1"
+      "version": "0.2.2",
+      "tag": "mz_interact-v0.2.2",
+      "asset": "mz_interact-v0.2.2.zip",
+      "sha256": "sha256:69cee01fcf925fc6a954ee0e3a78c478455bd11a96640f3ad8fbc65e3b650b21"
     },
     {
       "id": "mz_world_editor",
@@ -101,10 +101,10 @@
     },
     {
       "id": "mz_vehicles",
-      "version": "1.0.1",
-      "tag": "mz_vehicles-v1.0.1",
-      "asset": "mz_vehicles-v1.0.1.zip",
-      "sha256": "sha256:29a64cbf8f293142a03474238f194ad7da6dbd1d8053ab0c52e32e462a545abc"
+      "version": "1.0.2",
+      "tag": "mz_vehicles-v1.0.2",
+      "asset": "mz_vehicles-v1.0.2.zip",
+      "sha256": "sha256:c940f0bfb4b937754632d0850d6bb5c54079648dedf6de26427f37dd033287ae"
     },
     {
       "id": "mz_org",
@@ -115,24 +115,24 @@
     },
     {
       "id": "mz_target",
-      "version": "1.0.0",
-      "tag": "mz_target-v1.0.0",
-      "asset": "mz_target-v1.0.0.zip",
-      "sha256": "sha256:d42dd24e9c6a0239c1cd77fb8637addbb3a439c49325da8923f17eec79f17200"
+      "version": "1.0.1",
+      "tag": "mz_target-v1.0.1",
+      "asset": "mz_target-v1.0.1.zip",
+      "sha256": "sha256:6564dca1e73fbf46a9ff5f41343fbd0b11412116763d7f34b89ed5d394864b43"
     },
     {
       "id": "mz_fuel",
-      "version": "1.0.1",
-      "tag": "mz_fuel-v1.0.1",
-      "asset": "mz_fuel-v1.0.1.zip",
-      "sha256": "sha256:243ba48c4d9fd5c6237c338c96ddbc4a3eb20108855a3f2c56c1ca6927080bc7"
+      "version": "1.0.2",
+      "tag": "mz_fuel-v1.0.2",
+      "asset": "mz_fuel-v1.0.2.zip",
+      "sha256": "sha256:b39a453703c6ade5a01ab93db1388740f2dc12d9952e84896edc65bc9919f863"
     },
     {
       "id": "mz_garagem",
-      "version": "0.1.1",
-      "tag": "mz_garagem-v0.1.1",
-      "asset": "mz_garagem-v0.1.1.zip",
-      "sha256": "sha256:0ce519f67db6b7d4a1f3b03422a3976279d0c72f9f90e30633d71d7d3bbfdd18"
+      "version": "0.1.2",
+      "tag": "mz_garagem-v0.1.2",
+      "asset": "mz_garagem-v0.1.2.zip",
+      "sha256": "sha256:36ab7d004e0f6d527360777704c255484cb5a89b607c1183c597f0444aac2f02"
     },
     {
       "id": "mz_prison",
@@ -150,10 +150,10 @@
     },
     {
       "id": "mz_police",
-      "version": "0.11.1",
-      "tag": "mz_police-v0.11.1",
-      "asset": "mz_police-v0.11.1.zip",
-      "sha256": "sha256:c75d498c636f751cca0bbb4b8f90da0c655144c107ec035761bab1513ea93dab"
+      "version": "0.11.2",
+      "tag": "mz_police-v0.11.2",
+      "asset": "mz_police-v0.11.2.zip",
+      "sha256": "sha256:b2e5d54240ab72e5123aa75f37e56b53e4b0c53636dc2f9f1af95d2d9e119218"
     },
     {
       "id": "mz_medical",
@@ -185,17 +185,17 @@
     },
     {
       "id": "sd-computers",
-      "version": "1.2.1",
-      "tag": "v1.2.1",
-      "asset": "sd-computers-v1.2.1.zip",
-      "sha256": "sha256:9e707e575fc774ec6ae97217c4d0980030e8293028ebb3f8a3fa65892022f184"
+      "version": "1.2.2",
+      "tag": "v1.2.2",
+      "asset": "sd-computers-v1.2.2.zip",
+      "sha256": "sha256:1612c8e735ac6edbb0ee811700fa22ddfb066d1903711195a0c9878b6b5360e6"
     },
     {
       "id": "sd-tablet",
-      "version": "1.0.8",
-      "tag": "v1.0.8",
-      "asset": "sd-tablet-v1.0.8.zip",
-      "sha256": "sha256:934ac8cc9024b2a8a1d07af18c8694e1b8f085d31ad63d9bde53aef9e8766d10"
+      "version": "1.0.9",
+      "tag": "v1.0.9",
+      "asset": "sd-tablet-v1.0.9.zip",
+      "sha256": "sha256:2b026dd6760a39de056c45b24b6fcb0af337305fc716902622697c3b22979fca"
     },
     {
       "id": "mz_interiors",
@@ -276,10 +276,10 @@
     },
     {
       "id": "mz_admin",
-      "version": "0.3.2",
-      "tag": "mz_admin-v0.3.2",
-      "asset": "mz_admin-v0.3.2.zip",
-      "sha256": "sha256:dcb8fa15a239c1d932cbac2928dbeefd6651c0ce6335171ac20d11846798ded3"
+      "version": "0.3.3",
+      "tag": "mz_admin-v0.3.3",
+      "asset": "mz_admin-v0.3.3.zip",
+      "sha256": "sha256:574498298bf8a2234450b54cc5c077285a2dbc63b4855440a6cfbdf638aede34"
     },
     {
       "id": "mz_feedback",
@@ -318,10 +318,10 @@
     },
     {
       "id": "mz_mechanic",
-      "version": "0.1.1",
-      "tag": "mz_mechanic-v0.1.1",
-      "asset": "mz_mechanic-v0.1.1.zip",
-      "sha256": "sha256:e3deff8b49055174d76986cbee6e74c1be10e79ccba0263c342993f41a8772e8"
+      "version": "0.1.2",
+      "tag": "mz_mechanic-v0.1.2",
+      "asset": "mz_mechanic-v0.1.2.zip",
+      "sha256": "sha256:ffef682b3f72b7264acbcea5c630d5e9c89a1e1b997bd3abced5db7cd0c64eff"
     },
     {
       "id": "mz_whitelist",

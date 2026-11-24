@@ -124,4 +124,4 @@ Nao atualize esse resource com `git pull` isolado. Para atualizar, mude tag, com
 
 O perfil SD substitui `mz_phone` e `mz_computer`. `mz_transport` permanece desativado enquanto depende do telefone legado. As releases SD publicadas fornecem ZIP e SHA-256 compatíveis com o catálogo.
 
-A integração SD requer `mz_sd_bridge`, iniciado antes dos dispositivos. Sua distribuição ainda deve ser fornecida localmente; a integração permanece parcial.
+A integração SD requer `mz_sd_bridge`, iniciado antes dos dispositivos. A pré-release experimental está publicada, mas não é instalada pelo perfil estável; a integração permanece parcial e exige distribuição local autorizada para avaliação.
