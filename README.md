@@ -23,7 +23,7 @@ Para instalar, informe uma pasta nova ou vazia, clique em **Verificar componente
 
 Na interface, escolha Instalacao completa do MZ Core, informe um destino novo ou vazio e clique em Verificar componentes. O Starter consulta os releases reais dos repositorios oficiais `mz-core`, resolve os 51 componentes do perfil e mostra os bloqueios antes de instalar. O botao INSTALAR SERVIDOR baixa os componentes disponiveis, verifica SHA-256, inspeciona cada ZIP, extrai em staging privado e publica com rename sem sobrescrita.
 
-O perfil resolve automaticamente a release estavel marcada como **Latest** no GitHub para cada resource MZ, sem depender da versao fixada no catalogo. Como a resolucao consulta o GitHub em tempo de instalacao, uma nova release estavel passa a ser instalada pelo proximo cliente sem atualizar o executavel do Starter. O perfil publico atual instala 40 resources MZ com release publica, incluindo `mz_vehicles`, `mz_phone`, `mz_hud`, `mz_assets`, `mz_status` e `mz_transport`, alem de 7 snapshots oficiais de dependencias (`oxmysql`, `ox_lib`, `pma-voice` com patch, `bob74_ipl`, `screenshot-basic`, `mapmanager` e `spawnmanager`), `baseevents` e 2 system resources. `mz_menu` possui release estavel publica; `mz_banguard` permanece protegido e so pode vir de fonte local autorizada. Recursos sem release publica utilizavel continuam identificados individualmente e podem ser atendidos por uma pasta local explicitamente autorizada. Releases privados exigem token autorizado ou pacote local.
+O perfil resolve automaticamente a release estavel marcada como **Latest** no GitHub para cada resource MZ, sem depender da versao fixada no catalogo. Como a resolucao consulta o GitHub em tempo de instalacao, uma nova release estavel passa a ser instalada pelo proximo cliente sem atualizar o executavel do Starter. O perfil inclui resources MZ como `mz_vehicles`, `mz_hud`, `mz_assets` e `mz_status`, e os dispositivos `sd-phone`, `sd-computers` e `sd-tablet`, alem de 7 snapshots oficiais de dependencias (`oxmysql`, `ox_lib`, `pma-voice` com patch, `bob74_ipl`, `screenshot-basic`, `mapmanager` e `spawnmanager`), `baseevents` e 2 system resources. `mz_menu` possui release estavel publica; `mz_banguard` permanece protegido e so pode vir de fonte local autorizada. Recursos sem release publica utilizavel continuam identificados individualmente e podem ser atendidos por uma pasta local explicitamente autorizada. Releases privados exigem token autorizado ou pacote local.
 
 Os artifacts do FXServer sao separados do server-data. Na instalacao nova no Windows e no Linux, a opcao automatica consulta o build oficial recomendado para o sistema e o baixa em uma pasta separada por versao, sem sobrescrever artifacts anteriores; ela habilita `yarn`, `webpack`, `screenshot-basic` e `mz_feedback`. Se houver componentes obrigatorios sem distribuicao, o operador pode autorizar uma instalacao incompleta dos componentes disponiveis; o resultado e explicitamente marcado como incompleto e o servidor nao e declarado pronto. Licenca, banco, endpoints e permissoes continuam sendo responsabilidade do operador.
 
@@ -85,7 +85,7 @@ tools\install_deps.bat
 tools\check_structure.bat
 ```
 
-`mz_warns` e `mz_computer` fazem parte do runtime atual. O instalador interrompe o clean install antes de alterar dependencias se eles - ou qualquer outro resource distribution-only - nao estiverem na raiz-fonte nem previamente instalados.
+`mz_warns` faz parte do runtime atual. O instalador interrompe o clean install antes de alterar dependencias se eles - ou qualquer outro resource distribution-only - nao estiverem na raiz-fonte nem previamente instalados.
 
 ## Catalogo de opcoes do FXServer
 
@@ -118,6 +118,8 @@ git clone https://github.com/citizenfx/screenshot-basic.git "resources/[standalo
 
 ## pma-voice
 
-O `pma-voice` e instalado em `resources/[som]/pma-voice` antes de `mz_phone` e `mz_radio`. O pin e o patch fazem parte do contrato de seguranca do telefone: apenas resources server-side podem atribuir membership de chamada. O instalador aborta sem sobrescrever quando encontra uma copia sem `.git` ou alteracoes locais diferentes do patch esperado.
+O `pma-voice` e instalado em `resources/[som]/pma-voice` antes de `sd-phone` e `mz_radio`. O pin e o patch fazem parte do contrato de seguranca do telefone: apenas resources server-side podem atribuir membership de chamada. O instalador aborta sem sobrescrever quando encontra uma copia sem `.git` ou alteracoes locais diferentes do patch esperado.
 
-Nao atualize esse resource com `git pull` isolado. Para atualizar, mude tag, commit e patch juntos nos dois instaladores, valide o spoof de `pma-voice:setPlayerCall` e execute as regressões de `mz_phone` e `mz_radio`.
+Nao atualize esse resource com `git pull` isolado. Para atualizar, mude tag, commit e patch juntos nos dois instaladores, valide o spoof de `pma-voice:setPlayerCall` e execute as regressões dos dispositivos SD e de `mz_radio`.
+
+O perfil SD substitui `mz_phone` e `mz_computer`. `mz_transport` permanece desativado enquanto depende do telefone legado. As releases SD precisam conter ZIP e SHA-256 compatíveis com o catálogo; até lá, forneça uma distribuição local autorizada.

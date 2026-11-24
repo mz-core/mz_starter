@@ -133,7 +133,7 @@ fi
 echo
 echo "Verificando resources MZ declarados no boot..."
 while read -r directive resource _; do
-  if [ "$directive" = "ensure" ] && [[ "$resource" == mz_* && "$resource" != "mz_cayo" ]]; then
+  if [ "$directive" = "ensure" ] && [[ ( "$resource" == mz_* && "$resource" != "mz_cayo" ) || "$resource" == sd-* ]]; then
     check_file "resources/[mz]/$resource/fxmanifest.lua"
   fi
 done < cfg/resources.cfg

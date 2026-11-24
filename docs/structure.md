@@ -88,14 +88,15 @@ server-data/
 |   |   |-- mz_menu
 |   |   |-- mz_interact
 |   |   |-- mz_world_editor
-|   |   |-- mz_phone
+|   |   |-- sd-phone
+|   |   |-- sd-computers
+|   |   |-- sd-tablet
 |   |   |-- mz_transport
 |   |   |-- mz_org
 |   |   |-- mz_interiors
 |   |   |-- mz_houses
 |   |   |-- mz_furniture
 |   |   |-- mz_org_activities
-|   |   |-- mz_computer
 |   |   |-- mz_vehicles
 |   |   |-- mz_target
 |   |   |-- mz_radio
@@ -128,9 +129,9 @@ O instalador completo do Starter 2.0 cria essa arvore em um destino novo e vazio
 
 ## Resources MZ sem repositorio publico
 
-O starter nao presume que uma URL com o mesmo nome do resource exista. Enquanto `mz_status`, `mz_medical`, `mz_world_editor`, `mz_police`, `mz_prison`, `mz_dispatch`, `mz_furniture`, `mz_computer`, `mz_transport`, `mz_multichar`, `mz_warns` e `mz_feedback` forem distribuicao local, o operador deve fornecer `MZ_RESOURCE_SOURCE_ROOT` apontando para a raiz que contem essas pastas.
+O starter nao presume que uma URL com o mesmo nome do resource exista. Enquanto `mz_status`, `mz_medical`, `mz_world_editor`, `mz_police`, `mz_prison`, `mz_dispatch`, `mz_furniture`, `mz_multichar`, `mz_warns` e `mz_feedback` forem distribuicao local, o operador deve fornecer `MZ_RESOURCE_SOURCE_ROOT` apontando para a raiz que contem essas pastas.
 
-O preflight verifica esse conjunto antes de baixar ou alterar dependencias. Depois da instalacao, `tools/check_structure.bat` exige `fxmanifest.lua` para todo resource listado no boot. Isso torna ausencia de `mz_warns`/`mz_computer` um erro observavel de instalacao, nao uma degradacao silenciosa em runtime.
+O preflight verifica esse conjunto antes de baixar ou alterar dependencias. Depois da instalacao, `tools/check_structure.bat` exige `fxmanifest.lua` para todo resource listado no boot. Isso torna ausencia de `mz_warns` um erro observavel de instalacao, nao uma degradacao silenciosa em runtime.
 
 ## O que nao deve crescer dentro do `mz_starter`
 Para manter a fronteira limpa, este repositorio nao deve absorver:

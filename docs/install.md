@@ -191,9 +191,9 @@ de Bob, cópia ou deploy automático neste checkout.
 
 `cfg/resources.cfg` e a autoridade da ordem de boot MZ. Os instaladores Windows/Linux e `tools/check_structure.bat` devem cobrir exatamente essa lista.
 
-No estado atual, estes resources sao `distribution-only`: `mz_status`, `mz_medical`, `mz_world_editor`, `mz_police`, `mz_prison`, `mz_dispatch`, `mz_furniture`, `mz_computer`, `mz_transport`, `mz_multichar`, `mz_warns` e `mz_feedback`. Eles precisam existir previamente em `resources/[mz]` ou estar na raiz indicada por `MZ_RESOURCE_SOURCE_ROOT`. `mz_cayo` é uma fonte MZ local separada e é provisionada em `resources/[maps]/mz_cayo`.
+No estado atual, estes resources sao `distribution-only`: `mz_status`, `mz_medical`, `mz_world_editor`, `mz_police`, `mz_prison`, `mz_dispatch`, `mz_furniture`, `mz_multichar`, `mz_warns` e `mz_feedback`. Eles precisam existir previamente em `resources/[mz]` ou estar na raiz indicada por `MZ_RESOURCE_SOURCE_ROOT`. `mz_cayo` é uma fonte MZ local separada e é provisionada em `resources/[maps]/mz_cayo`.
 
-`mz_warns` e obrigatorio no perfil atual porque fornece a persistencia de advertencias consumida por `mz_admin`. `mz_computer` e obrigatorio no gate IC-0 porque sua sessao precisa ser revalidada contra `sessionId`/`characterId`. Nenhum dos dois e instalado por outro caminho conhecido.
+`mz_warns` e obrigatorio no perfil atual porque fornece a persistencia de advertencias consumida por `mz_admin`.
 
 ## O que precisa ficar entendido sem ambiguidade
 - O `mz_starter` nao substitui o `mz_core`.
@@ -224,7 +224,7 @@ Ao final desta etapa, o ambiente deve ter:
 - `mz_core` em `resources/[mz]/mz_core`
 - `mz_notify` em `resources/[mz]/mz_notify`
 - `mz_sync` em `resources/[mz]/mz_sync`
-- todos os resources `mz_*` declarados em `cfg/resources.cfg`, incluindo `mz_warns` e `mz_computer`, em `resources/[mz]/`
+- todos os resources `mz_*` declarados em `cfg/resources.cfg`, incluindo `mz_warns`, em `resources/[mz]/`
 
 Para a visao de fronteira entre os repositorios e a estrutura esperada do diretorio, veja [docs/structure.md](structure.md).
 
@@ -248,7 +248,7 @@ O resource deve iniciar antes de `mz_realestate` quando o `mz_realestate` estive
 
 ## Contrato de voz do telefone
 
-O setup define OneSync e os convars de calls, radios, native audio, sending range e submix em `cfg/onesync.cfg`. `pma-voice` inicia antes de `mz_phone`; o telefone usa exclusivamente o export server `setPlayerCall(source, channel)`. O patch remove o handler upstream que aceitava `pma-voice:setPlayerCall` enviado pelo client.
+O setup define OneSync e os convars de calls, radios, native audio, sending range e submix em `cfg/onesync.cfg`. `pma-voice` inicia antes dos dispositivos SD. O patch remove o handler upstream que aceitava `pma-voice:setPlayerCall` enviado pelo client.
 
 Uma instalacao manual precisa reproduzir exatamente o pin e aplicar o patch:
 

@@ -77,7 +77,7 @@ bash tools/check_structure.sh
 
 Se algum resource aparecer como `[MISSING]`, rode o instalador ou confira se o link do repositorio daquele resource ainda precisa ser ajustado no script.
 
-Para `mz_status`, `mz_medical`, `mz_world_editor`, `mz_police`, `mz_prison`, `mz_dispatch`, `mz_furniture`, `mz_computer`, `mz_transport`, `mz_multichar`, `mz_warns` e `mz_feedback`, nao ha URL publica confirmada no starter. Nao invente uma URL: atualize a distribuicao local de forma controlada e mantenha `MZ_RESOURCE_SOURCE_ROOT` apontando para o pacote completo em um clean install.
+Para `mz_status`, `mz_medical`, `mz_world_editor`, `mz_police`, `mz_prison`, `mz_dispatch`, `mz_furniture`, `mz_multichar`, `mz_warns` e `mz_feedback`, nao ha URL publica confirmada no starter. Nao invente uma URL: atualize a distribuicao local de forma controlada e mantenha `MZ_RESOURCE_SOURCE_ROOT` apontando para o pacote completo em um clean install.
 
 ## Observacao
 O `mz_starter` nao atualiza FXServer artifacts. Essa parte continua sendo uma decisao separada da infraestrutura do servidor.

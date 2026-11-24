@@ -87,8 +87,6 @@ preflight_distribution_resources() {
     mz_police
     mz_prison
     mz_furniture
-    mz_computer
-    mz_transport
     mz_multichar
     mz_warns
     mz_feedback
@@ -503,13 +501,13 @@ sync_mz_resource "mz_dispatch" ""
 sync_mz_resource "mz_police" ""
 sync_mz_resource "mz_medical" ""
 sync_mz_resource "mz_bank" "https://github.com/mz-core/mz_bank.git"
-sync_mz_resource "mz_phone" "https://github.com/mz-core/mz_phone.git"
-sync_mz_resource "mz_transport" ""
+sync_mz_resource "sd-phone" "https://github.com/mz-core/sd-phone.git"
+sync_mz_resource "sd-computers" "https://github.com/mz-core/sd-computers.git"
+sync_mz_resource "sd-tablet" "https://github.com/mz-core/sd-tablet.git"
 sync_mz_resource "mz_interiors" "https://github.com/mz-core/mz_interiors.git"
 sync_mz_resource "mz_houses" "https://github.com/mz-core/mz_houses.git"
 sync_mz_resource "mz_furniture" ""
 sync_mz_resource "mz_org_activities" "https://github.com/mz-core/mz_org_activities.git"
-sync_mz_resource "mz_computer" ""
 sync_mz_resource "mz_radio" "https://github.com/mz-core/mz_radio.git"
 sync_mz_resource "mz_creator" "https://github.com/mz-core/mz_creator.git"
 sync_mz_resource "mz_multichar" ""

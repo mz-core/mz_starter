@@ -150,11 +150,16 @@ if errorlevel 1 goto :git_error
 call :sync_mz_resource mz_bank https://github.com/mz-core/mz_bank.git
 if errorlevel 1 goto :git_error
 
-call :sync_mz_resource mz_phone https://github.com/mz-core/mz_phone.git
+call :sync_mz_resource sd-phone https://github.com/mz-core/sd-phone.git
 if errorlevel 1 goto :git_error
 
-call :sync_mz_resource mz_transport ""
+call :sync_mz_resource sd-computers https://github.com/mz-core/sd-computers.git
 if errorlevel 1 goto :git_error
+
+call :sync_mz_resource sd-tablet https://github.com/mz-core/sd-tablet.git
+if errorlevel 1 goto :git_error
+
+
 
 call :sync_mz_resource mz_interiors https://github.com/mz-core/mz_interiors.git
 if errorlevel 1 goto :git_error
@@ -168,8 +173,6 @@ if errorlevel 1 goto :git_error
 call :sync_mz_resource mz_org_activities https://github.com/mz-core/mz_org_activities.git
 if errorlevel 1 goto :git_error
 
-call :sync_mz_resource mz_computer ""
-if errorlevel 1 goto :git_error
 
 call :sync_mz_resource mz_radio https://github.com/mz-core/mz_radio.git
 if errorlevel 1 goto :git_error
@@ -241,8 +244,6 @@ for %%R in (
   mz_police
   mz_prison
   mz_furniture
-  mz_computer
-  mz_transport
   mz_multichar
   mz_warns
   mz_feedback
