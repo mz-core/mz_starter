@@ -192,10 +192,10 @@
     },
     {
       "id": "sd-tablet",
-      "version": "1.0.9",
-      "tag": "v1.0.9",
-      "asset": "sd-tablet-v1.0.9.zip",
-      "sha256": "sha256:2b026dd6760a39de056c45b24b6fcb0af337305fc716902622697c3b22979fca"
+      "version": "1.0.10",
+      "tag": "v1.0.10",
+      "asset": "sd-tablet-v1.0.10.zip",
+      "sha256": "sha256:f3855cbb24a53f3b4ccd2137a209f7b3c684b633a7ecc01769407877098b11b3"
     },
     {
       "id": "mz_interiors",
