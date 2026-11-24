@@ -117,7 +117,7 @@ func bootReadyFor(byID map[string]Resource, installed, system map[string]bool) m
 		}
 		visiting[id] = true
 		defer delete(visiting, id)
-		for _, dependency := range resource.Dependencies {
+		for _, dependency := range append(append([]string{}, resource.Dependencies...), resource.BootDependencies...) {
 			if !canBoot(dependency, visiting) {
 				return false
 			}

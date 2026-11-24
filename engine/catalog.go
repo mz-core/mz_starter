@@ -13,23 +13,24 @@ import (
 )
 
 type Resource struct {
-	ID            string     `json:"id"`
-	Name          string     `json:"name"`
-	Type          string     `json:"type"`
-	Group         string     `json:"group"`
-	Repository    string     `json:"repository"`
-	Visibility    string     `json:"visibility"`
-	Source        string     `json:"source"`
-	Version       string     `json:"version"`
-	Tag           string     `json:"tag"`
-	Asset         string     `json:"asset"`
-	SHA256        string     `json:"sha256"`
-	Dependencies  []string   `json:"dependencies"`
-	RequiredFiles []string   `json:"required_files"`
-	FileRules     []FileRule `json:"file_rules,omitempty"`
-	MutablePolicy string     `json:"mutable_policy"`
-	Channel       string     `json:"channel"`
-	Availability  string     `json:"availability"`
+	ID               string     `json:"id"`
+	Name             string     `json:"name"`
+	Type             string     `json:"type"`
+	Group            string     `json:"group"`
+	Repository       string     `json:"repository"`
+	Visibility       string     `json:"visibility"`
+	Source           string     `json:"source"`
+	Version          string     `json:"version"`
+	Tag              string     `json:"tag"`
+	Asset            string     `json:"asset"`
+	SHA256           string     `json:"sha256"`
+	Dependencies     []string   `json:"dependencies"`
+	BootDependencies []string   `json:"boot_dependencies,omitempty"`
+	RequiredFiles    []string   `json:"required_files"`
+	FileRules        []FileRule `json:"file_rules,omitempty"`
+	MutablePolicy    string     `json:"mutable_policy"`
+	Channel          string     `json:"channel"`
+	Availability     string     `json:"availability"`
 }
 
 // FileRule is maintained by the Starter, never by the inspected archive.
@@ -124,7 +125,7 @@ func ValidateCatalog(c Catalog) error {
 			return fmt.Errorf("mz_banguard requer fonte protegida")
 		}
 		deps := map[string]bool{}
-		for _, d := range r.Dependencies {
+		for _, d := range append(append([]string{}, r.Dependencies...), r.BootDependencies...) {
 			if !idPattern.MatchString(d) {
 				return fmt.Errorf("dependencia invalida: %s", d)
 			}

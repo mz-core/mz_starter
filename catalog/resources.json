@@ -897,7 +897,10 @@
       ],
       "mutable_policy": "unknown_preserve",
       "channel": "stable",
-      "availability": "release_missing"
+      "availability": "release_missing",
+      "boot_dependencies": [
+        "mz_sd_bridge"
+      ]
     },
     {
       "id": "sd-computers",
@@ -921,7 +924,10 @@
       ],
       "mutable_policy": "unknown_preserve",
       "channel": "stable",
-      "availability": "release_missing"
+      "availability": "release_missing",
+      "boot_dependencies": [
+        "mz_sd_bridge"
+      ]
     },
     {
       "id": "sd-tablet",
@@ -945,7 +951,10 @@
       ],
       "mutable_policy": "unknown_preserve",
       "channel": "stable",
-      "availability": "release_missing"
+      "availability": "release_missing",
+      "boot_dependencies": [
+        "mz_sd_bridge"
+      ]
     },
     {
       "id": "mz_interiors",

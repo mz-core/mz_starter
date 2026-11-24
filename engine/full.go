@@ -227,7 +227,7 @@ func ResolveFull(ctx context.Context, c Catalog, opts FullOptions) (FullPlan, er
 		go func(i int, r Resource) {
 			defer wg.Done()
 			if excluded[r.ID] {
-				plan.Components[i] = Component{ID: r.ID, Type: r.Type, Dependencies: append([]string{}, r.Dependencies...), Destination: componentDestination(r), Status: "blocked", Reason: "not_selected"}
+				plan.Components[i] = Component{ID: r.ID, Type: r.Type, Dependencies: append(append([]string{}, r.Dependencies...), r.BootDependencies...), Destination: componentDestination(r), Status: "blocked", Reason: "not_selected"}
 				return
 			}
 			limit <- struct{}{}
@@ -329,7 +329,7 @@ func uniqueStrings(values []string) []string {
 func resolveComponent(ctx context.Context, r Resource, opts FullOptions) Component {
 	base := Component{
 		ID: r.ID, Type: r.Type, Version: r.Version, Tag: r.Tag, Repository: r.Repository,
-		Destination: componentDestination(r), Dependencies: append([]string{}, r.Dependencies...),
+		Destination: componentDestination(r), Dependencies: append(append([]string{}, r.Dependencies...), r.BootDependencies...),
 		resource: r, Status: "blocked",
 	}
 	switch r.Type {
@@ -507,7 +507,7 @@ func directReleaseComponent(r Resource, digest, base string) (Component, error) 
 	}
 	comp := Component{
 		ID: r.ID, Type: r.Type, Version: r.Version, Tag: r.Tag, Repository: r.Repository,
-		Destination: componentDestination(r), Dependencies: append([]string{}, r.Dependencies...),
+		Destination: componentDestination(r), Dependencies: append(append([]string{}, r.Dependencies...), r.BootDependencies...),
 		Status: "ready", resource: r, kind: "direct_release", Digest: digest, Asset: r.Asset,
 		SourceKind: "github_release", SourceDetail: "pinned GitHub release " + r.Tag,
 	}
@@ -519,7 +519,7 @@ func resolveLatestRelease(ctx context.Context, r Resource, opts FullOptions) (Co
 	repository := repositoryForMZ(r)
 	comp := Component{
 		ID: r.ID, Type: r.Type, Version: r.Version, Tag: r.Tag, Repository: repository,
-		Destination: componentDestination(r), Dependencies: append([]string{}, r.Dependencies...),
+		Destination: componentDestination(r), Dependencies: append(append([]string{}, r.Dependencies...), r.BootDependencies...),
 		Status: "blocked", resource: r, kind: "github",
 	}
 	if repository == "" {
