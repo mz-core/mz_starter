@@ -329,6 +329,76 @@
       "tag": "mz_whitelist-v1.0.0",
       "asset": "mz_whitelist-v1.0.0.zip",
       "sha256": "sha256:a7cebb76ea78df5d84e02cb4453ed1ef182d0a3710dee0af4ae12565aaecca58"
+    },
+    {
+      "id": "mz_doors",
+      "version": "0.2.0",
+      "tag": "mz_doors-v0.2.0",
+      "asset": "mz_doors-v0.2.0.zip",
+      "sha256": "sha256:65a5e2b6a80e206e4b74fd037519a3e631b6a38223ddbf9ab585235a5353ec2a"
+    },
+    {
+      "id": "mz_jobs",
+      "version": "0.1.0",
+      "tag": "mz_jobs-v0.1.0",
+      "asset": "mz_jobs-v0.1.0.zip",
+      "sha256": "sha256:4c943efa7731db0d6e5c1f6fe06ef03c5f260e730681a3f918728644f6b77cfa"
+    },
+    {
+      "id": "mz_parkour",
+      "version": "0.2.1",
+      "tag": "mz_parkour-v0.2.1",
+      "asset": "mz_parkour-v0.2.1.zip",
+      "sha256": "sha256:8a42eb365ae9abfa44050ab9d94f3914c85fa62b029065a2cf46725e09c494a3"
+    },
+    {
+      "id": "mz_props",
+      "version": "0.2.0",
+      "tag": "mz_props-v0.2.0",
+      "asset": "mz_props-v0.2.0.zip",
+      "sha256": "sha256:49d25ce3e626bc5fae8a447bfb55aca510aceb1c0b85ca294e187d92e836c248"
+    },
+    {
+      "id": "mz_racing",
+      "version": "0.3.0",
+      "tag": "mz_racing-v0.3.0",
+      "asset": "mz_racing-v0.3.0.zip",
+      "sha256": "sha256:450a6ef46a90c0e6c02e4316ae17e4a99dc8e5bde231a2c1af9ab6a47b472094"
+    },
+    {
+      "id": "mz_radialmenu",
+      "version": "1.0.0",
+      "tag": "mz_radialmenu-v1.0.0",
+      "asset": "mz_radialmenu-v1.0.0.zip",
+      "sha256": "sha256:ef1c107e214ae6bf07dc85fa74526320dd370d9150a6302e5adbd4562a91f84e"
+    },
+    {
+      "id": "mz_rewards",
+      "version": "1.0.0",
+      "tag": "mz_rewards-v1.0.0",
+      "asset": "mz_rewards-v1.0.0.zip",
+      "sha256": "sha256:9c6dbf14135598b38f242872fc3bea0fc5969adf9d16ad88edb5845f12255dbe"
+    },
+    {
+      "id": "mz_shellstudio",
+      "version": "0.3.0",
+      "tag": "mz_shellstudio-v0.3.0",
+      "asset": "mz_shellstudio-v0.3.0.zip",
+      "sha256": "sha256:a4c8cc3de3537fbcb51b139b7f8769c01044ac6f850d946354de9c1fe294be60"
+    },
+    {
+      "id": "mz_stream",
+      "version": "0.1.0",
+      "tag": "mz_stream-v0.1.0",
+      "asset": "mz_stream-v0.1.0.zip",
+      "sha256": "sha256:590050e0c24bdb8e9d0f8aab2608c6ca24721a03bf3ffbb0a6c75491ec13e4c1"
+    },
+    {
+      "id": "mz_visuals",
+      "version": "1.0.0",
+      "tag": "mz_visuals-v1.0.0",
+      "asset": "mz_visuals-v1.0.0.zip",
+      "sha256": "sha256:1d48cb71b0714077e14d4d9b13b7036b79c52bf45285040deceb1d628a62bbc4"
     }
   ]
 }
